@@ -1,0 +1,164 @@
+/* color {
+    B6AE9F
+    C5C7BC
+    DEDED1
+    FBF3D1
+} */
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Ovo&family=Rubik:ital,wght@0,300..900;1,300..900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: #FBF3D1;
+    font-family: "EB Garamond", serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+}
+
+button {
+    background-color: #c7c0b1;
+    width: 45%;
+    margin: 2% 25%;
+    border-radius: 40px;
+    padding: 10px;
+    font-weight: 500;
+    transition: .4s;
+    border: 1px solid #46423b;
+
+    img {
+        width: 20px;
+        height: 20px;
+        margin-right: 8px;
+    }
+}
+
+button:hover {
+    transform: scale(1.04);
+    background-color: #46423b;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    color: white !important;
+
+}
+
+.myText {
+
+    background-color: #DEDED1;
+    border-radius: 10px;
+    padding: 30px 0px;
+
+
+    a {
+        text-decoration: none;
+        color: black;
+    }
+
+    transition: .5s;
+}
+
+.myText:hover {
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    transform: scale(1.01);
+}
+
+#logoImage {
+    width: 500px;
+}
+
+#logoTitle {
+    font-family: 'Ovo', serif;
+    font-size: 48px;
+    margin-top: -70px;
+    color: #F14F20;
+    font-weight: 500;
+    padding-left: 90px;
+}
+
+#smLogo {
+    width: 100px;
+}
+
+.signup-page {
+    margin: 25vh 7vh;
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    background-color: #DEDED1;
+    border-radius: 15px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+.signup-text {
+    padding: 0px 50px;
+
+    li {
+        list-style: none;
+        font-size: 18px;
+        margin: 10px 0px;
+    }
+}
+
+.signup-form {
+    h1 {
+        padding-top: 15px;
+        font-weight: 700;
+        text-decoration: none;
+        margin-bottom: 20px !important;
+        text-align: center;
+        color: black;
+    }
+
+    input {
+        width: 50%;
+        padding: 10px;
+        margin: 10px 0px;
+        border-radius: 8px;
+        border: 1px solid #999681;
+    }
+
+    label {
+        text-align: start;
+        width: 200px;
+        position: relative;
+        right: 100px;
+    }
+}
+
+.confirm-email-form {
+    padding: 10% 0%;
+    h1 {
+        padding-top: 15px;
+        font-weight: 700;
+        text-decoration: none;
+        margin-bottom: 20px !important;
+        text-align: center;
+        color: black;
+    }
+    input {
+        width: 8%;
+        @media (max-width: 480px) {
+            width: 60px;
+        }
+        padding: 10px;
+        margin: 10px 0px;
+        border-radius: 8px;
+        border: 1px solid #999681;
+        font-size: 25px;
+    }
+}
+
+.line {
+    transform: rotate(12deg);
+    height: 575px;
+    border-left: 10px solid red;
+    position: relative;
+    left: 20px;
+    padding: 0px;
+    margin: 0px;
+    opacity: 80%;
+}
+
+.logoimg {
+    width: 200px;
+}
