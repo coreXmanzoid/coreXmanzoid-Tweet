@@ -1,0 +1,47 @@
+/* color {
+    B6AE9F
+    C5C7BC
+    DEDED1
+    FBF3D1
+} */
+.logotitle{
+    color: #F94818 !important;
+    font-size: 28px !important;
+    font-weight: 700 !important;
+}
+.active{
+    background-color: #B6AE9F !important;
+}
+.LActive:hover{
+    background-color: #B6AE9F !important;
+}
+
+button {
+    background-color: #c7c0b1;
+    width: 100%;
+    margin: 5% 2%;
+    border-radius: 40px;
+    padding: 10px;
+    font-weight: 500;
+    transition: .4s;
+    border: 1px solid #46423b;
+}
+
+button:hover {
+    transform: scale(1.04);
+    background-color: #46423b;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    color: white !important;
+
+}
+.footer-bar{
+    background-color: #B6AE9F !important;
+}
+.icons{
+    padding: 15px 10px 15px 15px !important;
+    align-items: center !important;
+    background-color: #DEDED1 !important;
+    border-radius: 50% !important;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;!important;
+    transition: .6s;
+}

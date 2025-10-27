@@ -32,16 +32,14 @@ $("input[name = 'username']").on("keydown", function (event) {
 });
 
 
-$("input[name = 'email']").on("keydown", function (event) {
-    var email = $("input[name = 'email']").val() + event.key;
-    var emails = data["emails"];
+function isEmailValid(){
+    var emailAlreadyExist = data["emailAlreadyExist"];
     emailFound = false;
-    emails.forEach(function (value, index) {
-        if (email == value) {
+    if (emailAlreadyExist == "true") {
             $("input[name = 'email']").after("<small class='em' style='color: red;'><br/>*Email already taken.<br/></small>");
             emailFound = true;
         }
-    });
+    
     if (emailFound == false) {
         $('.em').remove();
     }
@@ -50,7 +48,9 @@ $("input[name = 'email']").on("keydown", function (event) {
     } else {
         $(".submitbutton").prop("disabled", false);
     }
-});
+}
+
+isEmailValid();
 
 $("#userPassword").on("keyup", function () {
     var password = $(this).val();

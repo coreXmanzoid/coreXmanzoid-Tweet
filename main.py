@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect,  url_for, request
+from flask import Flask, render_template, redirect,  url_for, request, flash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
 from sqlalchemy import Integer, String
@@ -7,9 +7,9 @@ import emailHandling
 data = {"page": "signup",
         "email": "example@gmail.com",
         "usernames": [],
-        "emails": [],
+        "emailAlreadyExist": "false",
             }
-name, email, username, phone, password = "", "", "", "", ""
+name, email, username, phone, password, OTP = "", "", "", "", "", ""
 class Base(DeclarativeBase):
     pass
 
@@ -49,12 +49,16 @@ def signup():
             password = request.form.get("pin")
             data["email"] = email
             data["page"] = "confirmEmail"
-            print(email)
-            data["OTP"] = emailHandling.sendEmail(email)
+            isUserExist = db.session.execute(db.select(UserData).where((UserData.email == email))).scalar()
+            if isUserExist:
+                data["page"] = "signup"
+                data["emailAlreadyExist"] = "true"
+                return render_template('signup.html', data = data)
+            OTP = emailHandling.sendEmail(email)
             return render_template('signup.html', data = data)
         elif data['page'] == "confirmEmail":
             userOTP = f'{request.form.get("OTP1")}{request.form.get("OTP2")}{request.form.get("OTP3")}{request.form.get("OTP4")}'
-            if emailHandling.checkOTP(data["OTP"], userOTP):
+            if emailHandling.checkOTP(OTP, userOTP):
                 new_user = UserData(
                     name=name,
                     username=username,
@@ -64,14 +68,36 @@ def signup():
                 )
                 db.session.add(new_user)
                 db.session.commit()
-                return redirect(url_for('home'))
+                return redirect(url_for('login'))
             data["page"] = "signup"
-            return redirect(url_for('home'))
+            return redirect(url_for('signup'))
     usernames = db.session.execute(db.select(UserData.username)).scalars().all()
-    emails = db.session.execute(db.select(UserData.email)).scalars().all()
     data["usernames"] = usernames
-    data["emails"] = emails
     return render_template('signup.html', data = data)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = str(request.form.get("username"))
+        password = str(request.form.get("pin"))
+        if username.endswith('@gmail.com'):
+            user = db.session.execute(db.select(UserData).where(UserData.email == username)).scalar()
+        else:
+            user = db.session.execute(db.select(UserData).where(UserData.username == username)).scalar()
+        if not user:
+            flash("User doesn't found. Sign in instead.")
+            return redirect(url_for('login'))
+        if check_password_hash(user.password, password):
+            return redirect(url_for('home'))
+        else:
+            flash("Wrong Password Try Again.")
+    return render_template('login.html')
+
+@app.route('/home')
+def homepage():
+    return render_template('home.html')
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
