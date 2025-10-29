@@ -3,13 +3,14 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
 from sqlalchemy import Integer, String
 from werkzeug.security import check_password_hash, generate_password_hash
+from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 import emailHandling
 data = {"page": "signup",
         "email": "example@gmail.com",
         "usernames": [],
         "emailAlreadyExist": "false",
             }
-name, email, username, phone, password, OTP = "", "", "", "", "", ""
+name, email, username, phone, password, OTP= "", "", "", "", "", ""
 class Base(DeclarativeBase):
     pass
 
@@ -22,14 +23,24 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///coreXmanzoidTweet.db"
 db = SQLAlchemy(model_class=Base)
 db.init_app(app)
 
-class UserData(db.Model):
+
+class UserData(UserMixin, db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
     username: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     email: Mapped[str] = mapped_column(String, nullable=False, unique = True)
     number: Mapped[int] = mapped_column(Integer, nullable=False)
     password: Mapped[str] = mapped_column(String, nullable=False)
-    
+
+    tweet = relationship("TweetData", back_populates="user")
+
+class TweetData(db.Model):
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    content: Mapped[str] = mapped_column(String, nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, db.ForeignKey("user_data.id"), nullable=False)
+
+    user = relationship("UserData", back_populates="tweet")
+
 with app.app_context():
     db.create_all()
 
@@ -37,9 +48,15 @@ with app.app_context():
 def home():
     return render_template("index.html")
 
+login_manager = LoginManager()
+login_manager.init_app(app)
+@login_manager.user_loader
+def load_user(user_id):
+    return db.get_or_404(UserData, user_id)
+
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
-    global name, email, username, password, phone, data
+    global name, email, username, password, phone, data, OTP
     if request.method == 'POST':
         if data["page"] == "signup":
             name = request.form.get("name")
@@ -88,13 +105,23 @@ def login():
             flash("User doesn't found. Sign in instead.")
             return redirect(url_for('login'))
         if check_password_hash(user.password, password):
-            return redirect(url_for('home'))
+            login_user(user)
+            return redirect(url_for('homepage'))
         else:
             flash("Wrong Password Try Again.")
     return render_template('login.html')
 
-@app.route('/home')
+@app.route('/home', methods=['GET', 'POST'])
+@login_required
 def homepage():
+    if request.method == 'POST':
+        post = request.form.get("post-input")
+        new_tweet = TweetData(
+            content=post,
+            user_id=current_user.id
+        )
+        db.session.add(new_tweet)
+        db.session.commit()
     return render_template('home.html')
 
 
