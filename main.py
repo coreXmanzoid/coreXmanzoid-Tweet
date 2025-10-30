@@ -1,10 +1,12 @@
 from flask import Flask, render_template, redirect,  url_for, request, flash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
-from sqlalchemy import Integer, String
+from sqlalchemy import Integer, String, JSON
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 import emailHandling
+from datetime import datetime
+import random
 data = {"page": "signup",
         "email": "example@gmail.com",
         "usernames": [],
@@ -38,7 +40,11 @@ class TweetData(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     content: Mapped[str] = mapped_column(String, nullable=False)
     user_id: Mapped[int] = mapped_column(Integer, db.ForeignKey("user_data.id"), nullable=False)
-
+    timestamp: Mapped[str] = mapped_column(String, nullable=False)
+    likes: Mapped[int] = mapped_column(Integer, default=0)
+    comments: Mapped[int] = mapped_column(Integer, default=0)
+    retweets: Mapped[int] = mapped_column(Integer, default=0)
+    shares: Mapped[int] = mapped_column(Integer, default=0)
     user = relationship("UserData", back_populates="tweet")
 
 with app.app_context():
@@ -116,13 +122,21 @@ def login():
 def homepage():
     if request.method == 'POST':
         post = request.form.get("post-input")
+        datetime_now = datetime.now().isoformat()  # '2025-10-30T14:22:15'
+        
         new_tweet = TweetData(
             content=post,
-            user_id=current_user.id
+            user_id=current_user.id,
+            timestamp=datetime_now
         )
         db.session.add(new_tweet)
         db.session.commit()
-    return render_template('home.html')
+        return redirect(url_for("homepage"))
+    posts = db.session.execute(db.select(TweetData)).scalars().all()
+    if len(posts) > 10:
+        posts = random.sample(posts, 10)
+    current_time = datetime.now().isoformat()  # '2025-10-30T14:22:15'
+    return render_template('home.html', posts=posts, ct=current_time)
 
 
 
