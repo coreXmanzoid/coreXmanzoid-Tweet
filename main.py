@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 import emailHandling
 from datetime import datetime
-import random
+import random, json
 data = {"page": "signup",
         "email": "example@gmail.com",
         "usernames": [],
@@ -123,7 +123,6 @@ def homepage():
     if request.method == 'POST':
         post = request.form.get("post-input")
         datetime_now = datetime.now().isoformat()  # '2025-10-30T14:22:15'
-        
         new_tweet = TweetData(
             content=post,
             user_id=current_user.id,
@@ -132,12 +131,27 @@ def homepage():
         db.session.add(new_tweet)
         db.session.commit()
         return redirect(url_for("homepage"))
-    posts = db.session.execute(db.select(TweetData)).scalars().all()
+    
+    posts = db.session.execute(db.select(TweetData).order_by(TweetData.timestamp.desc())).scalars().all()
     if len(posts) > 10:
         posts = random.sample(posts, 10)
+        
     current_time = datetime.now().isoformat()  # '2025-10-30T14:22:15'
     return render_template('home.html', posts=posts, ct=current_time)
 
+
+@app.route("/refresh", methods=['GET', 'POST'])
+@login_required
+def refresh_page():
+    if request.method == 'POST':
+        update_action = json.loads(request.form.get("post-action"))
+        for i in range(10):
+            post = db.session.execute(db.select(TweetData).where(TweetData.id == int(update_action['post_id'][i]))).scalar()
+            post.likes = update_action['likes'][i]
+            post.retweets = update_action['retweets'][i]
+            post.shares = update_action['shares'][i]
+        db.session.commit()
+    return redirect(url_for('homepage'))
 
 
 if __name__ == "__main__":

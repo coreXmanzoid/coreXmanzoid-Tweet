@@ -146,7 +146,6 @@
             <hr>
             <form action="/home" method="post">
                 <div class="post">
-
                     <img src="https://github.com/mdo.png" alt="" width="50" height="50" class="rounded-circle me-2">
                     <textarea name="post-input" placeholder="Whats-happening?"></textarea>
                 </div>
@@ -172,11 +171,11 @@
             </form>
         </div>
         <div class="div3">
+            {% for post in posts %}
             <div class="post">
-                {% for post in posts %}
                 <div class="post-heading">
                     <img src="https://github.com/mdo.png" alt="" width="40" height="40" class="rounded-circle me-2">
-                    <h5>{{ post.user.name }}<br /><span>@{{ post.user.username }}</span></h5>
+                    <h5 class="{{ post.id }}">{{ post.user.name }}<br /><span>@{{ post.user.username }}</span></h5>
                     <small>{{ post.timestamp }}</small>
                 </div>
                 <div class="post-content">
@@ -189,10 +188,15 @@
                     <a class="share"><i class="bi bi-share"></i> {{ post.shares }}</a>
                 </div>
                 <hr>
-                {% endfor %}
             </div>
+            {% endfor %}
         </div>
-        <div class="div4">4</div>
+        <div class="div4">
+            <form action="{{ url_for('refresh_page') }}" method="post">
+                <input type="hidden" name="post-action" id="time_now" value="">
+                <button type="submit">Refresh</button>
+            </form>
+        </div>
         <div class="div5">5</div>
         <div class="div6">6</div>
         <div class="div7">7</div>

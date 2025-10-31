@@ -125,17 +125,19 @@ button:hover {
         /* border: 2px soli transparent; */
         resize: none;
     }
-    .submit{
+
+    .submit {
         display: flex;
         justify-content: end;
         margin-top: 8px;
-        
-        button{
+
+        button {
             margin-top: 0px;
             margin-bottom: 0px;
             width: 90px;
         }
     }
+
     .progress-circle {
         position: relative;
         display: inline-flex;
@@ -162,27 +164,33 @@ button:hover {
     padding-left: 10px;
     grid-column-start: 2;
     grid-row-start: 2;
-    .post-heading{
+
+    .post-heading {
         display: flex;
         align-items: center;
-        h5{
+
+        h5 {
             color: #2e2a22;
             font-size: 17px;
         }
-        span{
+
+        span {
             color: #F94818;
             font-size: 14px;
             font-weight: 500;
         }
-        small{
+
+        small {
             padding-left: 5px !important;
             color: #46423b;
             font-weight: 500;
         }
     }
-    .post-content{
+
+    .post-content {
         margin-top: 10px;
-        p{
+
+        p {
             padding: 2px;
             opacity: 0.9;
             font-weight: 600;
@@ -190,26 +198,41 @@ button:hover {
             color: #8f8674;
         }
     }
-    .post-actions{
+
+    .post-actions {
         margin-top: 15px;
         display: flex;
         justify-content: space-between;
-        a{
+
+        a {
             text-decoration: none;
             color: #46423b;
             font-weight: 600;
             font-size: 16px;
             transition: .4s;
         }
-        a:hover{
+
+        a:hover {
             color: #F94818;
+            cursor: pointer;
         }
-        i{
+        
+        .retweet i {
             width: 18px;
             height: 18px;
             margin-right: 5px;
+            display: inline-block;
+            /* required so transform affects it properly */
         }
+
+        .retweet i.rotate {
+            transition: transform 0.5s ease;
+            transform: rotate(180deg);
+        }
+
+
     }
+
 }
 
 .div4 {
