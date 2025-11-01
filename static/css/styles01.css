@@ -187,6 +187,7 @@ button:hover {
         }
     }
 
+
     .post-content {
         margin-top: 10px;
 
@@ -216,7 +217,7 @@ button:hover {
             color: #F94818;
             cursor: pointer;
         }
-        
+
         .retweet i {
             width: 18px;
             height: 18px;
@@ -241,16 +242,112 @@ button:hover {
 }
 
 .div5 {
+    padding-top: 20px;
+    grid-row: span 3 / span 3;
     grid-column-start: 3;
     grid-row-start: 1;
-}
 
-.div6 {
-    grid-column-start: 3;
-    grid-row-start: 2;
-}
+    .search {
+        background-color: #c7c0b1;
+        width: 90%;
+        border-radius: 50px;
+        box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
 
-.div7 {
-    grid-column-start: 3;
-    grid-row-start: 3;
+        input {
+            margin: 4px;
+            background-color: transparent;
+            width: 88%;
+            font-size: 19px;
+            color: #F94818;
+            height: 40px;
+            border: none;
+            outline: none;
+        }
+
+        i {
+            color: #2e2a22;
+
+        }
+
+        transition: .5s;
+    }
+
+    .search:hover {
+        transform: scale(1.02);
+    }
+
+    .premium {
+        margin: 18px 10px;
+        padding: 15px;
+
+        h4 {
+            color: #F94818;
+        }
+
+        p {
+            padding: 2px;
+            opacity: 0.9;
+            font-weight: 600;
+            font-size: 15px;
+            color: #8f8674;
+        }
+
+        border: 1.5px solid #2e2a22;
+        border-radius: 20px;
+
+        button {
+            width: 100px;
+            margin: 0px;
+        }
+
+        transition: .5s;
+    }
+
+    .premium:hover {
+        border: 1px solid #2e2a22;
+        box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+
+        background-color: #c7c0b1;
+    }
+
+    .full-account {
+        padding: 0px 15px;
+        margin: 0px 10px;
+
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .follow {
+        display: flex;
+        align-items: center;
+
+        button {
+            width: 95px;
+        }
+    }
+
+    .post-heading {
+        margin: 18px 10px;
+        padding: 15px;
+        display: flex;
+        align-items: center;
+
+        h5 {
+            color: #2e2a22;
+            font-size: 19px;
+        }
+
+        span {
+            color: #F94818;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        strong {
+            padding-left: 8px !important;
+            color: #46423b;
+            font-weight: 500;
+        }
+    }
 }
