@@ -5,6 +5,7 @@ var post_info = {
     retweets: []
 }
 
+
 // Active sidebar animation
 $(".nav li a").click(function () {
     $(".nav a").removeClass("active link-dark");
@@ -77,31 +78,31 @@ $(".like").click(function (e) {
 });
 // share button functionality
 $(".share").click(function (e) {
-  e.preventDefault();
-  var $btn = $(this);
-  var wasshare = $btn.hasClass("text-warning");
-  $btn.toggleClass("text-warning");
+    e.preventDefault();
+    var $btn = $(this);
+    var wasshare = $btn.hasClass("text-warning");
+    $btn.toggleClass("text-warning");
 
-  var $post = $btn.closest(".post");
-  var text = $post.find(".post-content").text().trim();
+    var $post = $btn.closest(".post");
+    var text = $post.find(".post-content").text().trim();
 
-  navigator.clipboard.writeText(text).then(() => alert("Post copied to clipboard!"))
+    navigator.clipboard.writeText(text).then(() => alert("Post copied to clipboard!"))
 
-  var textNode = $btn.contents().filter(function () {
-    return this.nodeType === 3;
-  }).first();
+    var textNode = $btn.contents().filter(function () {
+        return this.nodeType === 3;
+    }).first();
 
-  var count = 0;
-  if (textNode.length) {
-    var txt = textNode[0].nodeValue.trim();
-    var m = txt.match(/\d+/);
-    count = m ? parseInt(m[0], 10) : 0;
-    count = Math.max(0, count + (wasshare ? -1 : 1));
-    textNode[0].nodeValue = " " + count;
-  } else {
-    count = wasshare ? 0 : 1;
-    $btn.append(" " + count);
-  }
+    var count = 0;
+    if (textNode.length) {
+        var txt = textNode[0].nodeValue.trim();
+        var m = txt.match(/\d+/);
+        count = m ? parseInt(m[0], 10) : 0;
+        count = Math.max(0, count + (wasshare ? -1 : 1));
+        textNode[0].nodeValue = " " + count;
+    } else {
+        count = wasshare ? 0 : 1;
+        $btn.append(" " + count);
+    }
 });
 
 // retweet button functionality
@@ -193,4 +194,59 @@ $(".div4 button").click(function (e) {
         shares: [],
         retweets: []
     };
+});
+
+
+$(".post-button").click(function () {
+    $("textarea").focus();
+});
+
+$(".explore-button").click(function () {
+    $(".search input").focus();
+});
+
+
+$(".full-post").hide();
+
+$(".post").dblclick(function () {
+    var $post = $(this);
+    var post_id = $post.find('.post-heading h5').attr("class");
+    var active_post = $post.hasClass("active-post");
+
+    $(".post").removeClass("active-post");
+
+    if (!active_post) {
+        $post.addClass("active-post");
+        $(".explore-tab").hide();
+
+        // Get user name
+        const userName = $post.find('.post-heading h5').clone().children().remove().end().text().trim();
+        // Get username (@username inside span)
+        const userHandle = $post.find('.post-heading h5 span').text().trim().replace(/^@/, '');
+        // Get timestamp
+        const timestamp = $post.find('.post-heading small').text().trim();
+        const like = $post.find('.like').text().trim();
+        const shares = $post.find('.share').text().trim();
+        const comment = $post.find('.comment').text().trim();
+        const retweet = $post.find('.retweet').text().trim();
+        const content = $post.find('.post-content p').text().trim();
+
+        // Fill in post data dynamically
+        $(".commmentpost-action .likes span").text(like);
+        $(".commmentpost-action .comments span").text(comment);
+        $(".commmentpost-action .retweets span").text(retweet);
+        $(".commmentpost-action .shares span").text(shares);
+
+        // Fixed invalid selector $(".4") — use .full-post or specific container
+        $(".full-post .post-heading h5").html(`${userName}<br><span>@${userHandle}</span>`);
+        $(".full-post .post-heading small").text(timestamp);
+        $(".full-post .post-content p").text(content);
+
+        $(".full-post").show();
+        $('.all-comments').load('/comments/' + post_id);
+    } else {
+        $post.removeClass("active-post");
+        $(".explore-tab").show();
+        $(".full-post").hide();
+    }
 });

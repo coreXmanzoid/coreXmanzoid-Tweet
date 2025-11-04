@@ -115,7 +115,8 @@ button:hover {
     textarea {
         width: 100%;
         height: 150px;
-        outline: none;
+        /* outline: none; */
+        /* border: none; */
         /* border-radius: 15px; */
         color: #c7c0b1;
         padding: 10px;
@@ -160,79 +161,84 @@ button:hover {
 
 }
 
+/* post designing */
+.post-heading {
+    display: flex;
+    align-items: center;
+
+    h5 {
+        color: #2e2a22;
+        font-size: 17px;
+    }
+
+    span {
+        color: #F94818;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    small {
+        padding-left: 5px !important;
+        color: #46423b;
+        font-weight: 500;
+    }
+}
+
+
+.post-content {
+    margin-top: 10px;
+
+    p {
+        padding: 2px;
+        opacity: 0.9;
+        font-weight: 600;
+        font-size: 15px;
+        color: #8f8674;
+    }
+}
+.active-post{
+    background-color: #DEDED1;
+}
+
+.post-actions {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+
+    a {
+        text-decoration: none;
+        color: #46423b;
+        font-weight: 600;
+        font-size: 16px;
+        transition: .4s;
+    }
+
+    a:hover {
+        color: #F94818;
+        cursor: pointer;
+    }
+
+    .retweet i {
+        width: 18px;
+        height: 18px;
+        margin-right: 5px;
+        display: inline-block;
+        /* required so transform affects it properly */
+    }
+
+    .retweet i.rotate {
+        transition: transform 0.5s ease;
+        transform: rotate(180deg);
+    }
+
+}
+
 .div3 {
     padding-left: 10px;
     grid-column-start: 2;
     grid-row-start: 2;
 
-    .post-heading {
-        display: flex;
-        align-items: center;
 
-        h5 {
-            color: #2e2a22;
-            font-size: 17px;
-        }
-
-        span {
-            color: #F94818;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        small {
-            padding-left: 5px !important;
-            color: #46423b;
-            font-weight: 500;
-        }
-    }
-
-
-    .post-content {
-        margin-top: 10px;
-
-        p {
-            padding: 2px;
-            opacity: 0.9;
-            font-weight: 600;
-            font-size: 15px;
-            color: #8f8674;
-        }
-    }
-
-    .post-actions {
-        margin-top: 15px;
-        display: flex;
-        justify-content: space-between;
-
-        a {
-            text-decoration: none;
-            color: #46423b;
-            font-weight: 600;
-            font-size: 16px;
-            transition: .4s;
-        }
-
-        a:hover {
-            color: #F94818;
-            cursor: pointer;
-        }
-
-        .retweet i {
-            width: 18px;
-            height: 18px;
-            margin-right: 5px;
-            display: inline-block;
-            /* required so transform affects it properly */
-        }
-
-        .retweet i.rotate {
-            transition: transform 0.5s ease;
-            transform: rotate(180deg);
-        }
-
-
-    }
 
 }
 
@@ -241,7 +247,7 @@ button:hover {
     grid-row-start: 3;
 }
 
-.div5 {
+.explore-tab {
     padding-top: 20px;
     grid-row: span 3 / span 3;
     grid-column-start: 3;
@@ -348,6 +354,76 @@ button:hover {
             padding-left: 8px !important;
             color: #46423b;
             font-weight: 500;
+        }
+    }
+}
+
+.full-post {
+    padding-top: 20px;
+    grid-row: span 3 / span 3;
+    grid-column-start: 3;
+    grid-row-start: 1;
+
+    .post-button {
+        display: flex;
+        justify-content: space-around;
+        gap: 25%;
+
+        i {
+            margin-top: 8px;
+            font-weight: 900;
+            font-size: 20px;
+        }
+
+        a {
+            text-decoration: none;
+            color: #F94818;
+            font-weight: 600;
+            font-size: 18px;
+            padding: 10px 13px;
+            transition: .4s;
+            height: fit-content;
+        }
+    }
+
+    .post-detail {
+        padding: 20px 18px;
+    }
+    
+    .my-comment {
+        padding: 5px 18px;
+        display: flex;
+        align-items: center;
+        
+        input {
+            width: 70%;
+            background-color: transparent;
+            width: 85%;
+            font-size: 16px;
+            color: #F94818;
+            height: 40px;
+            border: none;
+            outline: none;
+        }
+
+        button {
+            margin: 2px;
+            width: 95px;
+
+        }
+    }
+    .all-comments{
+        padding: 8px 18px;
+        h5{
+            font-size: 15px;
+        }
+        .post-top{
+            display: flex;
+            justify-content: space-between;
+        }
+        p{
+            font-size: 13px;
+            color: #2e2a22;
         }
     }
 }

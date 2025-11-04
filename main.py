@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect,  url_for, request, flash
+from flask import Flask, render_template, redirect,  url_for, request, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
 from sqlalchemy import Integer, String, JSON
@@ -13,6 +13,7 @@ data = {"page": "signup",
         "emailAlreadyExist": "false",
             }
 name, email, username, phone, password, OTP= "", "", "", "", "", ""
+posts = None
 class Base(DeclarativeBase):
     pass
 
@@ -34,7 +35,8 @@ class UserData(UserMixin, db.Model):
     number: Mapped[int] = mapped_column(Integer, nullable=False)
     password: Mapped[str] = mapped_column(String, nullable=False)
 
-    tweet = relationship("TweetData", back_populates="user")
+    tweets = relationship("TweetData", back_populates="user")
+    comments = relationship("Comments", back_populates="user")
 
 class TweetData(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -45,7 +47,17 @@ class TweetData(db.Model):
     comments: Mapped[int] = mapped_column(Integer, default=0)
     retweets: Mapped[int] = mapped_column(Integer, default=0)
     shares: Mapped[int] = mapped_column(Integer, default=0)
-    user = relationship("UserData", back_populates="tweet")
+    user = relationship("UserData", back_populates="tweets")
+    comment = relationship("Comments", back_populates="tweet")
+
+class Comments(db.Model):
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    content: Mapped[str] = mapped_column(String, nullable=False)
+    tweet_id: Mapped[int] = mapped_column(Integer, db.ForeignKey("tweet_data.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, db.ForeignKey("user_data.id"), nullable=False)
+    likes: Mapped[int] = mapped_column(Integer, default=0)
+    tweet = relationship("TweetData", back_populates="comment")
+    user = relationship("UserData", back_populates="comments")
 
 with app.app_context():
     db.create_all()
@@ -120,6 +132,7 @@ def login():
 @app.route('/home', methods=['GET', 'POST'])
 @login_required
 def homepage():
+    global posts
     if request.method == 'POST':
         post = request.form.get("post-input")
         datetime_now = datetime.now().isoformat()  # '2025-10-30T14:22:15'
@@ -135,7 +148,7 @@ def homepage():
     posts = db.session.execute(db.select(TweetData).order_by(TweetData.timestamp.desc())).scalars().all()
     if len(posts) > 10:
         posts = random.sample(posts, 10)
-        
+    
     current_time = datetime.now().isoformat()  # '2025-10-30T14:22:15'
     return render_template('home.html', posts=posts, ct=current_time)
 
@@ -145,7 +158,7 @@ def homepage():
 def refresh_page():
     if request.method == 'POST':
         update_action = json.loads(request.form.get("post-action"))
-        for i in range(10):
+        for i in range(len(update_action['retweets'])):
             post = db.session.execute(db.select(TweetData).where(TweetData.id == int(update_action['post_id'][i]))).scalar()
             post.likes = update_action['likes'][i]
             post.retweets = update_action['retweets'][i]
@@ -153,6 +166,33 @@ def refresh_page():
         db.session.commit()
     return redirect(url_for('homepage'))
 
+@app.route('/comments/<int:post_id>', methods=['GET', 'POST'])
+@login_required
+def comments(post_id):
+    global posts
+    if request.method == "POST":
+        content = request.form.get("content")
+        new_comment = Comments(
+            content = content,
+            tweet_id = post_id,
+            user_id = current_user.id
+        )
+        db.session.add(new_comment)
+        db.session.commit()
+        current_time = datetime.now().isoformat()  # '2025-10-30T14:22:15'
+        return render_template("home.html", posts=posts, ct=current_time)
+    comments = db.session.execute(db.select(Comments).where(Comments.tweet_id == post_id)).scalars().all()
+    # For GET request → return HTML for comments
+    return render_template('comments.html', comments=comments, post_id=post_id)
+
+@app.route("/logout/<int:state>")
+@login_required
+def logout(state):
+    if state == 1:
+        logout_user()
+        return redirect(url_for('home'))
+    logout_user()
+    return redirect(url_for('login'))
 
 if __name__ == "__main__":
     app.run(debug=True)
