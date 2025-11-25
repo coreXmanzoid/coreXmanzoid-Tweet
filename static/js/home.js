@@ -208,7 +208,8 @@ $(".explore-button").click(function () {
 
 $(".full-post").hide();
 
-$(".post").dblclick(function () {
+// Show comments section on double click of post
+$(".post").dblclick(function() {
     var $post = $(this);
     var post_id = $post.find('.post-heading h5').attr("class");
     var active_post = $post.hasClass("active-post");
@@ -243,7 +244,8 @@ $(".post").dblclick(function () {
         $(".full-post .post-content p").text(content);
 
         $(".full-post").show();
-        $('.all-comments').load('/comments/' + post_id);
+        // reload sepecific part of page without refreshing entire page and implementing on specific div
+        $('.all-comments').load('/comments/' + post_id + '/nill/0');
     } else {
         $post.removeClass("active-post");
         $(".explore-tab").show();

@@ -84,7 +84,7 @@ button:hover {
     display: flex;
     align-content: center;
     justify-content: center;
-    background-color: #DEDED1;
+    background: linear-gradient(120deg, #F14F20 55%, #FBF3D1 45%);
     border-radius: 15px;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }

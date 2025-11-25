@@ -50,6 +50,7 @@ class TweetData(db.Model):
     user = relationship("UserData", back_populates="tweets")
     comment = relationship("Comments", back_populates="tweet")
 
+
 class Comments(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     content: Mapped[str] = mapped_column(String, nullable=False)
@@ -166,24 +167,24 @@ def refresh_page():
         db.session.commit()
     return redirect(url_for('homepage'))
 
-@app.route('/comments/<int:post_id>', methods=['GET', 'POST'])
+@app.route('/comments/<int:post_id>/<string:content>/<int:state>')
 @login_required
-def comments(post_id):
+def comments(post_id, content, state):
     global posts
-    if request.method == "POST":
-        content = request.form.get("content")
+    if state == 1:
         new_comment = Comments(
             content = content,
             tweet_id = post_id,
-            user_id = current_user.id
+            user_id = current_user.id,
+            likes = random.randint(0, 1000)
         )
         db.session.add(new_comment)
         db.session.commit()
-        current_time = datetime.now().isoformat()  # '2025-10-30T14:22:15'
-        return render_template("home.html", posts=posts, ct=current_time)
-    comments = db.session.execute(db.select(Comments).where(Comments.tweet_id == post_id)).scalars().all()
+        # current_time = datetime.now().isoformat()  # '2025-10-30T14:22:15'
+        # return render_template("home.html", posts=posts, ct=current_time)
+    comments = db.session.execute(db.select(Comments).where(Comments.tweet_id == post_id).order_by(Comments.id.desc())).scalars().all()
     # For GET request → return HTML for comments
-    return render_template('comments.html', comments=comments, post_id=post_id)
+    return render_template('comments.html', comments=comments[:15], post_id=post_id)
 
 @app.route("/logout/<int:state>")
 @login_required
