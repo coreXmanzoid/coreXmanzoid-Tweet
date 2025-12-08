@@ -66,7 +66,6 @@ button:hover {
 
 .div2 {
     .flex {
-
         display: flex;
         justify-content: space-evenly;
     }
@@ -84,33 +83,38 @@ button:hover {
     }
 
     a {
+        display: inline-block;
         text-decoration: none;
-        color: #2e2a22;
         font-weight: 600;
         font-size: 18px;
         padding: 10px 13px;
-        transition: .4s;
-        height: fit-content;
-        border-bottom: 3px solid #2e2a22;
-        border-bottom-width: 0px;
-        transition:  border-bottom-width 0.3s ease;
+        color:  #46423b;
+    }
+    a::after{
+        content: '';
+        display: block;
+        height: 3px;
+        width: 0;
+        transition: width .3s;
+        background-color:#2e2a22;
+    }
+    a:hover::after {
+        width: 100%;
+        transition: width .3s;
     }
 
-    a:hover {
-        background-color: #DEDED1;
-        border-block-width: 3px;
-    }
 
     .active-a {
         color: #F94818;
         border-bottom: 3px solid #2e2a22;
     }
+
     .post {
         display: flex;
         margin-top: 25px;
     }
 
-    img {
+    .post img {
         float: left;
         margin: 0 15px 10px 0;
     }
@@ -198,8 +202,14 @@ button:hover {
         font-size: 15px;
         color: #8f8674;
     }
+
+    .hashtag {
+        color: #F94818;
+        font-weight: 700;
+    }
 }
-.active-post{
+
+.active-post {
     background-color: #DEDED1;
 }
 
@@ -234,7 +244,77 @@ button:hover {
         transform: rotate(180deg);
     }
 
+
 }
+
+.profile {
+    background-color: #DEDED1 !important;
+
+    .info {
+        position: relative;
+        bottom: 50px;
+        left: 10px;
+
+        i {
+            color: #3b82f6;
+        }
+
+        small {
+            color: #2e2a22;
+            font-weight: 600;
+        }
+
+        h5 {
+            color: #2e2a22;
+            font-weight: 600;
+        }
+
+        h6 {
+            color: #F94818;
+            font-size: 17px;
+            font-weight: 700;
+        }
+    }
+
+    .audience {
+
+        small {
+            position: relative;
+            left: 55%;
+            bottom: 5%;
+            text-decoration: underline;
+            color: #2e2a22;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+
+        strong {
+            font-weight: 600;
+            margin: 0px 5px;
+            position: relative;
+            top: 22%;
+            padding-top: 10px;
+            font-size: 15px;
+        }
+    }
+    
+    .profileOptions {
+    
+        display: flex;
+        justify-content: space-between;
+        hr {
+            transform: rotate(0deg);
+            height: 40px;
+            margin: 3px 8px;
+            border: none;
+            border-right: 2px solid #a0a090;
+            opacity: 1;
+        }
+        
+    }
+}
+
 
 .div3 {
     padding-left: 10px;
@@ -334,22 +414,28 @@ button:hover {
         button {
             width: 95px;
         }
+        button:hover {
+        transform: none;
+        background-color: #c7c0b1;
+        transform: none;
+        box-shadow: none;
+        }
     }
 
     .post-heading {
-        margin: 18px 10px;
-        padding: 15px;
+        margin: 5px 5px;
+        padding: 10px;
         display: flex;
         align-items: center;
 
         h5 {
             color: #2e2a22;
-            font-size: 19px;
+            font-size: 17px;
         }
 
         span {
             color: #F94818;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 500;
         }
 
@@ -392,12 +478,12 @@ button:hover {
     .post-detail {
         padding: 20px 18px;
     }
-    
+
     .my-comment {
         padding: 5px 18px;
         display: flex;
         align-items: center;
-        
+
         input {
             width: 70%;
             background-color: transparent;
@@ -415,16 +501,20 @@ button:hover {
 
         }
     }
-    .all-comments{
+
+    .all-comments {
         padding: 8px 18px;
-        h5{
+
+        h5 {
             font-size: 15px;
         }
-        .post-top{
+
+        .post-top {
             display: flex;
             justify-content: space-between;
         }
-        p{
+
+        p {
             font-size: 13px;
             color: #2e2a22;
         }

@@ -26,17 +26,52 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///coreXmanzoidTweet.db"
 db = SQLAlchemy(model_class=Base)
 db.init_app(app)
 
-
 class UserData(UserMixin, db.Model):
+    __tablename__ = "user_data"
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
     username: Mapped[str] = mapped_column(String, nullable=False, unique=True)
-    email: Mapped[str] = mapped_column(String, nullable=False, unique = True)
+    email: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     number: Mapped[int] = mapped_column(Integer, nullable=False)
     password: Mapped[str] = mapped_column(String, nullable=False)
 
     tweets = relationship("TweetData", back_populates="user")
     comments = relationship("Comments", back_populates="user")
+
+    # USERS WHO FOLLOW THIS USER
+    followers: Mapped[list["Follow"]] = relationship(
+        "Follow",
+        foreign_keys="Follow.following_id",   # <-- important
+        back_populates="following",
+        cascade="all, delete-orphan"
+    )
+
+    # USERS THIS USER IS FOLLOWING
+    following: Mapped[list["Follow"]] = relationship(
+        "Follow",
+        foreign_keys="Follow.follower_id",   # <-- important
+        back_populates="follower",
+        cascade="all, delete-orphan"
+    )
+
+
+class Follow(db.Model):
+    __tablename__ = "follows"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    # who follows
+    follower_id: Mapped[int] = mapped_column(Integer,db.ForeignKey("user_data.id"),nullable=False)
+
+    # who is being followed
+    following_id: Mapped[int] = mapped_column(Integer,db.ForeignKey("user_data.id"),nullable=False)
+
+    # user who follows someone
+    follower: Mapped["UserData"] = relationship("UserData",foreign_keys=[follower_id],back_populates="following")
+
+    # user who is being followed
+    following: Mapped["UserData"] = relationship("UserData",foreign_keys=[following_id],back_populates="followers")
 
 class TweetData(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -47,6 +82,7 @@ class TweetData(db.Model):
     comments: Mapped[int] = mapped_column(Integer, default=0)
     retweets: Mapped[int] = mapped_column(Integer, default=0)
     shares: Mapped[int] = mapped_column(Integer, default=0)
+    hashtags: Mapped[JSON] = mapped_column(JSON, default=[])
     user = relationship("UserData", back_populates="tweets")
     comment = relationship("Comments", back_populates="tweet")
 
@@ -135,10 +171,13 @@ def login():
 def homepage():
     global posts
     if request.method == 'POST':
-        post = request.form.get("post-input")
+        post_content = request.form.get("post-input")
+        hashtags = [word for word in post_content.split() if word.startswith('#')]
+        post = ' '.join([word for word in post_content.split() if not word.startswith('#')]) 
         datetime_now = datetime.now().isoformat()  # '2025-10-30T14:22:15'
         new_tweet = TweetData(
             content=post,
+            hashtags=hashtags,
             user_id=current_user.id,
             timestamp=datetime_now
         )
@@ -146,26 +185,9 @@ def homepage():
         db.session.commit()
         return redirect(url_for("homepage"))
     
-    posts = db.session.execute(db.select(TweetData).order_by(TweetData.timestamp.desc())).scalars().all()
-    if len(posts) > 10:
-        posts = random.sample(posts, 10)
-    
     current_time = datetime.now().isoformat()  # '2025-10-30T14:22:15'
-    return render_template('home.html', posts=posts, ct=current_time)
+    return render_template('home.html', ct=current_time)
 
-
-@app.route("/refresh", methods=['GET', 'POST'])
-@login_required
-def refresh_page():
-    if request.method == 'POST':
-        update_action = json.loads(request.form.get("post-action"))
-        for i in range(len(update_action['retweets'])):
-            post = db.session.execute(db.select(TweetData).where(TweetData.id == int(update_action['post_id'][i]))).scalar()
-            post.likes = update_action['likes'][i]
-            post.retweets = update_action['retweets'][i]
-            post.shares = update_action['shares'][i]
-        db.session.commit()
-    return redirect(url_for('homepage'))
 
 @app.route('/comments/<int:post_id>/<string:content>/<int:state>')
 @login_required
@@ -179,12 +201,43 @@ def comments(post_id, content, state):
             likes = random.randint(0, 1000)
         )
         db.session.add(new_comment)
+        post = db.session.execute(db.select(TweetData).where(TweetData.id == post_id)).scalar()
+        post.comments += 1
         db.session.commit()
-        # current_time = datetime.now().isoformat()  # '2025-10-30T14:22:15'
-        # return render_template("home.html", posts=posts, ct=current_time)
     comments = db.session.execute(db.select(Comments).where(Comments.tweet_id == post_id).order_by(Comments.id.desc())).scalars().all()
     # For GET request → return HTML for comments
     return render_template('comments.html', comments=comments[:15], post_id=post_id)
+
+@app.route('/randomPosts/<int:state>/<int:id>', methods=['GET', 'POST'])
+def randomPosts(state,id):
+    global posts
+    if request.method == 'POST':
+        update_action = request.get_json()
+        for i in range(len(update_action['retweets'])):
+            post = db.session.execute(db.select(TweetData).where(TweetData.id == int(update_action['post_id'][i]))).scalar()
+            post.likes = update_action['likes'][i]
+            post.retweets = update_action['retweets'][i]
+            post.shares = update_action['shares'][i]
+        db.session.commit()
+    if state == 1:
+        posts = db.session.execute(db.select(TweetData).where(TweetData.user_id == id).order_by(TweetData.timestamp.desc())).scalars().all()
+    else:
+        posts = db.session.execute(db.select(TweetData).order_by(TweetData.timestamp.desc())).scalars().all()
+    if len(posts) > 10:
+        posts = random.sample(posts, 10)
+    
+    return render_template('posts.html', posts=posts)
+
+@app.route('/exploreAccounts/<string:state>')
+def exploreAccounts(state):
+    if state == "random":
+        accounts = db.session.execute(db.select(UserData).order_by(UserData.id.desc())).scalars().all()
+    else:
+        accounts = db.session.execute(db.select(UserData).where(UserData.username.contains(state)).order_by(UserData.id.desc())).scalars().all()
+    if len(accounts) > 10:
+        accounts = random.sample(accounts, 10)
+    following = [follow.following_id for follow in current_user.following]
+    return render_template('exploreAccounts.html', accounts=accounts, following=following)
 
 @app.route("/logout/<int:state>")
 @login_required
@@ -194,6 +247,30 @@ def logout(state):
         return redirect(url_for('home'))
     logout_user()
     return redirect(url_for('login'))
+
+@app.route("/follows/<int:id>/<int:state>", methods=["GET", "POST"])
+def follows(id, state):
+    if request.method == "POST":
+        if state == 1:
+            new_follow = Follow(
+                follower_id = current_user.id,
+                following_id = id
+            )
+            db.session.add(new_follow)
+            db.session.commit()
+        elif state == 2:
+            unfollow = db.session.execute(db.select(Follow).where((Follow.follower_id == current_user.id) & (Follow.following_id == id))).scalar()
+            db.session.delete(unfollow)
+            db.session.commit()
+        return jsonify({"status": "success"})
+    return jsonify({"status": "failed"})
+
+@app.route("/profile/<int:id>")
+def profile(id):
+    if id == 0:
+        return render_template("newPost.html")
+    user = db.session.execute(db.select(UserData).where(UserData.id == id)).scalar()
+    return render_template("profile.html", current_user=user)
 
 if __name__ == "__main__":
     app.run(debug=True)

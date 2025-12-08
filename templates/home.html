@@ -13,7 +13,7 @@
 
 <body>
     <div class="parent">
-        <div class="div1">
+        <div class="div1 {{current_user.id}}">
             <div class="d-none d-sm-block">
                 <div class="d-flex flex-column flex-shrink-0 p-3 bg-light me-0" style="width: 280px;">
                     <a href="/"
@@ -24,7 +24,7 @@
                     <hr>
                     <ul class="nav nav-pills flex-column mb-auto">
                         <li class="nav-item">
-                            <a href="#" class="nav-link active fw-semibold" aria-current="page">
+                            <a href="#" class="nav-link active fw-semibold home-link" aria-current="page">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor"
                                     class="bi bi-house-door-fill me-2" viewBox="0 0 16 16">
                                     <path
@@ -46,7 +46,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="nav-link link-dark fw-semibold">
+                            <a href="#" class="nav-link link-dark fw-semibold notifications-link">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor"
                                     class="bi bi-bell-fill me-2" viewBox="0 0 16 16">
                                     <path
@@ -76,7 +76,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="nav-link link-dark fw-semibold">
+                            <a href="#" class="nav-link link-dark fw-semibold profile-link">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor"
                                     class="bi bi-person-bounding-box me-2" viewBox="0 0 16 16">
                                     <path
@@ -135,73 +135,18 @@
             </div>
         </div>
 
-
-
         <div class="div2">
-            <div class="flex">
-
-                <a href="#" class="active-a">For you</a>
-                <hr>
-                <a href="#">Following</a>
-            </div>
-            <hr>
-            <form action="/home" method="post">
-                <div class="post">
-                    <img src="https://github.com/mdo.png" alt="" width="50" height="50" class="rounded-circle me-2">
-                    <textarea name="post-input" placeholder="Whats-happening?"></textarea>
-                </div>
-                <div class="submit">
-
-                    <div class="progress-circle" style="width: 40px; height: 40px;">
-                        <svg viewBox="0 0 50 50">
-
-                            <circle class="progress-circle-track" cx="25" cy="25" r="22" stroke="#e2e8f0"
-                                stroke-width="3" fill="none" />
-                            <circle class="progress-circle-indicator" cx="25" cy="25" r="22" stroke="#3b82f6"
-                                stroke-width="3" fill="none" stroke-dasharray="138.23007675795088 138.23007675795088"
-                                stroke-dashoffset="0" transform="rotate(-90 25 25)" />
-
-                        </svg>
-
-                    </div>
-
-
-                    <button type="submit" disabled>Post</button>
-                </div>
-                <hr>
-            </form>
+            <!-- newpost or profile will load here -->
+            {% include 'newPost.html' %}
         </div>
+
         <div class="div3">
-            {% for post in posts %}
-            <div class="post">
-                <div class="post-heading">
-                    <img src="https://github.com/mdo.png" alt="" width="40" height="40" class="rounded-circle me-2">
-                    <h5 class="{{ post.id }}">{{ post.user.name }}<br /><span>@{{ post.user.username }}</span></h5>
-                    <small>{{ post.timestamp }}</small>
-                </div>
-                <div class="post-content">
-                    <p>{{ post.content }}</p>
-                </div>
-                <div class="post-actions">
-                    <a class="comment"><i class="bi bi-chat-heart"></i> {{ post.comments }}</a>
-                    <a class="retweet"><i class="bi bi-repeat"></i> {{ post.retweets }}</a>
-                    <a class="like"><i class="bi bi-heart"></i> {{ post.likes }}</a>
-                    <a class="share"><i class="bi bi-share"></i> {{ post.shares }}</a>
-                </div>
-                <hr>
-            </div>
-            {% endfor %}
+            <!-- Load posts.html here -->
         </div>
+
         <div class="div4">
-            <form action="{{ url_for('refresh_page') }}" method="post">
-                <input type="hidden" name="post-action" id="time_now" value="">
-                <button type="submit">Refresh</button>
-            </form>
+            <button type="submit">Refresh</button>
         </div>
-        <!--         
-                <div class="div5">
-                    <img class="img-fluid" width="350px" style="position: fixed; right: 6%; top: 155px;" src="../static/assets/logo1.png"/>
-                </div> -->
 
         <div class="div5 explore-tab">
             <center>
@@ -215,46 +160,10 @@
                 <p>Get access to premium features that are available for our special users</p>
                 <button>Subscribe</button>
             </div>
-            <div class="accounts">
-                <div class="full-account">
-
-                    <div class="post-heading">
-                        <img src="https://github.com/mdo.png" alt="" width="50" height="50" class="rounded-circle me-2">
-                        <h5 class="1">Babar Azam<br /><span>@babarazam</span></h5>
-                        <strong>17M Followers</strong>
-                    </div>
-
-                    <div class="follow">
-                        <button>Follow</button>
-                    </div>
-                </div>
-                <div class="full-account">
-
-                    <div class="post-heading">
-                        <img src="https://github.com/mdo.png" alt="" width="50" height="50" class="rounded-circle me-2">
-                        <h5 class="1">The Rock<br /><span>@therock</span></h5>
-                        <strong>638.4M Followers</strong>
-                    </div>
-
-                    <div class="follow">
-                        <button>Follow</button>
-                    </div>
-                </div>
-                <div class="full-account">
-
-                    <div class="post-heading">
-                        <img src="https://github.com/mdo.png" alt="" width="50" height="50" class="rounded-circle me-2">
-                        <h5 class="1">John Cena<br /><span>@john_cena</span></h5>
-                        <strong>189M Followers</strong>
-                    </div>
-
-                    <div class="follow">
-                        <button>Follow</button>
-                    </div>
-                </div>
+            <div class="explore-accounts">
+                <!-- Show Accounts Segguestions -->
             </div>
         </div>
-
         <div class="div5 full-post">
             <div class="post-button">
                 <div class="p">
@@ -270,8 +179,11 @@
                     <small></small>
                 </div>
                 <div class="post-content">
-                    <p>Hello How are you this is my post for today and I am going to university to take class. I'll see
+                    <p class="content">Hello How are you this is my post for today and I am going to university to
+                        take
+                        class. I'll see
                         you later guys.</p>
+                    <p class="hashtag">#university #class #post</p>
                 </div>
                 <div class="post-actions commmentpost-action">
                     <a class="comments"><i class="bi bi-chat-heart"></i> <span>999</span></a>
@@ -286,8 +198,6 @@
             </div>
 
         </div>
-
-
 
         <div class="d-block d-sm-none fixed-bottom">
             <nav class="navbar navbar-expand bg-light footer-bar">

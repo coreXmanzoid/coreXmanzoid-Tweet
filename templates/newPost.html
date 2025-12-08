@@ -1,0 +1,61 @@
+<div class="flex">
+
+    <a href="#" class="active-a">For you</a>
+    <hr>
+    <a href="#">Following</a>
+</div>
+<hr>
+<form action="/home" method="post">
+    <div class="post">
+        <img src="https://github.com/mdo.png" alt="" width="50" height="50" class="rounded-circle me-2">
+        <textarea name="post-input" placeholder="Whats-happening?"></textarea>
+    </div>
+    <div class="submit">
+
+        <div class="progress-circle" style="width: 40px; height: 40px;">
+            <svg viewBox="0 0 50 50">
+
+                <circle class="progress-circle-track" cx="25" cy="25" r="22" stroke="#e2e8f0" stroke-width="3"
+                    fill="none" />
+                <circle class="progress-circle-indicator" cx="25" cy="25" r="22" stroke="#3b82f6" stroke-width="3"
+                    fill="none" stroke-dasharray="138.23007675795088 138.23007675795088" stroke-dashoffset="0"
+                    transform="rotate(-90 25 25)" />
+            </svg>
+        </div>
+
+        <button type="submit" disabled>Post</button>
+    </div>
+    <hr>
+</form>
+<script>
+    // Control foryou and following active link
+    $(".div2 a").click(function () {
+        $(".div2 a").removeClass("active-a");
+        $(this).addClass("active-a");
+    });
+
+    // Control textarea input characters and progress of circle
+    $("textarea").on("input", function () {
+        var inputLength = $(this).val().length;
+        var maxLength = 150;
+        var progress = (inputLength / maxLength) * 100;
+
+        var circumference = 2 * Math.PI * 22;
+        var offset = (progress / 100) * circumference;
+        if (progress >= 100) {
+            $(".progress-circle-indicator").attr("stroke", "red");
+        } else if (progress >= 80) {
+            $(".progress-circle-indicator").attr("stroke", "orange");
+        } else {
+            $(".progress-circle-indicator").attr("stroke", "#3b82f6");
+        }
+        $(".progress-circle-indicator").css("stroke-dashoffset", offset);
+
+        if (inputLength > 0 && inputLength <= maxLength) {
+            $("button[type='submit']").prop("disabled", false);
+        } else {
+            $("button[type='submit']").prop("disabled", true);
+        }
+    });
+
+</script>
