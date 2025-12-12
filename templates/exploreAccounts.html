@@ -1,9 +1,12 @@
+{% if accounts|length == 0 %}
+<div class="no-data text-center py-3 fs-6">No accounts exist</div>
+{% endif %}
 {% for account in accounts %}
 <div class="full-account">
     <div class="post-heading">
         <img src="https://github.com/mdo.png" alt="" width="50" height="50" class="rounded-circle me-2">
         <h5 class="{{account.id}}">{{ account.name }}<br /><span>@{{ account.username }}</span></h5>
-        <strong>17M Followers</strong>
+        <strong>{{account.followers | length}} Followers</strong>
     </div>
     <div class="follow">
         {% if account.id in following %}
@@ -15,6 +18,10 @@
 </div>
 {% endfor %}
 <script>
+    $(".post-heading").click(function () {
+        var accountId = $(this).find('h5').attr('class');
+        showProfile(accountId);
+    });
     $('.follow button').click(function () {
         var button = $(this);
         var accountId = button.closest('.full-account').find('h5').attr('class');

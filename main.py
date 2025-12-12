@@ -205,8 +205,9 @@ def comments(post_id, content, state):
         post.comments += 1
         db.session.commit()
     comments = db.session.execute(db.select(Comments).where(Comments.tweet_id == post_id).order_by(Comments.id.desc())).scalars().all()
+    post = db.session.execute(db.select(TweetData).where(TweetData.id == post_id)).scalar()
     # For GET request → return HTML for comments
-    return render_template('comments.html', comments=comments[:15], post_id=post_id)
+    return render_template('comments.html', comments=comments[:15], post=post)
 
 @app.route('/randomPosts/<int:state>/<int:id>', methods=['GET', 'POST'])
 def randomPosts(state,id):
@@ -228,16 +229,23 @@ def randomPosts(state,id):
     
     return render_template('posts.html', posts=posts)
 
-@app.route('/exploreAccounts/<string:state>')
-def exploreAccounts(state):
+@app.route('/exploreAccounts/<int:id>/<string:state>')
+def exploreAccounts(id, state):
+    user = db.session.get(UserData, id)
     if state == "random":
         accounts = db.session.execute(db.select(UserData).order_by(UserData.id.desc())).scalars().all()
+    elif state == "following":
+        accounts = [f.following for f in user.following]
+    elif state == "followers":
+        accounts = [f.follower for f in user.followers]
     else:
         accounts = db.session.execute(db.select(UserData).where(UserData.username.contains(state)).order_by(UserData.id.desc())).scalars().all()
     if len(accounts) > 10:
         accounts = random.sample(accounts, 10)
-    following = [follow.following_id for follow in current_user.following]
-    return render_template('exploreAccounts.html', accounts=accounts, following=following)
+
+    following_ids = {f.following_id for f in current_user.following}
+
+    return render_template("exploreAccounts.html",accounts=accounts,following=following_ids)
 
 @app.route("/logout/<int:state>")
 @login_required
@@ -270,7 +278,9 @@ def profile(id):
     if id == 0:
         return render_template("newPost.html")
     user = db.session.execute(db.select(UserData).where(UserData.id == id)).scalar()
-    return render_template("profile.html", current_user=user)
+    is_following = False
+    is_following = db.session.execute(db.select(Follow).where((Follow.follower_id == current_user.id) & (Follow.following_id == id))).scalar() is not None
+    return render_template("profile.html", user=user, is_following=is_following)
 
 if __name__ == "__main__":
     app.run(debug=True)

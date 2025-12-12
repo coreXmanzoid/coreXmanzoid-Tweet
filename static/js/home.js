@@ -4,9 +4,9 @@ var post_info = {
     shares: [],
     retweets: [],
 }
-exploreAccounts("/exploreAccounts/random");
+exploreAccounts("/exploreAccounts/0/random");
 function exploreAccounts(url) {
-    
+
     // show explore accounts
     $.ajax({
         url: url,
@@ -15,7 +15,7 @@ function exploreAccounts(url) {
 
             // Create dummy container to extract HTML + scripts
             let dummy = $("<div>").html(response);
-            
+
             // Extract script tags
             let scripts = dummy.find("script");
 
@@ -40,9 +40,9 @@ function exploreAccounts(url) {
 $(".search input").on("input", function () {
     var query = $(this).val();
     if (query.length > 0) {
-        exploreAccounts("/exploreAccounts/" + query);
-    }else{
-        exploreAccounts("/exploreAccounts/random");
+        exploreAccounts("/exploreAccounts/0/" + query);
+    } else {
+        exploreAccounts("/exploreAccounts/0/random");
     }
 
 });
@@ -66,8 +66,8 @@ $(".div4 button").click(function (e) {
 
     // get the text node that holds the count (if any)
 
-    $(".post-heading h5").each(function () {
-        var post_id = Number($(this).attr("class"));
+    $(".info").each(function () {
+        var post_id = Number($(this).attr("class").split(' ')[1]);
         post_info.post_id.push(post_id);
     });
     $(".like").each(function () {
@@ -131,8 +131,7 @@ $(".full-post").hide();
 
 
 // show profile on clicking profile link
-$(".profile-link").click(function () {
-    user_id = $(".div1").attr("class").split(" ")[1];
+function showProfile(user_id) {
     $(".div2").load("/profile/" + user_id);
     $(".full-post").hide();
     $(".explore-tab").show();
@@ -163,12 +162,20 @@ $(".profile-link").click(function () {
         }
     });
 
+};
+$(".profile-link").click(function (){
+    user_id = $(".div1").attr("class").split(" ")[1]
+    showProfile(user_id);
 });
-// show Home on clicking home link
-$(".home-link").click(function () {
+// show Home on clicking home link & back to home from profile
+function Backtohome() {
     $(".div2").load("/profile/0");
     $(".full-post").hide();
     $(".explore-tab").show();
+    $(".nav a").removeClass("active link-dark");
+    $(".nav a").addClass("link-dark");
+    $(".home-link").addClass("active");
+    $(".home-link").removeClass("link-dark");
     $.ajax({
         url: "/randomPosts/0/0",
         method: "GET",
@@ -195,8 +202,8 @@ $(".home-link").click(function () {
             });
         }
     });
-
-});
+}
+$(".home-link").click(Backtohome);
 
 // Control foryou and following active link
 $(".div2 a").click(function () {
@@ -204,10 +211,31 @@ $(".div2 a").click(function () {
     $(this).addClass("active-a");
 });
 
+// show full post method
+function showFullPost() {
+    var $post = $(this).closest(".post");
+    var post_id = $post.attr("class").split(' ')[1];
+    var active_post = $post.hasClass("active-post");
+
+    $(".post").removeClass("active-post");
+
+    if (!active_post) {
+        $post.addClass("active-post");
+        $(".explore-tab").hide();
+        $(".full-post").show();
+        // reload sepecific part of page without refreshing entire page and implementing on specific div
+        $('.coreXmanzoid').load('/comments/' + post_id + '/nill/0');
+    } else {
+        $post.removeClass("active-post");
+        $(".explore-tab").show();
+        $(".full-post").hide();
+    }
+}
+
 // Control textarea input characters and progress of circle
 $("textarea").on("input", function () {
     var inputLength = $(this).val().length;
-    var maxLength = 150;
+    var maxLength = 200;
     var progress = (inputLength / maxLength) * 100;
 
     var circumference = 2 * Math.PI * 22;

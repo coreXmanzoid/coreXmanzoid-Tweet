@@ -1,4 +1,11 @@
 <div class="container">
+    <div class="profile-header d-flex justify-content-between align-items-center p-2">
+        <div class="p">
+            <i class="backtohome bi bi-arrow-left"></i>
+            <a href="">Home</a>
+        </div>
+        <i class="bi bi-three-dots"></i>
+    </div>
     <img class="img-fluid ps-5 w-75 ms-5 " src="../static/assets/logo1.png">
     <div class="profile row">
         <div class="info col-lg-7">
@@ -6,17 +13,23 @@
                 width="100" height="100" class="m-2">
             <br>
             <small>
-                <h5 style="display: inline;"><b>{{current_user.name}}</b></h5><i class="bi bi-patch-check-fill m-1"></i>Get
+                <h5 style="display: inline;"><b>{{user.name}}</b></h5><i class="bi bi-patch-check-fill m-1"></i>Get
                 Verified
             </small>
-            <h6>@{{current_user.username}}</h6>
+            <h6>@{{user.username}}</h6>
             <small><i class="bi bi-calendar-heart m-1"></i>6 July, 2025</small> <br>
             <small><em>Always coding...</em></small>
         </div>
-        <div class="audience col-lg-5 pt-3">
-            <small>Edit Profile</small> <br>
-            <strong style="color: #F94818;">{{current_user.followers | length}} Followers</strong>
-            <strong>{{current_user.following | length}} Following</strong>
+        <div class="audience {{user.id}} col-lg-5 pt-3">
+            {% if current_user.id == user.id %}
+            <small class="edit-profile">Edit Profile</small> <br>
+            {% elif is_following %}
+            <small class="Following ps-3">Following</small> <br>
+            {% else %}
+            <small class="Follow ps-4">Follow</small> <br>
+            {% endif %}
+            <strong class="followers {{user.id}}" style="color: #F94818;">{{user.followers | length}} Followers</strong>
+            <strong class="followings {{user.id}}">{{user.following | length}} Following</strong>
         </div>
         <hr style="margin:0px;">
         <div class="ProfileOptions">
@@ -30,5 +43,39 @@
         </div>
     </div>
 
-    <hr style="margin: 0px 0px 15x 0px;">
+    <hr style="margin: 0px 0px 15px 0px;">
 </div>
+<script>
+    $(".backtohome").click(Backtohome);
+    $('.audience small').click(function () {
+        let btn = $(this);   // <-- THIS is the actual element
+        let button = btn.attr('class').split(' ')[0];
+        let accountId = $(this).closest('.audience').attr('class').split(' ')[1];
+
+        if (button === 'Follow') {
+            $.ajax({
+                url: '/follows/' + accountId + '/1',
+                type: 'POST',
+                success: function (response) {
+                    btn.text('Following');      // update text
+                    btn.attr('class', 'Following ps-3'); // update class
+                }
+            });
+        } else {
+            $.ajax({
+                url: '/follows/' + accountId + '/2',
+                type: 'POST',
+                success: function (response) {
+                    btn.text('Follow');
+                    btn.attr('class', 'Follow ps-4');
+                }
+            });
+        }
+    });
+    $(".followers").click(function(){
+        exploreAccounts("/exploreAccounts/" + $(".followers").attr("class").split(' ')[1] + "/followers");
+    });
+    $(".followings").click(function(){
+        exploreAccounts("/exploreAccounts/" + $(".followings").attr("class").split(' ')[1] + "/following");
+    });
+</script>

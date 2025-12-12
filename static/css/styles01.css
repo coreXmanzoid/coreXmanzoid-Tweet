@@ -88,26 +88,32 @@ button:hover {
         font-weight: 600;
         font-size: 18px;
         padding: 10px 13px;
-        color:  #46423b;
+        color: #46423b;
     }
-    a::after{
+
+    a::after {
         content: '';
         display: block;
         height: 3px;
         width: 0;
         transition: width .3s;
-        background-color:#2e2a22;
+        background-color: #2e2a22;
     }
+
     a:hover::after {
         width: 100%;
         transition: width .3s;
     }
 
-
     .active-a {
         color: #F94818;
-        border-bottom: 3px solid #2e2a22;
     }
+
+    /* ⭐ Active link underline effect */
+    .active-a::after {
+        width: 100%;
+    }
+
 
     .post {
         display: flex;
@@ -247,6 +253,12 @@ button:hover {
 
 }
 
+.no-data {
+    color: #F94818;
+    font-size: 14px;
+    font-weight: 500;
+}
+
 .profile {
     background-color: #DEDED1 !important;
 
@@ -287,22 +299,25 @@ button:hover {
             font-size: 16px;
             font-weight: 700;
             margin-bottom: 30px;
+            cursor: pointer;
         }
-
+        
         strong {
             font-weight: 600;
             margin: 0px 5px;
             position: relative;
             top: 22%;
+            cursor: pointer;
             padding-top: 10px;
             font-size: 15px;
         }
     }
-    
+
     .profileOptions {
-    
+
         display: flex;
         justify-content: space-between;
+
         hr {
             transform: rotate(0deg);
             height: 40px;
@@ -311,7 +326,7 @@ button:hover {
             border-right: 2px solid #a0a090;
             opacity: 1;
         }
-        
+
     }
 }
 
@@ -414,11 +429,12 @@ button:hover {
         button {
             width: 95px;
         }
+
         button:hover {
-        transform: none;
-        background-color: #c7c0b1;
-        transform: none;
-        box-shadow: none;
+            transform: none;
+            background-color: #c7c0b1;
+            transform: none;
+            box-shadow: none;
         }
     }
 
@@ -445,6 +461,10 @@ button:hover {
             font-weight: 500;
         }
     }
+}
+
+h5:hover {
+    cursor: pointer;
 }
 
 .full-post {
@@ -518,5 +538,49 @@ button:hover {
             font-size: 13px;
             color: #2e2a22;
         }
+    }
+}
+
+.loader-wrapper {
+    width: 100%;
+    height: 200px;
+    /* any height or auto */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.loader {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: inline-block;
+    border-top: 4px solid #8f8674;
+    border-right: 4px solid transparent;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+}
+
+.loader::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border-bottom: 4px solid #FF3D00;
+    border-left: 4px solid transparent;
+}
+
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
     }
 }

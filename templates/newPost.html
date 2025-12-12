@@ -8,13 +8,12 @@
 <form action="/home" method="post">
     <div class="post">
         <img src="https://github.com/mdo.png" alt="" width="50" height="50" class="rounded-circle me-2">
-        <textarea name="post-input" placeholder="Whats-happening?"></textarea>
+        <textarea name="post-input" spellcheck="false" placeholder="Whats-happening!"></textarea>
     </div>
     <div class="submit">
 
         <div class="progress-circle" style="width: 40px; height: 40px;">
             <svg viewBox="0 0 50 50">
-
                 <circle class="progress-circle-track" cx="25" cy="25" r="22" stroke="#e2e8f0" stroke-width="3"
                     fill="none" />
                 <circle class="progress-circle-indicator" cx="25" cy="25" r="22" stroke="#3b82f6" stroke-width="3"
@@ -37,7 +36,7 @@
     // Control textarea input characters and progress of circle
     $("textarea").on("input", function () {
         var inputLength = $(this).val().length;
-        var maxLength = 150;
+        var maxLength = 180;
         var progress = (inputLength / maxLength) * 100;
 
         var circumference = 2 * Math.PI * 22;

@@ -1,8 +1,15 @@
+{% if not posts %}
+<div class="no-posts text-center py-5">
+    <i class="bi bi-inbox" style="font-size:48px;opacity:.3"></i>
+    <h4 class="no-data mt-3">No posts yet</h4>
+    <p class="text-muted">There are no posts to show. Create the first post to get started.</p>
+</div>
+{% endif %}
 {% for post in posts %}
-<div class="post">
+<div class="post {{ post.id }} info">
     <div class="post-heading">
         <img src="https://github.com/mdo.png" alt="" width="40" height="40" class="rounded-circle me-2">
-        <h5 class="{{ post.id }}">{{ post.user.name }}<br /><span>@{{ post.user.username }}</span></h5>
+        <h5 class="{{ post.user.id }}">{{ post.user.name }}<br /><span>@{{ post.user.username }}</span></h5>
         <small>{{ post.timestamp }}</small>
     </div>
     <div class="post-content">
@@ -134,49 +141,11 @@ $(".post-heading small").each(function() {
 });
 
 // Show comments section on double click of post
-$(".post").dblclick(function () {
-    var $post = $(this);
-    var post_id = $post.find('.post-heading h5').attr("class");
-    var active_post = $post.hasClass("active-post");
-
-    $(".post").removeClass("active-post");
-
-    if (!active_post) {
-        $post.addClass("active-post");
-        $(".explore-tab").hide();
-
-        // Get user name
-        const userName = $post.find('.post-heading h5').clone().children().remove().end().text().trim();
-        // Get username (@username inside span)
-        const userHandle = $post.find('.post-heading h5 span').text().trim().replace(/^@/, '');
-        // Get timestamp
-        const timestamp = $post.find('.post-heading small').text().trim();
-        const like = $post.find('.like').text().trim();
-        const shares = $post.find('.share').text().trim();
-        const comment = $post.find('.comment').text().trim();
-        const retweet = $post.find('.retweet').text().trim();
-        const content = $post.find('.post-content p.content').text().trim();
-        const hashtag = $post.find('.post-content p.hashtag').text().trim();
-
-        // Fill in post data dynamically
-        $(".commmentpost-action .likes span").text(like);
-        $(".commmentpost-action .comments span").text(comment);
-        $(".commmentpost-action .retweets span").text(retweet);
-        $(".commmentpost-action .shares span").text(shares);
-
-        // Fixed invalid selector $(".4") — use .full-post or specific container
-        $(".full-post .post-heading h5").html(`${userName}<br><span>@${userHandle}</span>`);
-        $(".full-post .post-heading small").text(timestamp);
-        $(".full-post .post-content p.content").text(content);
-        $(".full-post .post-content p.hashtag").text(hashtag);
-
-        $(".full-post").show();
-        // reload sepecific part of page without refreshing entire page and implementing on specific div
-        $('.all-comments').load('/comments/' + post_id + '/nill/0');
-    } else {
-        $post.removeClass("active-post");
-        $(".explore-tab").show();
-        $(".full-post").hide();
-    }
+$(".post").dblclick(showFullPost);
+$(".comment").click(showFullPost);
+// Show user profile on clicking user name
+$(".post-heading h5").click(function () {
+    var post_id = $(this).attr("class");
+    showProfile(post_id);
 });
 </script>
