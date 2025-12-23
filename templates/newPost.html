@@ -1,8 +1,8 @@
 <div class="flex">
 
-    <a href="#" class="active-a">For you</a>
+    <a data-state="0" class="active-a" data-userid={{ current_user.id }}>For you</a>
     <hr>
-    <a href="#">Following</a>
+    <a data-state="2" class="" data-userid="{{ current_user.id }}">Following</a>
 </div>
 <hr>
 <form action="/home" method="post">

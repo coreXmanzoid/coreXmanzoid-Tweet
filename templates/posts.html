@@ -6,7 +6,7 @@
 </div>
 {% endif %}
 {% for post in posts %}
-<div class="post {{ post.id }} info">
+<div class="post {{ post.id }} info"data-postid="{{post.id}}">
     <div class="post-heading">
         <img src="https://github.com/mdo.png" alt="" width="40" height="40" class="rounded-circle me-2">
         <h5 class="{{ post.user.id }}">{{ post.user.name }}<br /><span>@{{ post.user.username }}</span></h5>
@@ -28,32 +28,44 @@
 <script>
 
 // Like button functionality
-$(".like").click(function (e) {
+// Like / Unlike handler (works with AJAX-loaded content)
+$(document).on("click", ".like", function (e) {
     e.preventDefault();
+
     var $btn = $(this);
     var $icon = $btn.find("i");
+
     var wasLiked = $icon.hasClass("bi-heart-fill");
+    var postId = $btn.closest(".post").data("postid");
 
-    // toggle heart icon
-    $btn.toggleClass("text-warning");
-    $icon.toggleClass("bi-heart bi-heart-fill");
+    $.ajax({
+        url: "/likePost",
+        method: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({
+            post_id: postId,
+            like: !wasLiked
+        }),
+        success: function (res) {
 
-    // get the text node that holds the count (if any)
-    var textNode = $btn.contents().filter(function () { return this.nodeType === 3; }).first();
-    var count = 0;
+            // Update UI ONLY after backend success
+            $btn.toggleClass("text-warning", !wasLiked);
+            $icon.toggleClass("bi-heart bi-heart-fill");
 
-    if (textNode.length) {
-        var txt = textNode[0].nodeValue.trim();
-        var m = txt.match(/\d+/);
-        count = m ? parseInt(m[0], 10) : 0;
-        count = Math.max(0, count + (wasLiked ? -1 : 1));
-        textNode[0].nodeValue = " " + count;
-    } else {
-        // no count present yet -> create one
-        count = wasLiked ? 0 : 1;
-        $btn.append(" " + count);
-    }
+            // Update count safely
+            var textNode = $btn.contents().filter(function () {
+                return this.nodeType === 3;
+            }).first();
+
+            if (textNode.length) {
+                textNode[0].nodeValue = " " + res.likes;
+            } else {
+                $btn.append(" " + res.likes);
+            }
+        }
+    });
 });
+
 // share button functionality
 $(".share").click(function (e) {
     e.preventDefault();

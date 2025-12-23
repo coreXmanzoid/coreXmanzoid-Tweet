@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect,  url_for, request, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
-from sqlalchemy import Integer, String, JSON
+from sqlalchemy import Integer, String, JSON, Boolean
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 import emailHandling
@@ -35,6 +35,10 @@ class UserData(UserMixin, db.Model):
     email: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     number: Mapped[int] = mapped_column(Integer, nullable=False)
     password: Mapped[str] = mapped_column(String, nullable=False)
+    is_pro_member: Mapped[bool] = mapped_column(Boolean, default=False)
+    
+    liked_posts: Mapped[JSON] = mapped_column(JSON, default=[])
+    repsted_posts: Mapped[JSON] = mapped_column(JSON, default=[])
 
     tweets = relationship("TweetData", back_populates="user")
     comments = relationship("Comments", back_populates="user")
@@ -212,22 +216,44 @@ def comments(post_id, content, state):
 @app.route('/randomPosts/<int:state>/<int:id>', methods=['GET', 'POST'])
 def randomPosts(state,id):
     global posts
+    posts = []
     if request.method == 'POST':
         update_action = request.get_json()
         for i in range(len(update_action['retweets'])):
             post = db.session.execute(db.select(TweetData).where(TweetData.id == int(update_action['post_id'][i]))).scalar()
-            post.likes = update_action['likes'][i]
             post.retweets = update_action['retweets'][i]
             post.shares = update_action['shares'][i]
         db.session.commit()
     if state == 1:
         posts = db.session.execute(db.select(TweetData).where(TweetData.user_id == id).order_by(TweetData.timestamp.desc())).scalars().all()
+    elif state == 2:
+        follows = db.session.execute(db.select(Follow).where(Follow.follower_id == id)).scalars().all()
+        following_ids = [f.following_id for f in follows]
+        if following_ids:
+            posts = db.session.execute(db.select(TweetData).where(TweetData.user_id.in_(following_ids)).order_by(TweetData.timestamp.desc())).scalars().all()
     else:
         posts = db.session.execute(db.select(TweetData).order_by(TweetData.timestamp.desc())).scalars().all()
     if len(posts) > 10:
         posts = random.sample(posts, 10)
     
-    return render_template('posts.html', posts=posts)
+    current_time = datetime.now().isoformat()  # '2025-10-30T14:22:15'
+    return render_template('posts.html', posts=posts, time_now=current_time)
+
+@app.route('/likePost', methods=['POST'])
+def like_post():
+    data = request.get_json()
+    post_id = data.get('post_id')
+    like = data.get('like')
+    post = db.session.execute(db.select(TweetData).where(TweetData.id == post_id)).scalar()
+    if like:
+        post.likes += 1
+        current_user.liked_posts.append(post_id)
+    else:
+        post.likes -= 1
+        current_user.liked_posts.remove(post_id)
+    db.session.commit()
+
+    return jsonify({"status": "success", "likes": post.likes})
 
 @app.route('/exploreAccounts/<int:id>/<string:state>')
 def exploreAccounts(id, state):

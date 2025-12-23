@@ -89,6 +89,7 @@ button:hover {
         font-size: 18px;
         padding: 10px 13px;
         color: #46423b;
+        cursor: pointer;
     }
 
     a::after {

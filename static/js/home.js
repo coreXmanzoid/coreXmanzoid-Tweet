@@ -1,6 +1,5 @@
 var post_info = {
     post_id: [],
-    likes: [],
     shares: [],
     retweets: [],
 }
@@ -70,11 +69,6 @@ $(".div4 button").click(function (e) {
         var post_id = Number($(this).attr("class").split(' ')[1]);
         post_info.post_id.push(post_id);
     });
-    $(".like").each(function () {
-        var $btn = $(this);
-        var textNode = $btn.contents().filter(function () { return this.nodeType === 3; }).first();
-        post_info.likes.push(textNode.length ? parseInt(textNode[0].nodeValue.trim().match(/\d+/)[0], 10) : 0);
-    });
     $(".share").each(function () {
         var $btn = $(this);
         var textNode = $btn.contents().filter(function () { return this.nodeType === 3; }).first();
@@ -110,7 +104,6 @@ $(".div4 button").click(function (e) {
 
     post_info = {
         post_id: [],
-        likes: [],
         shares: [],
         retweets: [],
     };
@@ -163,7 +156,7 @@ function showProfile(user_id) {
     });
 
 };
-$(".profile-link").click(function (){
+$(".profile-link").click(function () {
     user_id = $(".div1").attr("class").split(" ")[1]
     showProfile(user_id);
 });
@@ -204,11 +197,33 @@ function Backtohome() {
     });
 }
 $(".home-link").click(Backtohome);
+// show posts based on for you and following tabs
+$(document).on("click", ".div2 a", function (e) {
+    e.preventDefault();   // STOP navigation
+    e.stopPropagation();  // EXTRA safety
 
-// Control foryou and following active link
-$(".div2 a").click(function () {
     $(".div2 a").removeClass("active-a");
     $(this).addClass("active-a");
+
+    var state = parseInt($(this).data("state"));
+    var user_id = $(this).data("userid");
+    $.ajax({
+        url: `/randomPosts/${state}/${user_id}`,
+        type: "GET",
+        success: function (response) {
+            let dummy = $("<div>").html(response);
+            let scripts = dummy.find("script");
+            dummy.find("script").remove();
+            $(".div3").html(dummy.html());
+
+            scripts.each(function () {
+                let code = $(this).text();
+                if (code.trim()) eval(code);
+            });
+        }
+    });
+
+    return false;
 });
 
 // show full post method
