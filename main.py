@@ -7,6 +7,9 @@ from flask_login import UserMixin, login_user, LoginManager, login_required, cur
 import emailHandling
 from datetime import datetime
 import random, json
+from sqlalchemy.ext.mutable import MutableList
+
+
 data = {"page": "signup",
         "email": "example@gmail.com",
         "usernames": [],
@@ -36,8 +39,7 @@ class UserData(UserMixin, db.Model):
     number: Mapped[int] = mapped_column(Integer, nullable=False)
     password: Mapped[str] = mapped_column(String, nullable=False)
     is_pro_member: Mapped[bool] = mapped_column(Boolean, default=False)
-    
-    liked_posts: Mapped[JSON] = mapped_column(JSON, default=[])
+    liked_posts: Mapped[list] = mapped_column(MutableList.as_mutable(JSON),default=list)
     repsted_posts: Mapped[JSON] = mapped_column(JSON, default=[])
 
     tweets = relationship("TweetData", back_populates="user")
@@ -231,6 +233,11 @@ def randomPosts(state,id):
         following_ids = [f.following_id for f in follows]
         if following_ids:
             posts = db.session.execute(db.select(TweetData).where(TweetData.user_id.in_(following_ids)).order_by(TweetData.timestamp.desc())).scalars().all()
+    elif state == 3: # Likes
+        user = db.session.get(UserData, id)
+        liked_post_ids = (user.liked_posts)
+        if liked_post_ids:
+            posts = db.session.execute(db.select(TweetData).where(TweetData.id.in_(liked_post_ids)).order_by(TweetData.timestamp.desc())).scalars().all()
     else:
         posts = db.session.execute(db.select(TweetData).order_by(TweetData.timestamp.desc())).scalars().all()
     if len(posts) > 10:
@@ -244,15 +251,21 @@ def like_post():
     data = request.get_json()
     post_id = data.get('post_id')
     like = data.get('like')
-    post = db.session.execute(db.select(TweetData).where(TweetData.id == post_id)).scalar()
-    if like:
-        post.likes += 1
-        current_user.liked_posts.append(post_id)
-    else:
-        post.likes -= 1
-        current_user.liked_posts.remove(post_id)
-    db.session.commit()
 
+    post = db.session.get(TweetData, post_id)
+    if not post:
+        return jsonify({"status": "error"}), 404
+
+    if like:
+        if post_id not in current_user.liked_posts:
+            post.likes += 1
+            current_user.liked_posts.append(post_id)
+    else:
+        if post_id in current_user.liked_posts:
+            post.likes = max(post.likes - 1, 0)
+            current_user.liked_posts.remove(post_id)
+
+    db.session.commit()
     return jsonify({"status": "success", "likes": post.likes})
 
 @app.route('/exploreAccounts/<int:id>/<string:state>')

@@ -5,7 +5,7 @@ var post_info = {
 }
 exploreAccounts("/exploreAccounts/0/random");
 function exploreAccounts(url) {
-
+    
     // show explore accounts
     $.ajax({
         url: url,
@@ -20,10 +20,10 @@ function exploreAccounts(url) {
 
             // Remove scripts from HTML
             dummy.find("script").remove();
-
+            
             // Insert cleaned HTML into div3
             $(".explore-accounts").html(dummy.html());
-
+            
             // Execute extracted scripts manually
             scripts.each(function () {
                 let code = $(this).text();
@@ -43,7 +43,7 @@ $(".search input").on("input", function () {
     } else {
         exploreAccounts("/exploreAccounts/0/random");
     }
-
+    
 });
 // Active sidebar animation
 $(".nav li a").click(function () {
@@ -58,11 +58,39 @@ $(".footer-navbar a").click(function () {
     $(".footer-navbar a").removeClass("icons");
     $(this).addClass("icons");
 });
+// Show posts
+function showPosts(state, id) {
+    $.ajax({
+        url: "/randomPosts/"+ state + "/" + id,
+        method: "GET",
+        success: function (response) {
+            // Create dummy container to extract HTML + scripts
+            let dummy = $("<div>").html(response);
+
+            // Extract script tags
+            let scripts = dummy.find("script");
+
+            // Remove scripts from HTML
+            dummy.find("script").remove();
+            
+            // Insert cleaned HTML into div3
+            $(".div3").html(dummy.html());
+            
+            // Execute extracted scripts manually
+            scripts.each(function () {
+                let code = $(this).text();
+                if (code.trim() !== "") {
+                    eval(code);
+                }
+            });
+        }
+    });
+}
 // Show posts.html
 $(".div3").load("/randomPosts/0/0");
 // Refresh button functionality and returning current likes
 $(".div4 button").click(function (e) {
-
+    
     // get the text node that holds the count (if any)
 
     $(".info").each(function () {
@@ -79,29 +107,17 @@ $(".div4 button").click(function (e) {
         var textNode = $btn.contents().filter(function () { return this.nodeType === 3; }).first();
         post_info.retweets.push(textNode.length ? parseInt(textNode[0].nodeValue.trim().match(/\d+/)[0], 10) : 0);
     });
+    
     $.ajax({
         url: "/randomPosts/0/0",
         type: "POST",
         contentType: "application/json",
         data: JSON.stringify(post_info),
         success: function (response) {
-            // extract script content
-            let dummy = $("<div>").html(response);
-            let scripts = dummy.find("script");
-
-            // remove scripts from HTML
-            dummy.find("script").remove();
-
-            // insert HTML without scripts
-            $(".div3").html(dummy.html());
-
-            // run script code manually
-            scripts.each(function () {
-                eval($(this).text());
-            });
+            showPosts(0, 0);
         }
     });
-
+    
     post_info = {
         post_id: [],
         shares: [],
@@ -119,6 +135,14 @@ $(".explore-button").click(function () {
     $(".search input").focus();
 });
 
+$(".likes-button").click(function () {
+    var user_id = $(".div1").attr("class").split(" ")[1];
+    showPosts(3, user_id);
+    exploreAccounts("/exploreAccounts/0/random");
+    $(".div2").load("/profile/0");
+    $(".full-post").hide();
+    $(".explore-tab").show();
+});
 // Initially hide full post section
 $(".full-post").hide();
 
@@ -128,33 +152,7 @@ function showProfile(user_id) {
     $(".div2").load("/profile/" + user_id);
     $(".full-post").hide();
     $(".explore-tab").show();
-    $.ajax({
-        url: "/randomPosts/1/" + user_id,
-        method: "GET",
-        success: function (response) {
-
-            // Create dummy container to extract HTML + scripts
-            let dummy = $("<div>").html(response);
-
-            // Extract script tags
-            let scripts = dummy.find("script");
-
-            // Remove scripts from HTML
-            dummy.find("script").remove();
-
-            // Insert cleaned HTML into div3
-            $(".div3").html(dummy.html());
-
-            // Execute extracted scripts manually
-            scripts.each(function () {
-                let code = $(this).text();
-                if (code.trim() !== "") {
-                    eval(code);
-                }
-            });
-        }
-    });
-
+   showPosts(1, user_id);
 };
 $(".profile-link").click(function () {
     user_id = $(".div1").attr("class").split(" ")[1]
@@ -169,32 +167,7 @@ function Backtohome() {
     $(".nav a").addClass("link-dark");
     $(".home-link").addClass("active");
     $(".home-link").removeClass("link-dark");
-    $.ajax({
-        url: "/randomPosts/0/0",
-        method: "GET",
-        success: function (response) {
-
-            // Create dummy container to extract HTML + scripts
-            let dummy = $("<div>").html(response);
-
-            // Extract script tags
-            let scripts = dummy.find("script");
-
-            // Remove scripts from HTML
-            dummy.find("script").remove();
-
-            // Insert cleaned HTML into div3
-            $(".div3").html(dummy.html());
-
-            // Execute extracted scripts manually
-            scripts.each(function () {
-                let code = $(this).text();
-                if (code.trim() !== "") {
-                    eval(code);
-                }
-            });
-        }
-    });
+    showPosts(0, 0);
 }
 $(".home-link").click(Backtohome);
 // show posts based on for you and following tabs
@@ -207,22 +180,7 @@ $(document).on("click", ".div2 a", function (e) {
 
     var state = parseInt($(this).data("state"));
     var user_id = $(this).data("userid");
-    $.ajax({
-        url: `/randomPosts/${state}/${user_id}`,
-        type: "GET",
-        success: function (response) {
-            let dummy = $("<div>").html(response);
-            let scripts = dummy.find("script");
-            dummy.find("script").remove();
-            $(".div3").html(dummy.html());
-
-            scripts.each(function () {
-                let code = $(this).text();
-                if (code.trim()) eval(code);
-            });
-        }
-    });
-
+    showPosts(state, user_id);
     return false;
 });
 

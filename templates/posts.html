@@ -19,7 +19,11 @@
     <div class="post-actions">
         <a class="comment"><i class="bi bi-chat-heart"></i> {{ post.comments }}</a>
         <a class="retweet"><i class="bi bi-repeat"></i> {{ post.retweets }}</a>
+        {% if post.id in current_user.liked_posts %}
+        <a class="like"><i class="bi bi-heart-fill"></i> {{ post.likes }}</a>
+        {% else %}
         <a class="like"><i class="bi bi-heart"></i> {{ post.likes }}</a>
+        {% endif %}
         <a class="share"><i class="bi bi-share"></i> {{ post.shares }}</a>
     </div>
     <hr>
@@ -49,9 +53,15 @@ $(document).on("click", ".like", function (e) {
         success: function (res) {
 
             // Update UI ONLY after backend success
-            $btn.toggleClass("text-warning", !wasLiked);
-            $icon.toggleClass("bi-heart bi-heart-fill");
-
+            if (wasLiked) {
+                // Was liked, now unliked
+                $btn.removeClass("text-warning");
+                $icon.removeClass("bi-heart-fill").addClass("bi-heart");
+            } else {
+                // Was unliked, now liked
+                $btn.addClass("text-warning");
+                $icon.removeClass("bi-heart").addClass("bi-heart-fill");
+            }
             // Update count safely
             var textNode = $btn.contents().filter(function () {
                 return this.nodeType === 3;

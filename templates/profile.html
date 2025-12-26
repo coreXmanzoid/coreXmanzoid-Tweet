@@ -32,7 +32,7 @@
             <strong class="followings {{user.id}}">{{user.following | length}} Following</strong>
         </div>
         <hr style="margin:0px;">
-        <div class="ProfileOptions">
+        <div class="ProfileOptions {{user.id}}">
             <a>Posts</a>
             <hr>
             <a>Likes</a>
@@ -78,4 +78,16 @@
     $(".followings").click(function(){
         exploreAccounts("/exploreAccounts/" + $(".followings").attr("class").split(' ')[1] + "/following");
     });
+    $(".ProfileOptions a:first").addClass("active-a");
+    $(".profileOptions a").click(function(){
+        let option = $(this).text();
+        let userId = $(".ProfileOptions").attr("class").split(' ')[1];
+        if (option === "Posts"){
+            showPosts(1, userId);
+        } else if (option === "Likes"){
+            showPosts(3, userId)
+        } else if (option === "Reposts"){
+            showPosts(4, userId)
+        }
+    })
 </script>
