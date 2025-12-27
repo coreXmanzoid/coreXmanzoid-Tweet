@@ -40,7 +40,7 @@ class UserData(UserMixin, db.Model):
     password: Mapped[str] = mapped_column(String, nullable=False)
     is_pro_member: Mapped[bool] = mapped_column(Boolean, default=False)
     liked_posts: Mapped[list] = mapped_column(MutableList.as_mutable(JSON),default=list)
-    repsted_posts: Mapped[JSON] = mapped_column(JSON, default=[])
+    reposted_posts: Mapped[list] = mapped_column(MutableList.as_mutable(JSON),default=list)
 
     tweets = relationship("TweetData", back_populates="user")
     comments = relationship("Comments", back_populates="user")
@@ -219,15 +219,18 @@ def comments(post_id, content, state):
 def randomPosts(state,id):
     global posts
     posts = []
+    reposts = None
+    # Refresh route
     if request.method == 'POST':
         update_action = request.get_json()
-        for i in range(len(update_action['retweets'])):
+        for i in range(len(update_action['post_id'])):
             post = db.session.execute(db.select(TweetData).where(TweetData.id == int(update_action['post_id'][i]))).scalar()
-            post.retweets = update_action['retweets'][i]
             post.shares = update_action['shares'][i]
         db.session.commit()
+    # Get posts for someone profile
     if state == 1:
         posts = db.session.execute(db.select(TweetData).where(TweetData.user_id == id).order_by(TweetData.timestamp.desc())).scalars().all()
+    # Get posts for following
     elif state == 2:
         follows = db.session.execute(db.select(Follow).where(Follow.follower_id == id)).scalars().all()
         following_ids = [f.following_id for f in follows]
@@ -238,35 +241,51 @@ def randomPosts(state,id):
         liked_post_ids = (user.liked_posts)
         if liked_post_ids:
             posts = db.session.execute(db.select(TweetData).where(TweetData.id.in_(liked_post_ids)).order_by(TweetData.timestamp.desc())).scalars().all()
+    elif state == 4: # Reposts
+        user = db.session.get(UserData, id)
+        reposted_post_ids = (user.reposted_posts)
+        if reposted_post_ids:
+            reposts = user.username 
+            posts = db.session.execute(db.select(TweetData).where(TweetData.id.in_(reposted_post_ids)).order_by(TweetData.timestamp.desc())).scalars().all()
+    # Get random posts and Foryou page
     else:
         posts = db.session.execute(db.select(TweetData).order_by(TweetData.timestamp.desc())).scalars().all()
+    
     if len(posts) > 10:
         posts = random.sample(posts, 10)
     
     current_time = datetime.now().isoformat()  # '2025-10-30T14:22:15'
-    return render_template('posts.html', posts=posts, time_now=current_time)
+    return render_template('posts.html', posts=posts, time_now=current_time, reposts=reposts)
 
-@app.route('/likePost', methods=['POST'])
-def like_post():
+@app.route('/likePost/<int:state>', methods=['POST'])
+def post_Action(state):
     data = request.get_json()
     post_id = data.get('post_id')
-    like = data.get('like')
-
     post = db.session.get(TweetData, post_id)
     if not post:
         return jsonify({"status": "error"}), 404
-
-    if like:
-        if post_id not in current_user.liked_posts:
-            post.likes += 1
-            current_user.liked_posts.append(post_id)
-    else:
-        if post_id in current_user.liked_posts:
-            post.likes = max(post.likes - 1, 0)
-            current_user.liked_posts.remove(post_id)
-
+    if state == 1:
+        like = data.get('like')
+        if like:
+            if post_id not in current_user.liked_posts:
+                post.likes += 1
+                current_user.liked_posts.append(post_id)
+        else:
+            if post_id in current_user.liked_posts:
+                post.likes = max(post.likes - 1, 0)
+                current_user.liked_posts.remove(post_id)
+    elif state == 2:
+        repost = data.get('repost')
+        if repost:
+            if post_id not in current_user.reposted_posts:
+                post.retweets += 1
+                current_user.reposted_posts.append(post_id)
+        else:
+            if post_id in current_user.reposted_posts:
+                post.retweets = max(post.retweets - 1, 0)
+                current_user.reposted_posts.remove(post_id)
     db.session.commit()
-    return jsonify({"status": "success", "likes": post.likes})
+    return jsonify({"status": "success", "likes": post.likes, "reposts": post.retweets})
 
 @app.route('/exploreAccounts/<int:id>/<string:state>')
 def exploreAccounts(id, state):

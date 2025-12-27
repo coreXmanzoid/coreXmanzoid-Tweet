@@ -102,12 +102,7 @@ $(".div4 button").click(function (e) {
         var textNode = $btn.contents().filter(function () { return this.nodeType === 3; }).first();
         post_info.shares.push(textNode.length ? parseInt(textNode[0].nodeValue.trim().match(/\d+/)[0], 10) : 0);
     });
-    $(".retweet").each(function () {
-        var $btn = $(this);
-        var textNode = $btn.contents().filter(function () { return this.nodeType === 3; }).first();
-        post_info.retweets.push(textNode.length ? parseInt(textNode[0].nodeValue.trim().match(/\d+/)[0], 10) : 0);
-    });
-    
+
     $.ajax({
         url: "/randomPosts/0/0",
         type: "POST",
@@ -121,7 +116,6 @@ $(".div4 button").click(function (e) {
     post_info = {
         post_id: [],
         shares: [],
-        retweets: [],
     };
 });
 
