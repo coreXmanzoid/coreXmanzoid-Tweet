@@ -336,9 +336,6 @@ button:hover {
     padding-left: 10px;
     grid-column-start: 2;
     grid-row-start: 2;
-
-
-
 }
 
 .div4 {
@@ -346,7 +343,14 @@ button:hover {
     grid-row-start: 3;
 }
 
-.explore-tab {
+.div5 {
+    grid-row: span 3 / span 3;
+    grid-column-start: 3;
+    grid-row-start: 1;
+}
+
+
+.explore-tab , .ai-bar{
     padding-top: 20px;
     grid-row: span 3 / span 3;
     grid-column-start: 3;

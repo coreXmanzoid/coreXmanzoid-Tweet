@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manzoid AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='../static/css/AI.css') }}">
+</head>
+<body>
+
+<div class="Manzoid-container">
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <div class="ai-header">
+            <img src="../static/assets/logo.png" alt=""> Manzoid AI
+        </div>
+
+        <div id="chat-box" class="chat-box">
+            <div class="message ai">
+                Hi {{current_user.username}}👋, I am Manzoid AI. Ask me anything!
+            </div>
+        </div>
+
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Type a message..." />
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function addMessage(text, sender) {
+    const chatBox = document.getElementById("chat-box");
+    const msg = document.createElement("div");
+    msg.className = "message " + sender;
+    msg.innerText = text;
+    chatBox.appendChild(msg);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+async function sendMessage() {
+    const input = document.getElementById("user-input");
+    const text = input.value.trim();
+    if (!text) return;
+
+    addMessage(text, "user");
+    input.value = "";
+
+    const typing = document.createElement("div");
+    typing.className = "message ai";
+    typing.innerText = "Typing...";
+    document.getElementById("chat-box").appendChild(typing);
+
+    try {
+        const response = await fetch("/api/ai/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: text })
+        });
+
+        const data = await response.json();
+        typing.remove();
+
+        if (data.reply) {
+            addMessage(data.reply, "ai");
+        } else {
+            addMessage("⚠️ AI service error.", "ai");
+        }
+    } catch (err) {
+        typing.remove();
+        addMessage("⚠️ Network error.", "ai");
+    }
+}
+</script>
+
+</body>
+</html>

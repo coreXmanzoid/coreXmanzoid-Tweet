@@ -4,10 +4,12 @@ from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
 from sqlalchemy import Integer, String, JSON, Boolean
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-import emailHandling
+import emailHandling, random, json, requests, os
 from datetime import datetime
-import random, json
 from sqlalchemy.ext.mutable import MutableList
+from groq import Groq
+from dotenv import load_dotenv
+load_dotenv()
 
 
 data = {"page": "signup",
@@ -22,10 +24,13 @@ class Base(DeclarativeBase):
 
 
 app = Flask(__name__)
+# Load API key 
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 app.config["SECRET_KEY"] = "8BYkEfBA6O6donzWlSihBXox7C0sKR6b"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///coreXmanzoidTweet.db"
 
 
+client = Groq(api_key=GROQ_API_KEY)
 db = SQLAlchemy(model_class=Base)
 db.init_app(app)
 
@@ -286,6 +291,44 @@ def post_Action(state):
                 current_user.reposted_posts.remove(post_id)
     db.session.commit()
     return jsonify({"status": "success", "likes": post.likes, "reposts": post.retweets})
+
+
+@app.route("/Manzoid-AI")
+def manzoid_ai():
+    return render_template("AI.html")
+
+
+@app.route("/api/ai/chat", methods=["POST"])
+def ai_chat():
+    data = request.get_json(silent=True)
+
+    if not data or "message" not in data:
+        return jsonify({"error": "Message is required"}), 400
+
+    prompt = data["message"].strip()
+
+    if not prompt:
+        return jsonify({"error": "Empty message"}), 400
+
+    if len(prompt) > 500:
+        return jsonify({"error": "Message too long"}), 400
+
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=150
+        )
+
+        answer = response.choices[0].message.content
+        return jsonify({"reply": answer})
+
+    except Exception as e:
+        print("Groq error:", e)
+        return jsonify({"error": "AI service unavailable"}), 503
+
 
 @app.route('/exploreAccounts/<int:id>/<string:state>')
 def exploreAccounts(id, state):

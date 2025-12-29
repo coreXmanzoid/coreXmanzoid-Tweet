@@ -3,6 +3,7 @@ var post_info = {
     shares: [],
     retweets: [],
 }
+// fetch accounts for explore accounts section
 exploreAccounts("/exploreAccounts/0/random");
 function exploreAccounts(url) {
     
@@ -90,7 +91,9 @@ function showPosts(state, id) {
 $(".div3").load("/randomPosts/0/0");
 // Refresh button functionality and returning current likes
 $(".div4 button").click(function (e) {
-    
+    $(".ai-bar").hide();
+    $(".full-post").hide();
+    $(".explore-tab").show();
     // get the text node that holds the count (if any)
 
     $(".info").each(function () {
@@ -119,12 +122,22 @@ $(".div4 button").click(function (e) {
     };
 });
 
+// AI tab functionality
+$(".ai-button").click(function(){
+    $(".full-post").hide();
+    $(".div2").hide();
+    $(".div3").load("/Manzoid-AI");
+    $(".explore-tab").hide();
+    $(".ai-bar").show();
+});
+
 $(".post-button").click(function () {
     $("textarea").focus();
 });
 
 $(".explore-button").click(function () {
     $(".full-post").hide();
+    $(".ai-bar").hide();
     $(".explore-tab").show();
     $(".search input").focus();
 });
@@ -135,6 +148,8 @@ $(".likes-button").click(function () {
     exploreAccounts("/exploreAccounts/0/random");
     $(".div2").load("/profile/0");
     $(".full-post").hide();
+    $(".div2").show();
+    $(".ai-bar").hide();
     $(".explore-tab").show();
 });
 // Initially hide full post section
@@ -145,6 +160,7 @@ $(".full-post").hide();
 function showProfile(user_id) {
     $(".div2").load("/profile/" + user_id);
     $(".full-post").hide();
+    $(".ai-bar").hide();
     $(".explore-tab").show();
    showPosts(1, user_id);
 };
@@ -156,11 +172,13 @@ $(".profile-link").click(function () {
 function Backtohome() {
     $(".div2").load("/profile/0");
     $(".full-post").hide();
+    $(".ai-bar").hide();
     $(".explore-tab").show();
     $(".nav a").removeClass("active link-dark");
     $(".nav a").addClass("link-dark");
     $(".home-link").addClass("active");
     $(".home-link").removeClass("link-dark");
+    $(".div2").show();
     showPosts(0, 0);
 }
 $(".home-link").click(Backtohome);
@@ -189,6 +207,7 @@ function showFullPost() {
     if (!active_post) {
         $post.addClass("active-post");
         $(".explore-tab").hide();
+        $(".ai-bar").hide();
         $(".full-post").show();
         // reload sepecific part of page without refreshing entire page and implementing on specific div
         $('.coreXmanzoid').load('/comments/' + post_id + '/nill/0');
@@ -198,7 +217,6 @@ function showFullPost() {
         $(".full-post").hide();
     }
 }
-
 // Control textarea input characters and progress of circle
 $("textarea").on("input", function () {
     var inputLength = $(this).val().length;
