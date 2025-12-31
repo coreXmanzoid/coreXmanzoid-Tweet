@@ -87,7 +87,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="{{ url_for('logout', state=2)}}" class="nav-link link-dark fw-semibold">
+                            <a href="#" class="nav-link link-dark fw-semibold switch-account-link">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor"
                                     class="bi bi-nintendo-switch me-2" viewBox="0 0 16 16">
                                     <path
@@ -116,7 +116,7 @@
                     <div class="dropdown">
                         <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle"
                             id="dropdownUser2" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="https://github.com/mdo.png" alt="" width="32" height="32"
+                            <img src="{{ current_user.profile_image_url if current_user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}" alt="" width="32" height="32"
                                 class="rounded-circle me-2">
                             <strong>{{ current_user.name }}</strong>
                         </a>
@@ -213,7 +213,7 @@
             </div>
         </div>
 
-        <div class="div5 full-post">
+        <div class="div5 full-post" style="display: none;">
             <div class="coreXmanzoid">
                 <div class="loader-wrapper">
                     <span class="loader"></span>

@@ -7,10 +7,19 @@ from flask_login import UserMixin, login_user, LoginManager, login_required, cur
 import emailHandling, random, json, requests, os
 from datetime import datetime
 from sqlalchemy.ext.mutable import MutableList
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 from groq import Groq
 from dotenv import load_dotenv
 load_dotenv()
 
+cloudinary.config(
+    cloud_name= os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.environ.get("CLOUDINARY_API_KEY"),
+    api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
+    secure=True
+)
 
 data = {"page": "signup",
         "email": "example@gmail.com",
@@ -40,6 +49,7 @@ class UserData(UserMixin, db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
     username: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+    profile_image_url: Mapped[str] = mapped_column(String, nullable=True, default=None)
     email: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     number: Mapped[int] = mapped_column(Integer, nullable=False)
     password: Mapped[str] = mapped_column(String, nullable=False)
@@ -176,6 +186,47 @@ def login():
         else:
             flash("Wrong Password Try Again.")
     return render_template('login.html')
+
+@app.route("/update-profile/<int:id>", methods=["POST"])
+def upload_profile(id):
+    if "profile" not in request.files:
+        return jsonify({"status": "error", "message": "No file provided"}), 400
+
+    file = request.files["profile"]
+
+    if file.filename == "":
+        return jsonify({"status": "error", "message": "Empty file"}), 400
+
+    user = db.session.get(UserData, id)
+    if not user:
+        return jsonify({"status": "error", "message": "User not found"}), 404
+
+    try:
+        result = cloudinary.uploader.upload(
+            file,
+            folder="profile_pictures",
+            public_id=f"user_{id}",
+            overwrite=True,
+            transformation=[
+                {"width": 256, "height": 256, "crop": "fill"},
+                {"quality": "auto"},
+                {"fetch_format": "auto"}
+            ]
+        )
+
+        image_url = result["secure_url"]
+        user.profile_image_url = image_url
+        db.session.commit()
+        return jsonify({
+            "status": "success",
+            "image_url": image_url
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
 @app.route('/home', methods=['GET', 'POST'])
 @login_required

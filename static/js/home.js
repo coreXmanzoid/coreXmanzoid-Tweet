@@ -122,6 +122,15 @@ $(".div4 button").click(function (e) {
     };
 });
 
+// switch account functionality
+$(".switch-account-link").click(function () {
+    confirmSwitch = confirm("Are you sure you want to switch accounts? Unsaved changes will be lost.");
+    if (confirmSwitch) {
+        window.location.href = "/logout/2";
+    }else{
+        Backtohome();
+    }
+});
 // AI tab functionality
 $(".ai-button").click(function(){
     $(".full-post").hide();
@@ -132,6 +141,7 @@ $(".ai-button").click(function(){
 });
 
 $(".post-button").click(function () {
+    Backtohome();
     $("textarea").focus();
 });
 
@@ -153,7 +163,7 @@ $(".likes-button").click(function () {
     $(".explore-tab").show();
 });
 // Initially hide full post section
-$(".full-post").hide();
+// $(".full-post").hide();
 
 
 // show profile on clicking profile link
