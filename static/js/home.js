@@ -207,8 +207,19 @@ $(document).on("click", ".div2 a", function (e) {
 });
 
 // show full post method
-function showFullPost() {
+function showFullPost(e) {
+    if (e) {
+        e.preventDefault();
+    }
     var $post = $(this).closest(".post");
+    if ($post.length === 0) {
+        $post = $(".post.active-post").first();
+    }
+    if ($post.length === 0) {
+        $(".explore-tab").show();
+        $(".full-post").hide();
+        return;
+    }
     var post_id = $post.attr("class").split(' ')[1];
     var active_post = $post.hasClass("active-post");
 

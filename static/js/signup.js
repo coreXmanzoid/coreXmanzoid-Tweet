@@ -1,15 +1,6 @@
 var emailFound = false;
 var usernameFound = false;
 var passwordValid = true;
-$('#Showpassword').click(function () {
-    if (this.value == "0") {
-        $('#userPassword').attr('type', 'text');
-        this.value = "1";
-    } else if (this.value == "1") {
-        $('#userPassword').attr('type', 'password');
-        this.value = "0";
-    }
-});
 
 $("input[name = 'username']").on("keydown", function (event) {
     var username = $("input[name = 'username']").val() + event.key;
@@ -91,16 +82,9 @@ $("#userPassword").on("keyup", function () {
 $(".submitbutton").click(function () {
     confirm("We will send you an OTP on your email. Make sure to entered a correct Email.");
 });
-if (data.page == "signup") {
-
-    $('.signup-form').show();
-    $('.confirm-email-form').hide();
-}
 
 if (data.page == "confirmEmail") {
-    $('.confirm-email-form').show();
     $("input[name='OTP1']").focus();
-    $('.signup-form').hide();
 }
 
 $(".confirm-email-form input").on("keydown", function (event) {

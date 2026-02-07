@@ -1,13 +1,14 @@
-<div class="post-button">
-    <div class="p">
-        <i class="bi bi-arrow-left"></i>
+<div class="post-button" >
+    <div class="back-post">
+        <i class="bi bi-arrow-left" style="cursor: pointer;"></i>
         <a href="">Post</a>
     </div>
     <i class="bi bi-three-dots"></i>
 </div>
 <div class="post-detail">
     <div class="post-heading">
-        <img src="https://github.com/mdo.png" alt="" width="40" height="40" class="rounded-circle me-2">
+        <img src="{{ post.user.profile_image_url if post.user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
+            alt="" width="40" height="40" class="rounded-circle me-2">
         <h5 class="{{ post.user.id}}">{{ post.user.name }}<br /><span>@{{ post.user.username }}</span></h5>
     </div>
     <div class="post-content">
@@ -24,31 +25,33 @@
 <hr>
 
 <div class="my-comment">
-    <img src="https://github.com/mdo.png" alt="" width="35" height="35" class="rounded-circle me-2">
+    <img src="{{ current_user.profile_image_url if current_user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
+        alt="" width="35" height="35" class="rounded-circle me-2">
     <input type="text" name="content" placeholder="Leave your Comment">
     <button id="submitComment">reply</button>
 </div>
 <hr />
 <div class="all-comments">
-{% if not comments %}
-<div class="no-data text-center py-3">No comments yet.</div>
-{% else %}
-{% for comment in comments %}
-<div class="post-top">
+    {% if not comments %}
+    <div class="no-data text-center py-3">No comments yet.</div>
+    {% else %}
+    {% for comment in comments %}
+    <div class="post-top">
         <div class="post-heading">
-        <img src="https://github.com/mdo.png" alt="" width="30" height="30" class="rounded-circle me-2">
-        <h5 class="{{ comment.user.id }}">{{ comment.user.name }} <br><span>@{{ comment.user.username }}</span></h5>
+            <img src="{{ comment.user.profile_image_url if comment.user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
+                alt="" width="30" height="30" class="rounded-circle me-2">
+            <h5 class="{{ comment.user.id }}">{{ comment.user.name }} <br><span>@{{ comment.user.username }}</span></h5>
+        </div>
+        <div class="post-actions comment-actions" data-postId="{{ comment.id }}">
+            <a class="like-comment"><i class="bi bi-heart"></i> {{ comment.likes }}</a>
+        </div>
     </div>
-    <div class="post-actions">
-        <a class="like"><i class="bi bi-heart"></i> {{ comment.likes }}</a>
+    <div class="post-content">
+        <p>{{ comment.content }}</p>
     </div>
-</div>
-<div class="post-content">
-    <p>{{ comment.content }}</p>
-</div>
-<hr>
-{% endfor %}
-{% endif %}
+    <hr>
+    {% endfor %}
+    {% endif %}
 </div>
 <script>
 
@@ -56,6 +59,49 @@
         user_id = $(this).attr("class");
         showProfile(user_id);
     });
+    $(".like-comment").click(function (e) {
+        e.preventDefault();
+
+        var $btn = $(this);
+        var $icon = $btn.find("i");
+
+        var wasLiked = $icon.hasClass("bi-heart-fill");
+        var postId = $btn.closest(".comment-actions").data("postid");
+        $.ajax({
+            url: "/likePost/3",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                post_id: postId,
+                like: !wasLiked
+            }),
+            success: function (res) {
+
+                // Update UI ONLY after backend success
+                if (wasLiked) {
+                    // Was liked, now unliked
+                    $btn.removeClass("text-warning");
+                    $icon.removeClass("bi-heart-fill").addClass("bi-heart");
+                } else {
+                    // Was unliked, now liked
+                    $btn.addClass("text-warning");
+                    $icon.removeClass("bi-heart").addClass("bi-heart-fill");
+                }
+                // Update count safely
+                var textNode = $btn.contents().filter(function () {
+                    return this.nodeType === 3;
+                }).first();
+
+                if (textNode.length) {
+                    textNode[0].nodeValue = " " + res.likes;
+                } else {
+                    $btn.append(" " + res.likes);
+                }
+            }
+        });
+    });
+    // active arrow back button
+    $(".back-post > i").click(showFullPost);
 
     $("#submitComment").click(function () {
         var post_id = $(".active-post").attr("class").split(' ')[1];

@@ -3,17 +3,27 @@ from random import randint
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
-import os
+import re, os
 
 load_dotenv()
 
-EMAIL = str(os.getenv("EMAIL"))       # your sender email
-PASSWORD = str(os.environ.get("PASSWORD"))      # Gmail App Password (not your main password)
+EMAIL = str(os.getenv("EMAIL"))  # your sender email
+PASSWORD = str(
+    os.environ.get("PASSWORD")
+)  # Gmail App Password (not your main password)
+
+
+def validate_email(email):
+    pattern = r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+    return re.match(pattern, email) is not None
 
 def sendEmail(userEmail: str) -> str:
+    # Validate the email address format
+    if not validate_email(userEmail):
+        print("❌ Invalid email format")
+        return "0000"
     # Generate a 4-digit OTP
     OTP = str(randint(1000, 9999))
-
     # Create the email message
     msg = MIMEMultipart("alternative")
     msg["From"] = EMAIL
@@ -44,17 +54,18 @@ def sendEmail(userEmail: str) -> str:
         with SMTP("smtp.gmail.com", 587) as connection:
             connection.starttls()
             connection.login(EMAIL, PASSWORD)
-            connection.send_message(msg)
+            response = connection.sendmail(EMAIL, userEmail, msg.as_string())
         print("✅ Email sent successfully!")
+        return OTP
     except Exception as e:
         print(f"❌ Failed to send email: {e}")
-
-    return OTP
+    return "0000"
 
 
 def checkOTP(sentOTP, UserEnteredOTP) -> bool:
     if sentOTP == UserEnteredOTP or sentOTP == 9999:
         return True
     return False
+
 
 # sendEmail("me.hammad163@gmail.com")

@@ -20,11 +20,13 @@
                 <br>
             </div>
             <small>
-                <h5 style="display: inline;"><b>{{user.name}}</b></h5><i class="bi bi-patch-check-fill m-1"></i>Get
-                Verified
+                <h5 style="display: inline;"><b>{{user.name}}</b></h5><i class="bi bi-patch-check-fill m-1"></i>
             </small>
             <h6>@{{user.username}}</h6>
-            <small><i class="bi bi-calendar-heart m-1"></i>6 July, 2025</small> <br>
+            <small>
+                <i class="bi bi-calendar-heart m-1"></i>
+                <span id="birthDate">{{ user.birth_date }}</span>
+            </small> <br>
             <small><em>Always coding...</em></small>
         </div>
         <div class="audience {{user.id}} col-lg-6 pt-3">
@@ -76,6 +78,28 @@
             uploadProfileImage(this, `/update-profile/${userId}`);
         }
     });
+
+    const rawDate = $("#birthDate").text().trim();
+
+    if (rawDate) {
+        const dateObj = new Date(rawDate);
+
+        const formattedDate = dateObj.toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        });
+
+        $("#birthDate").text(formattedDate);
+    }
+
+    const d = new Date(rawDate);
+    const formatted =
+        String(d.getDate()).padStart(2, "0") + " " +
+        d.toLocaleString("en-GB", { month: "short" }) + ", " +
+        d.getFullYear();
+
+    $("#birthDate").text(formatted);
 
     function uploadProfileImage(input, url) {
         const file = input.files[0];

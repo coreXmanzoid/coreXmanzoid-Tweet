@@ -5,7 +5,7 @@
     <a data-state="2" class="" data-userid="{{ current_user.id }}">Following</a>
 </div>
 <hr>
-<form action="/home" method="post">
+<form action="/managePosts/1" method="post">
     <div class="post">
         <img src="{{ current_user.profile_image_url if current_user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}" alt="" width="50" height="50" class="rounded-circle me-2">
         <textarea name="post-input" spellcheck="false" placeholder="Whats-happening!"></textarea>

@@ -1,11 +1,11 @@
 from flask import Flask, render_template, redirect,  url_for, request, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
-from sqlalchemy import Integer, String, JSON, Boolean
+from sqlalchemy import Integer, String, JSON, Boolean, Date, DateTime
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 import emailHandling, random, json, requests, os
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy.ext.mutable import MutableList
 import cloudinary
 import cloudinary.uploader
@@ -26,7 +26,7 @@ data = {"page": "signup",
         "usernames": [],
         "emailAlreadyExist": "false",
             }
-name, email, username, phone, password, OTP= "", "", "", "", "", ""
+name, email, username, phone, password, OTP, birth_date="", "", "", "", "", "", ""
 posts = None
 class Base(DeclarativeBase):
     pass
@@ -55,6 +55,7 @@ class UserData(UserMixin, db.Model):
     password: Mapped[str] = mapped_column(String, nullable=False)
     is_pro_member: Mapped[bool] = mapped_column(Boolean, default=False)
     liked_posts: Mapped[list] = mapped_column(MutableList.as_mutable(JSON),default=list)
+    birth_date: Mapped[Date] = mapped_column(Date, nullable=True)
     reposted_posts: Mapped[list] = mapped_column(MutableList.as_mutable(JSON),default=list)
 
     tweets = relationship("TweetData", back_populates="user")
@@ -75,7 +76,6 @@ class UserData(UserMixin, db.Model):
         back_populates="follower",
         cascade="all, delete-orphan"
     )
-
 
 class Follow(db.Model):
     __tablename__ = "follows"
@@ -98,7 +98,7 @@ class TweetData(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     content: Mapped[str] = mapped_column(String, nullable=False)
     user_id: Mapped[int] = mapped_column(Integer, db.ForeignKey("user_data.id"), nullable=False)
-    timestamp: Mapped[str] = mapped_column(String, nullable=False)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     likes: Mapped[int] = mapped_column(Integer, default=0)
     comments: Mapped[int] = mapped_column(Integer, default=0)
     retweets: Mapped[int] = mapped_column(Integer, default=0)
@@ -106,7 +106,6 @@ class TweetData(db.Model):
     hashtags: Mapped[JSON] = mapped_column(JSON, default=[])
     user = relationship("UserData", back_populates="tweets")
     comment = relationship("Comments", back_populates="tweet")
-
 
 class Comments(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -116,6 +115,7 @@ class Comments(db.Model):
     likes: Mapped[int] = mapped_column(Integer, default=0)
     tweet = relationship("TweetData", back_populates="comment")
     user = relationship("UserData", back_populates="comments")
+
 
 with app.app_context():
     db.create_all()
@@ -132,13 +132,18 @@ def load_user(user_id):
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
-    global name, email, username, password, phone, data, OTP
+    global name, email, username, password, phone, data, OTP, birth_date
     if request.method == 'POST':
         if data["page"] == "signup":
             name = request.form.get("name")
             username = request.form.get("username")
             phone = request.form.get("phone")
             email = str(request.form.get("email"))
+
+            birth_date_str = request.form.get("birthDate")  # "2007-01-11"
+
+            birth_date = (datetime.strptime(birth_date_str, "%Y-%m-%d").date() if birth_date_str else None)
+
             password = request.form.get("pin")
             data["email"] = email
             data["page"] = "confirmEmail"
@@ -148,24 +153,36 @@ def signup():
                 data["emailAlreadyExist"] = "true"
                 return render_template('signup.html', data = data)
             OTP = emailHandling.sendEmail(email)
+            if OTP == "0000":
+                data["page"] = "signup"
+                flash("Failed to send verification email. Please try again.")
+            else:
+                data['page'] = "confirmEmail"
             return render_template('signup.html', data = data)
         elif data['page'] == "confirmEmail":
             userOTP = f'{request.form.get("OTP1")}{request.form.get("OTP2")}{request.form.get("OTP3")}{request.form.get("OTP4")}'
             if emailHandling.checkOTP(OTP, userOTP):
+                print(birth_date)
                 new_user = UserData(
                     name=name,
                     username=username,
                     email=email,
+                    birth_date=birth_date,
                     number=phone,
                     password=generate_password_hash(password, method='pbkdf2:sha256', salt_length=8)
                 )
                 db.session.add(new_user)
                 db.session.commit()
+                data["page"] = "signup"
                 return redirect(url_for('login'))
+            flash("INVALID OTP")
             data["page"] = "signup"
             return redirect(url_for('signup'))
     usernames = db.session.execute(db.select(UserData.username)).scalars().all()
     data["usernames"] = usernames
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    data["current_date"] = current_date
+    data["page"] = "signup"
     return render_template('signup.html', data = data)
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -231,26 +248,45 @@ def upload_profile(id):
 @app.route('/home', methods=['GET', 'POST'])
 @login_required
 def homepage():
-    global posts
-    if request.method == 'POST':
-        post_content = request.form.get("post-input")
-        hashtags = [word for word in post_content.split() if word.startswith('#')]
-        post = ' '.join([word for word in post_content.split() if not word.startswith('#')]) 
-        datetime_now = datetime.now().isoformat()  # '2025-10-30T14:22:15'
-        new_tweet = TweetData(
-            content=post,
-            hashtags=hashtags,
-            user_id=current_user.id,
-            timestamp=datetime_now
-        )
-        db.session.add(new_tweet)
-        db.session.commit()
-        return redirect(url_for("homepage"))
-    
     current_time = datetime.now().isoformat()  # '2025-10-30T14:22:15'
     return render_template('home.html', ct=current_time)
 
-
+@app.route("/managePosts/<int:state>", methods=['GET', 'POST'])
+def managePosts(state):
+    global posts
+    if request.method == 'POST':
+        if state == 1:
+            post_content = request.form.get("post-input")
+            hashtags = [word for word in post_content.split() if word.startswith('#')]
+            post = ' '.join([word for word in post_content.split() if not word.startswith('#')]) 
+            datetime_now = datetime.utcnow()  # '2025-10-30T14:22:15'
+            new_tweet = TweetData(
+                content=post,
+                hashtags=hashtags,
+                user_id=current_user.id,
+                timestamp=datetime_now
+            )
+            db.session.add(new_tweet)
+            db.session.commit()
+        elif state == 2:
+            data = request.get_json()
+            post_id = data.get("post_id")
+            new_content = data.get("content")
+            post = db.session.get(TweetData, post_id)
+            if post:
+                post.content = new_content
+                db.session.commit()
+                return {"status": "success", "content": new_content}
+        elif state == 3:
+            data = request.get_json()
+            post_id = data.get("post_id")
+            post = db.session.get(TweetData, post_id)
+            if post:
+                db.session.delete(post)
+                db.session.commit()
+                return {"status": "success"}
+    return redirect(url_for("homepage"))
+    
 @app.route('/comments/<int:post_id>/<string:content>/<int:state>')
 @login_required
 def comments(post_id, content, state):
@@ -260,7 +296,6 @@ def comments(post_id, content, state):
             content = content,
             tweet_id = post_id,
             user_id = current_user.id,
-            likes = random.randint(0, 1000)
         )
         db.session.add(new_comment)
         post = db.session.execute(db.select(TweetData).where(TweetData.id == post_id)).scalar()
@@ -310,17 +345,15 @@ def randomPosts(state,id):
     if len(posts) > 10:
         posts = random.sample(posts, 10)
     
-    current_time = datetime.now().isoformat()  # '2025-10-30T14:22:15'
-    return render_template('posts.html', posts=posts, time_now=current_time, reposts=reposts)
+    current_time = datetime.utcnow()  # '2025-10-30T14:22:15'
+    return render_template('posts.html', posts=posts, time_now=current_time, timedelta=timedelta, reposts=reposts)
 
 @app.route('/likePost/<int:state>', methods=['POST'])
 def post_Action(state):
     data = request.get_json()
     post_id = data.get('post_id')
-    post = db.session.get(TweetData, post_id)
-    if not post:
-        return jsonify({"status": "error"}), 404
     if state == 1:
+        post = db.session.get(TweetData, post_id)
         like = data.get('like')
         if like:
             if post_id not in current_user.liked_posts:
@@ -331,6 +364,7 @@ def post_Action(state):
                 post.likes = max(post.likes - 1, 0)
                 current_user.liked_posts.remove(post_id)
     elif state == 2:
+        post = db.session.get(TweetData, post_id)
         repost = data.get('repost')
         if repost:
             if post_id not in current_user.reposted_posts:
@@ -340,14 +374,22 @@ def post_Action(state):
             if post_id in current_user.reposted_posts:
                 post.retweets = max(post.retweets - 1, 0)
                 current_user.reposted_posts.remove(post_id)
+    elif state == 3:
+        comment = db.session.get(Comments, post_id)
+        like = data.get('like')
+        if like:
+            comment.likes += 1
+        else:
+            comment.likes = max(comment.likes - 1, 0)
+        db.session.commit()
+        return jsonify({"status": "success", "likes": comment.likes})
+
     db.session.commit()
     return jsonify({"status": "success", "likes": post.likes, "reposts": post.retweets})
-
 
 @app.route("/Manzoid-AI")
 def manzoid_ai():
     return render_template("AI.html")
-
 
 @app.route("/api/ai/chat", methods=["POST"])
 def ai_chat():
@@ -379,7 +421,6 @@ def ai_chat():
     except Exception as e:
         print("Groq error:", e)
         return jsonify({"error": "AI service unavailable"}), 503
-
 
 @app.route('/exploreAccounts/<int:id>/<string:state>')
 def exploreAccounts(id, state):
