@@ -7,10 +7,8 @@ import re, os
 
 load_dotenv()
 
-EMAIL = str(os.getenv("EMAIL"))  # your sender email
-PASSWORD = str(
-    os.environ.get("PASSWORD")
-)  # Gmail App Password (not your main password)
+EMAIL = str(os.getenv("EMAIL"))
+PASSWORD = str(os.environ.get("PASSWORD")) 
 
 
 def validate_email(email):
@@ -18,6 +16,14 @@ def validate_email(email):
     return re.match(pattern, email) is not None
 
 def sendEmail(userEmail: str) -> str:
+    """
+    '0000' if email sending fail and OTP if success
+    
+    :param userEmail: Email where OTP to be sent
+    :type userEmail: str
+    :return: OTP
+    :rtype: str
+    """
     # Validate the email address format
     if not validate_email(userEmail):
         print("❌ Invalid email format")
@@ -63,9 +69,12 @@ def sendEmail(userEmail: str) -> str:
 
 
 def checkOTP(sentOTP, UserEnteredOTP) -> bool:
-    if sentOTP == UserEnteredOTP or sentOTP == 9999:
+    """
+    :param sentOTP: The OTP sent to the user.
+    :param UserEnteredOTP: The OTP entered by the user.
+    :return: True if both OTP matched.
+    :rtype: bool
+    """
+    if sentOTP == UserEnteredOTP:
         return True
     return False
-
-
-# sendEmail("me.hammad163@gmail.com")

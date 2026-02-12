@@ -15,7 +15,7 @@
                     style="border-radius:50px;border: 2px solid #DEDED1;" width="100" height="100" class="m-2">
                 {% if current_user.id == user.id %}
                 <div class="profile-pic-overlay">Update</div>
-                <input type="file" name="profile" id="profileInput">
+                <input title="Update Profile Picture" type="file" name="profile" id="profileInput">
                 {% endif %}
                 <br>
             </div>
@@ -27,7 +27,7 @@
                 <i class="bi bi-calendar-heart m-1"></i>
                 <span id="birthDate">{{ user.birth_date }}</span>
             </small> <br>
-            <small><em>Always coding...</em></small>
+            <small><em>Busy in Coding...</em></small>
         </div>
         <div class="audience {{user.id}} col-lg-6 pt-3">
             {% if current_user.id == user.id %}
@@ -38,7 +38,7 @@
             <small class="Follow ps-4">Follow</small> <br>
             {% endif %}
             <strong class="followers {{user.id}}" style="color: #F94818;">{{user.followers | length}} Followers</strong>
-            <strong class="followings {{user.id}}">{{user.following | length}} Following</strong>
+            <strong class="following {{user.id}}">{{user.following | length}} following</strong>
         </div>
         <hr style="margin:0px;">
         <div class="ProfileOptions {{user.id}}">
@@ -139,8 +139,8 @@
                 url: '/follows/' + accountId + '/1',
                 type: 'POST',
                 success: function (response) {
-                    btn.text('Following');      // update text
-                    btn.attr('class', 'Following ps-3'); // update class
+                    btn.text('following');      // update text
+                    btn.attr('class', 'following ps-3'); // update class
                 }
             });
         } else {
@@ -157,8 +157,8 @@
     $(".followers").click(function () {
         exploreAccounts("/exploreAccounts/" + $(".followers").attr("class").split(' ')[1] + "/followers");
     });
-    $(".followings").click(function () {
-        exploreAccounts("/exploreAccounts/" + $(".followings").attr("class").split(' ')[1] + "/following");
+    $(".following").click(function () {
+        exploreAccounts("/exploreAccounts/" + $(".following").attr("class").split(' ')[1] + "/following");
     });
     $(".ProfileOptions a:first").addClass("active-a");
     $(".profileOptions a").click(function () {

@@ -1,20 +1,23 @@
 var emailFound = false;
-var usernameFound = false;
 var passwordValid = true;
-
+var usernameFound = false;
 $("input[name = 'username']").on("keydown", function (event) {
     var username = $("input[name = 'username']").val() + event.key;
-    var usernames = data["usernames"];
-    usernameFound = false;
-    usernames.forEach(function (value, index) {
-        if (username == value) {
-            $("input[name = 'username']").after("<small class='ur' style='color: red;'><br/>*Username already exists<br/></small>");
-            usernameFound = true;
+    $.ajax({
+        url: "/signup/3",
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({"username": username}),
+        success: function (response) {
+            if (response.status == 'abondonded') {
+                    $("input[name = 'username']").after("<small class='ur' style='color: red;'><br/>*Username already exists<br/></small>");
+                    usernameFound = true;
+            } else if (response.status == 'success'){
+                $('.ur').remove();
+                usernameFound = false;
+            }
         }
     });
-    if (usernameFound == false) {
-        $('.ur').remove();
-    }
     if (passwordValid == false || emailFound == true || usernameFound == true) {
         $(".submitbutton").prop("disabled", true);
     } else {
@@ -80,7 +83,9 @@ $("#userPassword").on("keyup", function () {
 });
 
 $(".submitbutton").click(function () {
-    confirm("We will send you an OTP on your email. Make sure to entered a correct Email.");
+    if (data.page == "signup"){
+        confirm("We will send you an OTP on your email. Make sure to entered a correct Email.");
+    }
 });
 
 if (data.page == "confirmEmail") {

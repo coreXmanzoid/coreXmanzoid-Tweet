@@ -214,6 +214,11 @@ button:hover {
 .post-content {
     margin-top: 10px;
 
+    .content {
+        white-space: pre-line;
+        word-break: break-word;
+    }
+
     p {
         padding: 2px;
         opacity: 0.9;
@@ -274,9 +279,10 @@ button:hover {
     cursor: pointer;
 }
 
-.edit-action.save{
+.edit-action.save {
     color: rgb(244, 163, 106);
 }
+
 .edit-action.delete {
     color: #F94818;
 }
@@ -407,7 +413,6 @@ button:hover {
 
 
 .div3 {
-    padding-left: 10px;
     grid-column-start: 2;
     grid-row-start: 2;
 }
@@ -556,7 +561,7 @@ h5:hover {
     .post-button {
         display: flex;
         justify-content: space-around;
-        gap: 25%;
+        gap: 55%;
 
         i {
             margin-top: 8px;

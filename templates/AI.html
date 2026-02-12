@@ -1,77 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Manzoid AI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='../static/css/AI.css') }}">
 </head>
+
 <body>
 
-<div class="Manzoid-container">
-    <!-- Main Content Area -->
-    <div class="main-content">
-        <div class="ai-header">
-            <img src="../static/assets/logo.png" alt=""> Manzoid AI
-        </div>
+    <div class="Manzoid-container">
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <div class="ai-header">
+                <img src="../static/assets/logo.png" alt=""> Manzoid AI
+            </div>
 
-        <div id="chat-box" class="chat-box">
-            <div class="message ai">
-                Hi {{current_user.username}}👋, I am Manzoid AI. Ask me anything!
+            <div id="chat-box" class="chat-box">
+                <div class="message ai">
+                    Hi {{current_user.name.split(' ')[0]}}👋, It's Manzoid AI. Ask me anything!
+                </div>
+
+            </div>
+
+            <div class="chat-input">
+                <input type="text" id="user-input" maxlength="100" placeholder="write a motivation tweet..." />
+                <button onclick="sendMessage()">Send</button>
             </div>
         </div>
 
-        <div class="chat-input">
-            <input type="text" id="user-input" maxlength="100" placeholder="write a motivation tweet..." />
-            <button onclick="sendMessage()">Send</button>
-        </div>
     </div>
 
-</div>
-
-<script>
-function addMessage(text, sender) {
-    const chatBox = document.getElementById("chat-box");
-    const msg = document.createElement("div");
-    msg.className = "message " + sender;
-    msg.innerText = text;
-    chatBox.appendChild(msg);
-    chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-async function sendMessage() {
-    const input = document.getElementById("user-input");
-    const text = input.value.trim();
-    if (!text) return;
-
-    addMessage(text, "user");
-    input.value = "";
-
-    const typing = document.createElement("div");
-    typing.className = "message ai";
-    typing.innerText = "Typing...";
-    document.getElementById("chat-box").appendChild(typing);
-
-    try {
-        const response = await fetch("/api/ai/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: text })
+    <script>
+        $(".chat-input input").keydown(function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                sendMessage();
+            }
         });
+        function addMessage(text, sender) {
+            const $chatBox = $("#chat-box");
+            const $msg = $("<div></div>")
+                .addClass("message " + sender)
+                .text(text);
 
-        const data = await response.json();
-        typing.remove();
-
-        if (data.reply) {
-            addMessage(data.reply, "ai");
-        } else {
-            addMessage("⚠️ AI service error.", "ai");
+            $chatBox.append($msg);
+            $chatBox.scrollTop($chatBox[0].scrollHeight);
         }
-    } catch (err) {
-        typing.remove();
-        addMessage("⚠️ Network error.", "ai");
-    }
-}
-</script>
+
+        function sendMessage() {
+            const $input = $("#user-input");
+            const text = $input.val().trim();
+
+            if (!text) return;
+
+            addMessage(text, "user");
+            $input.val("");
+
+            const $typing = $(`<div class="message ai typing-indicator">
+            <span></span><span></span><span></span></div>`);
+
+            $("#chat-box").append($typing);
+
+            $.ajax({
+                url: "/Manzoid-AI",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    message: text,
+                    user_id: {{ current_user.id }}
+                 }),
+
+        success: function (data) {
+            $typing.remove();
+
+            if (data.reply) {
+                addMessage(data.reply, "ai");
+            } else {
+                addMessage("⚠️ AI service error.", "ai");
+            }
+        },
+
+        error: function () {
+            $typing.remove();
+            addMessage("⚠️ Network error.", "ai");
+        }
+            });
+        }
+    </script>
 
 </body>
+
 </html>

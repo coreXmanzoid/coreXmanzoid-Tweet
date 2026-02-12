@@ -9,7 +9,7 @@
     <div class="post-heading">
         <img src="{{ post.user.profile_image_url if post.user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
             alt="" width="40" height="40" class="rounded-circle me-2">
-        <h5 class="{{ post.user.id}}">{{ post.user.name }}<br /><span>@{{ post.user.username }}</span></h5>
+        <h5 class="{{ post.user.id}}">{{ post.user.name }}<br/><span>@{{ post.user.username }}</span></h5>
     </div>
     <div class="post-content">
         <p class="content">{{ post.content }}</p>
@@ -27,8 +27,8 @@
 <div class="my-comment">
     <img src="{{ current_user.profile_image_url if current_user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
         alt="" width="35" height="35" class="rounded-circle me-2">
-    <input type="text" name="content" placeholder="Leave your Comment">
-    <button id="submitComment">reply</button>
+    <input type="text" name="content" maxlength="130" placeholder="Leave your Comment">
+    <button id="submitComment">Reply</button>
 </div>
 <hr />
 <div class="all-comments">
@@ -40,7 +40,7 @@
         <div class="post-heading">
             <img src="{{ comment.user.profile_image_url if comment.user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
                 alt="" width="30" height="30" class="rounded-circle me-2">
-            <h5 class="{{ comment.user.id }}">{{ comment.user.name }} <br><span>@{{ comment.user.username }}</span></h5>
+            <h5 data-userid="{{ comment.user.id }}">{{ comment.user.name }} <br><span>@{{ comment.user.username }}</span></h5>
         </div>
         <div class="post-actions comment-actions" data-postId="{{ comment.id }}">
             <a class="like-comment"><i class="bi bi-heart"></i> {{ comment.likes }}</a>
@@ -56,9 +56,10 @@
 <script>
 
     $(".post-heading h5").click(function () {
-        user_id = $(this).attr("class");
+        user_id = $(this).data("userid");
         showProfile(user_id);
     });
+    
     $(".like-comment").click(function (e) {
         e.preventDefault();
 
@@ -103,13 +104,21 @@
     // active arrow back button
     $(".back-post > i").click(showFullPost);
 
-    $("#submitComment").click(function () {
-        var post_id = $(".active-post").attr("class").split(' ')[1];
+    function submitComment() {
+        var post_id = $(".active-post").data("postid");
         var post_content = $(".my-comment input").val().trim();
         post_content = encodeURIComponent(post_content);
         if (post_content === "") {
             return;
         }
         $('.coreXmanzoid').load('/comments/' + post_id + '/' + post_content + '/1');
+    }
+    $("#submitComment").click(submitComment);
+
+    $(".my-comment input").keydown(function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            submitComment();
+        }
     });
 </script>

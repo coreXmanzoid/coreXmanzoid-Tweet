@@ -127,7 +127,7 @@
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item LActive" href="{{ url_for('logout', state=1) }}">Sign out</a>
+                            <li><a class="dropdown-item LActive" href="{{ url_for('logout', st=1) }}">Sign out</a>
                             </li>
                         </ul>
                     </div>
@@ -152,65 +152,8 @@
         </div>
 
         <div class="div5">
-            <div class="ai-bar" style="display: none">
-                <div class="right-sidebar">
-                    <div class="premium">
-                        <h4>Subscribe to Premium</h4>
-                        <p>Get access to premium features with better response & unlimited access to Manzoid-AI.</p>
-                        <button>Subscribe</button>
-                    </div>
-                    <div class="premium">
-                        <h4>Manzoid AI Tips</h4>
-                        <ul>
-                            <li>
-                                <p>Enjoy best AI features with our trained model</p>
-                            </li>
-                            <li>
-                                <p>Ask me to rewrite your posts</p>
-                            </li>
-                            <li>
-                                <p>Ask me to generate new text ideas</p>
-                            </li>
-                            <li>
-                                <p>Ask me to summarize content</p>
-                            </li>
-                            <li>
-                                <p>Ask me to generate new text ideas</p>
-                            </li>
-                            <li>
-                                <p>Ask me to suggest hashtags for your post</p>
-                            </li>
-                            <li>
-                                <p>Answer questions quickly</p>
-                            </li>
-                            <li>
-                                <p>All chats are private and temporary</p>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <div class="explore-tab">
-                <center>
-                    <div class="search">
-                        <i class="bi bi-search"></i>
-                        <input type="text" placeholder="Search By Name">
-                    </div>
-                </center>
-                <div class="premium">
-                    <h4>Subscribe to Premium</h4>
-                    <p>Get access to premium features that are available for our special users</p>
-                    <button>Subscribe</button>
-                </div>
-                <div class="explore-accounts">
-                    <!-- Show Accounts Segguestions -->
-                    <div class="loader-wrapper">
-                        <span class="loader"></span>
-                    </div>
-
-                </div>
-            </div>
+            <!-- here the premium ads -->
+             {% include 'premium.html' %}
         </div>
 
         <div class="div5 full-post" style="display: none;">
@@ -221,61 +164,6 @@
             </div>
 
         </div>
-
-        <div class="d-block d-sm-none fixed-bottom">
-            <nav class="navbar navbar-expand bg-light footer-bar">
-                <div class="container-fluid">
-                    <ul class="navbar-nav w-100 justify-content-around footer-navbar">
-                        <li class="nav-item">
-                            <a href="#" class="align-item-center nav-link active fw-semibold icons" aria-current="page">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor"
-                                    class="bi bi-house-door-fill me-2" viewBox="0 0 16 16">
-                                    <path
-                                        d="M6.5 14.5v-3.505c0-.245.25-.495.5-.495h2c.25 0 .5.25.5.5v3.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5" />
-                                </svg>
-                            </a>
-                            <small></small>
-                        </li>
-                        <li>
-                            <a href="#" class="align-item-center nav-link link-dark fw-semibold">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor"
-                                    class="bi bi-search-heart me-2" viewBox="0 0 16 16">
-                                    <path
-                                        d="M6.5 4.482c1.664-1.673 5.825 1.254 0 5.018-5.825-3.764-1.664-6.69 0-5.018" />
-                                    <path
-                                        d="M13 6.5a6.47 6.47 0 0 1-1.258 3.844q.06.044.115.098l3.85 3.85a1 1 0 0 1-1.414 1.415l-3.85-3.85a1 1 0 0 1-.1-.115h.002A6.5 6.5 0 1 1 13 6.5M6.5 12a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11" />
-                                </svg>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" class="align-item-center nav-link link-dark fw-semibold">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor"
-                                    class="bi bi-bell-fill me-2" viewBox="0 0 16 16">
-                                    <path
-                                        d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5 5 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901" />
-                                </svg>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" class="align-item-center nav-link link-dark fw-semibold">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor"
-                                    class="bi bi-chat-left-heart-fill me-2" viewBox="0 0 16 16">
-                                    <path
-                                        d="M2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm6 3.993c1.664-1.711 5.825 1.283 0 5.132-5.825-3.85-1.664-6.843 0-5.132" />
-                                </svg>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" class="align-item-center nav-link link-dark fw-semibold">
-                                <img src="https://github.com/mdo.png" alt="" width="32" height="32"
-                                    class="rounded-circle me-2">
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
-        </div>
-
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>

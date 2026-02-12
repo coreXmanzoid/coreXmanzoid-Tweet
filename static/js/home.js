@@ -1,12 +1,7 @@
-var post_info = {
-    post_id: [],
-    shares: [],
-    retweets: [],
-}
 // fetch accounts for explore accounts section
 exploreAccounts("/exploreAccounts/0/random");
 function exploreAccounts(url) {
-    
+
     // show explore accounts
     $.ajax({
         url: url,
@@ -21,10 +16,10 @@ function exploreAccounts(url) {
 
             // Remove scripts from HTML
             dummy.find("script").remove();
-            
+
             // Insert cleaned HTML into div3
             $(".explore-accounts").html(dummy.html());
-            
+
             // Execute extracted scripts manually
             scripts.each(function () {
                 let code = $(this).text();
@@ -44,7 +39,7 @@ $(".search input").on("input", function () {
     } else {
         exploreAccounts("/exploreAccounts/0/random");
     }
-    
+
 });
 // Active sidebar animation
 $(".nav li a").click(function () {
@@ -54,15 +49,10 @@ $(".nav li a").click(function () {
     $(this).removeClass("link-dark");
 });
 
-// Active footer navbar animation
-$(".footer-navbar a").click(function () {
-    $(".footer-navbar a").removeClass("icons");
-    $(this).addClass("icons");
-});
 // Show posts
 function showPosts(state, id) {
     $.ajax({
-        url: "/randomPosts/"+ state + "/" + id,
+        url: "/showPosts/" + state + "/" + id,
         method: "GET",
         success: function (response) {
             // Create dummy container to extract HTML + scripts
@@ -73,10 +63,10 @@ function showPosts(state, id) {
 
             // Remove scripts from HTML
             dummy.find("script").remove();
-            
+
             // Insert cleaned HTML into div3
             $(".div3").html(dummy.html());
-            
+
             // Execute extracted scripts manually
             scripts.each(function () {
                 let code = $(this).text();
@@ -88,38 +78,13 @@ function showPosts(state, id) {
     });
 }
 // Show posts.html
-$(".div3").load("/randomPosts/0/0");
-// Refresh button functionality and returning current likes
+$(".div3").load("/showPosts/0/0");
+// Refresh button functionality
 $(".div4 button").click(function (e) {
     $(".ai-bar").hide();
     $(".full-post").hide();
     $(".explore-tab").show();
-    // get the text node that holds the count (if any)
-
-    $(".info").each(function () {
-        var post_id = Number($(this).attr("class").split(' ')[1]);
-        post_info.post_id.push(post_id);
-    });
-    $(".share").each(function () {
-        var $btn = $(this);
-        var textNode = $btn.contents().filter(function () { return this.nodeType === 3; }).first();
-        post_info.shares.push(textNode.length ? parseInt(textNode[0].nodeValue.trim().match(/\d+/)[0], 10) : 0);
-    });
-
-    $.ajax({
-        url: "/randomPosts/0/0",
-        type: "POST",
-        contentType: "application/json",
-        data: JSON.stringify(post_info),
-        success: function (response) {
-            showPosts(0, 0);
-        }
-    });
-    
-    post_info = {
-        post_id: [],
-        shares: [],
-    };
+    $(".div3").load("/showPosts/0/0");
 });
 
 // switch account functionality
@@ -127,12 +92,12 @@ $(".switch-account-link").click(function () {
     confirmSwitch = confirm("Are you sure you want to switch accounts? Unsaved changes will be lost.");
     if (confirmSwitch) {
         window.location.href = "/logout/2";
-    }else{
+    } else {
         Backtohome();
     }
 });
 // AI tab functionality
-$(".ai-button").click(function(){
+$(".ai-button").click(function () {
     $(".full-post").hide();
     $(".div2").hide();
     $(".div3").load("/Manzoid-AI");
@@ -151,28 +116,49 @@ $(".explore-button").click(function () {
     $(".explore-tab").show();
     $(".search input").focus();
 });
-
+// fetching likes posts
 $(".likes-button").click(function () {
     var user_id = $(".div1").attr("class").split(" ")[1];
     showPosts(3, user_id);
     exploreAccounts("/exploreAccounts/0/random");
-    $(".div2").load("/profile/0");
+    // $(".div2").load("/profile/0");
+    $(".div2").hide();
     $(".full-post").hide();
-    $(".div2").show();
     $(".ai-bar").hide();
     $(".explore-tab").show();
 });
-// Initially hide full post section
-// $(".full-post").hide();
-
 
 // show profile on clicking profile link
 function showProfile(user_id) {
-    $(".div2").load("/profile/" + user_id);
-    $(".full-post").hide();
-    $(".ai-bar").hide();
-    $(".explore-tab").show();
-   showPosts(1, user_id);
+    $.ajax({
+        url: "/profile/" + user_id,
+        method: "GET",
+        success: function (response) {
+            // Create dummy container to extract HTML + scripts
+            let dummy = $("<div>").html(response);
+
+            // Extract script tags
+            let scripts = dummy.find("script");
+
+            // Remove scripts from HTML
+            dummy.find("script").remove();
+
+            // Insert cleaned HTML into div3
+            $(".div2").html(dummy.html());
+
+            // Execute extracted scripts manually
+            scripts.each(function () {
+                let code = $(this).text();
+                if (code.trim() !== "") {
+                    eval(code);
+                }
+            });
+            $(".full-post").hide();
+            $(".ai-bar").hide();
+            $(".explore-tab").show();
+            showPosts(1, user_id);
+        }
+    })
 };
 $(".profile-link").click(function () {
     user_id = $(".div1").attr("class").split(" ")[1]
@@ -220,7 +206,7 @@ function showFullPost(e) {
         $(".full-post").hide();
         return;
     }
-    var post_id = $post.attr("class").split(' ')[1];
+    var post_id = $post.data("postid");
     var active_post = $post.hasClass("active-post");
 
     $(".post").removeClass("active-post");
