@@ -1,8 +1,10 @@
 {% if not posts %}
-<div class="no-posts text-center py-5">
-    <i class="bi bi-inbox" style="font-size:48px;opacity:.3"></i>
-    <h4 class="no-data mt-3">No posts yet</h4>
-    <p class="text-muted">There are no posts to show. Create the first post to get started.</p>
+<div class="no-posts text-center d-flex align-items-center justify-content-center">
+    <div>
+        <i class="bi bi-inbox" style="font-size:48px;opacity:.3"></i>
+        <h4 class="no-data mt-3">No posts yet</h4>
+        <p class="text-muted">There are no posts to show. Create the first post to get started.</p>
+    </div>
 </div>
 {% endif %}
 {% for post in posts %}
@@ -43,9 +45,10 @@
     {% endif %}
 </div>
 <div class="post-content">
-    <p class="content">{{ post.content }}</p>
+    <p class="content" data-mentions='{{ post.mentions | tojson }}'>{{ post.content }}</p>
     <p class="hashtag">{{ ' '.join(post.hashtags) }}</p>
 </div>
+
 <div class="post-actions">
     <a class="comment"><i class="bi bi-chat-heart"></i> {{ post.comments }}</a>
     {% if post.id in current_user.reposted_posts %}
@@ -64,7 +67,21 @@
 </div>
 {% endfor %}
 <script>
+    // customise mentioned user display in posts
+    document.querySelectorAll('.post-content .content').forEach(el => {
+        const mentions = JSON.parse(el.dataset.mentions || '[]');
+        let text = el.innerText;
 
+        mentions.forEach(m => {
+            // Escape special regex chars in username
+            const username = m.username.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`@${username}\\b`, 'g');
+
+            text = text.replace(regex, `<span class="mention">@${m.username}</span>`);
+        });
+
+        el.innerHTML = text;
+    });
     $(".edit-post").click(function () {
         var editLink = $(this);
         var postDiv = editLink.closest(".post");
@@ -190,6 +207,38 @@
                 } else {
                     $btn.append(" " + res.likes);
                 }
+                // udpate and create notification for post owner when someone likes their post (but not for unlikes)
+                sendNotification({
+                    recipientId: res.user_id,
+                    title: "New Like!",
+                    type: "post_like",
+                    identifier: postId,
+                    message: res.likes > 1
+                        ? `${res.current_user_name} and ${res.likes - 1} others liked your post.`
+                        : `${res.current_user_name} liked your post.`,
+                    Push: res.likes > 1 ? "false" : "true", // send push only for first like, for subsequent likes just update the notification without sending push
+                    state: 3
+                }).done(function (response) {
+                    console.log("Notification sent:", response);
+                }).fail(function (err) {
+                    console.error("Failed to send notification:", err);
+                });
+                // check for milstone and send push
+                if (res.likes == 100 || res.likes == 1000 || res.likes == 10000) {
+                    sendNotification({
+                        recipientId: res.user_id,
+                        title: (res.likes / 1000) + "k Likes 🎉",
+                        type: "post_like_milestone",
+                        identifier: postId,
+                        message: "Your post has reached " + (res.likes / 1000) + "k likes!",
+                        Push: "true",
+                        state: 3
+                    }).done(function (res) {
+                        console.log("Notification sent:", res);
+                    }).fail(function (err) {
+                        console.error("Failed to send notification:", err);
+                    });
+                }
             }
         });
     });
@@ -231,6 +280,38 @@
                 } else {
                     $btn.append(" " + res.reposts);
                 }
+                sendNotification({
+                    recipientId: res.user_id,
+                    title: "New Retweet!",
+                    type: "post_retweet",
+                    identifier: postId,
+                    message: res.reposts > 1
+                        ? `${res.current_user_name} and ${res.reposts - 1} others retweeted your post.`
+                        : `${res.current_user_name} retweeted your post.`,
+                    Push: res.reposts > 1 ? "false" : "true", // only send push for the first retweet to avoid spamming
+                    state: 3
+                }).done(function (response) {
+                    console.log("Notification sent:", response);
+                }).fail(function (err) {
+                    console.error("Failed to send notification:", err);
+                });
+                // check for milstone and send push
+                if (res.reposts == 100 || res.reposts == 1000 || res.reposts == 10000) {
+                    sendNotification({
+                        recipientId: res.user_id,
+                        title: (res.reposts / 1000) + "k Retweets 🎉",
+                        type: "post_retweet_milestone",
+                        identifier: postId,
+                        message: "Your post has reached " + (res.reposts / 1000) + "k retweets!",
+                        Push: "true",
+                        state: 3
+                    }).done(function (res) {
+                        console.log("Notification sent:", res);
+                    }).fail(function (err) {
+                        console.error("Failed to send notification:", err);
+                    });
+                }
+
             }
         });
     });
@@ -268,7 +349,7 @@
                     $btn.append(" " + res.shares);
                 }
             }
-            });
+        });
     });
 
     $(".post-heading small").each(function () {
@@ -286,8 +367,12 @@
             display = diffMins + " min ago";
         } else if (diffMins < 1440) {
             display = Math.floor(diffMins / 60) + " hours ago";
-        } else {
+        } else if (diffMins < 10080) { // less than 1 week (7 days)
             display = Math.floor(diffMins / 1440) + " days ago";
+        } else if (diffMins < 43200) { // less than 1 month (30 days)
+            display = Math.floor(diffMins / 10080) + " week ago";
+        } else { // 1 month or more
+            display = Math.floor(diffMins / 43200) + " month ago";
         }
 
         $(this).text(display);
@@ -302,4 +387,6 @@
         var post_id = $(this).attr("class");
         showProfile(post_id);
     });
+    user_id = $(".div1").attr("class").split(" ")[1];
+    checkForNotifications(user_id);
 </script>

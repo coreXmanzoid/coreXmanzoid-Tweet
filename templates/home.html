@@ -13,6 +13,7 @@
 
 <body>
     <div class="parent">
+
         <div class="div1 {{current_user.id}}">
             <div class="d-none d-sm-block">
                 <div class="d-flex flex-column flex-shrink-0 p-3 bg-light me-0" style="width: 280px; height: 100vh;">
@@ -46,7 +47,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="nav-link link-dark fw-semibold notifications-link">
+                            <a href="#" class="nav-link link-dark fw-semibold notifications-button">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor"
                                     class="bi bi-bell-fill me-2" viewBox="0 0 16 16">
                                     <path
@@ -116,8 +117,8 @@
                     <div class="dropdown">
                         <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle"
                             id="dropdownUser2" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="{{ current_user.profile_image_url if current_user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}" alt="" width="32" height="32"
-                                class="rounded-circle me-2">
+                            <img src="{{ current_user.profile_image_url if current_user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
+                                alt="" width="32" height="32" class="rounded-circle me-2">
                             <strong>{{ current_user.name }}</strong>
                         </a>
                         <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
@@ -153,7 +154,7 @@
 
         <div class="div5">
             <!-- here the premium ads -->
-             {% include 'premium.html' %}
+            {% include 'premium.html' %}
         </div>
 
         <div class="div5 full-post" style="display: none;">
@@ -171,6 +172,24 @@
             var time_now = {{ ct | tojson | safe }};
         </script>
 
+        <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js"></script>
+        <script>
+            window.firebaseRuntimeConfig = {
+                firebaseEnabled: {{ firebase_enabled | tojson }},
+            vapidKey: { { fcm_vapid_key | tojson } },
+            const firebaseConfig = {
+                apiKey: "<YOUR_API_KEY_HERE>",
+                authDomain: "corexmanzoid-twitter-notify.firebaseapp.com",
+                projectId: "corexmanzoid-twitter-notify",
+                storageBucket: "corexmanzoid-twitter-notify.firebasestorage.app",
+                messagingSenderId: "465761356424",
+                appId: "1:465761356424:web:64b333e53e7b45ef37ed3d",
+                measurementId: "G-PG8P4FC5L7"
+            };
+            };
+        </script>
+        <script src="../static/js/firebase.js"></script>
         <script src="../static/js/home.js"></script>
 
 </body>

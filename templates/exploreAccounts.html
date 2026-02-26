@@ -32,6 +32,35 @@
                 type: 'POST',
                 success: function (response) {
                     button.text('Following');
+
+                    sendNotification({
+                        recipientId: accountId,
+                        title: "New Follower",
+                        type: "new_follower",
+                        identifier: response.follower_id, // to prevent duplicate notifications for same follower
+                        message: response.follower_name + " started following you.",
+                        Push: "true",
+                        state: 3, // create notification if not or update and send push.
+                    }).done(function (res) {
+                        console.log("Notification sent:", res);
+                    }).fail(function (err) {
+                        console.error("Failed to send notification:", err);
+                    });
+                    if (response.followersCount == 100 || response.followersCount == 1000 || response.followersCount == 10000) {
+                        sendNotification({
+                            recipientId: accountId,
+                            title: (response.followersCount / 1000) + "K Followers Reached",
+                            type: "follower_milestone",
+                            identifier: accountId,
+                            message: "Congratulations! You've reached " + (response.followersCount / 1000) + "K followers.",
+                            Push: "true",
+                            state: 3
+                        }).done(function (res) {
+                            console.log("Milestone notification sent:", res);
+                        }).fail(function (err) {
+                            console.error("Failed to send milestone notification:", err);
+                        });
+                    }
                 }
             });
         } else {
@@ -44,6 +73,8 @@
             });
         }
     });
+    user_id = $(".div1").attr("class").split(" ")[1];
+    checkForNotifications(user_id);
 </script>
 <style>
     .follow button {

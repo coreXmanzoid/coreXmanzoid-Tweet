@@ -41,6 +41,15 @@ button {
     border: 1px solid #46423b;
 }
 
+button:disabled {
+    background-color: #ddd;
+    /* lighter gray */
+    color: #777;
+    /* muted text */
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
 button:hover {
     transform: scale(1.04);
     background-color: #46423b;
@@ -74,6 +83,18 @@ button:hover {
     position: fixed;
     height: 100vh;
     overflow-y: auto;
+}
+
+.notification-dot {
+    position: absolute;
+    top: 3px;
+    left: 56%;
+    background-color: #8f8674;
+    font-weight: 600;
+    width: 7px;
+    height: 7px;
+    padding: 0;
+
 }
 
 .div2 {
@@ -225,6 +246,11 @@ button:hover {
         font-weight: 600;
         font-size: 15px;
         color: #8f8674;
+    }
+
+    .mention {
+        color: #17a2b8;
+        font-weight: 600;
     }
 
     .hashtag {
@@ -623,6 +649,80 @@ h5:hover {
             font-size: 13px;
             color: #2e2a22;
         }
+
+        .mention {
+            color: #3b82f6;
+            font-weight: 600;
+        }
+    }
+}
+
+.notifications {
+    .notification-info {
+        display: flex;
+        padding-top: 10px;
+    }
+
+    .notification-header {
+        padding-top: 20px;
+        display: flex;
+        justify-content: space-around;
+        gap: 55%;
+        align-items: center;
+    }
+
+    i {
+        margin-top: 8px;
+        font-weight: 900;
+        font-size: 20px;
+    }
+
+    h4 {
+        color: #F94818;
+        font-weight: 600;
+        font-size: 18px;
+        transition: .4s;
+        height: fit-content;
+    }
+
+    img {
+        float: left;
+        margin: 15px 7px 10px 5px;
+    }
+
+    Strong {
+        color: #2e2a22;
+        font-weight: 600;
+        font-size: 17px;
+    }
+
+    small {
+        padding-top: 1px;
+        color: #F94818;
+        font-size: 14px;
+        font-weight: 500;
+
+        span {
+            background-color: #8f8674;
+            font-weight: 500;
+            width: 7px;
+            height: 7px;
+            padding: 0;
+        }
+    }
+
+    p {
+        padding: 2px;
+        opacity: 0.9;
+        font-weight: 600;
+        font-size: 14px;
+        color: #8f8674;
+    }
+
+    span {
+        color: #1d1b17;
+        font-weight: 600;
+        font-size: 12px;
     }
 }
 

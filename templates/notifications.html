@@ -1,0 +1,95 @@
+<div class="no-posts text-center d-flex align-items-center justify-content-center" style="min-height: 100vh;"
+    id="notifications-permission">
+    <div>
+        <i class="bi bi-inbox" style="font-size:48px;opacity:.3"></i>
+        <h4 class="no-data mt-3">Notifications Permission Denied</h4>
+        <p class="text-muted px-3">Allow Notifications service to get notify about everything.</p>
+        <button class="notifications-allow w-50">Allow Notifications</button>
+    </div>
+</div>
+<div class="notifications" data-userid="{{current_user.id}}">
+    <div class="notification-header py-3">
+        <h4 href=""><i class="bi bi-arrow-left" style="cursor: pointer;"></i>&nbsp;Notifications</h4>
+        <i class="bi bi-three-dots"></i>
+    </div>
+    {% if not notifications %}
+    <div class="no-posts text-center d-flex align-items-center justify-content-center" style="min-height: 100vh;">
+        <div>
+            <i class="bi bi-inbox" style="font-size:48px;opacity:.3"></i>
+            <h4 class="no-data mt-3">No notifications Yet</h4>
+            <p class="text-muted px-3">There are no notifications to show. You'll see notifications here when someone
+                interacts with you.</p>
+        </div>
+    </div>
+    {% else %}
+    {% for notification in notifications %}
+    <img src="{{notification.sender.profile_image_url if notification.sender.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
+        width="45" height="45" class="rounded-circle">
+    <div class="notification-info">
+        <strong>{{notification.sender.name}}</strong>
+        <small>&nbsp;{{notification.title}} {% if not notification.is_read %}<span class="badge rounded-circle">
+            </span>{% endif %}</small>
+    </div>
+    <div class="notification-message">
+        <p>{{notification.message}} &nbsp;<span data-timestamp="{{notification.created_at.isoformat()}}Z"></span></p>
+    </div>
+    <hr>
+    {% endfor %}
+    {% endif %}
+</div>
+<script>
+
+    const permissionWarning = document.getElementById("notifications-permission");
+
+    if (permissionWarning) {
+        if (!("Notification" in window) || Notification.permission !== "granted") {
+            $(".notifications").hide();
+        } else {
+            $("#notifications-permission").remove();
+            $(".notifications").show();
+        }
+    }
+
+    $(".notification-message span").each(function () {
+        const post_time_str = $(this).data("timestamp");
+        const post_time = new Date(post_time_str);  // JS knows it's UTC
+
+        const current_time = new Date();  // Browser local time
+        const diffMs = current_time - post_time;
+        const diffMins = Math.floor(diffMs / 60000);
+
+        let display = "";
+        if (diffMins < 1) {
+            display = diffMins + "s";
+        } else if (diffMins < 60) {
+            display = diffMins + "m";
+        } else if (diffMins < 1440) {
+            display = Math.floor(diffMins / 60) + "h";
+        } else if (diffMins < 10080) { // less than 1 week (7 days)
+            display = Math.floor(diffMins / 1440) + "d";
+        } else if (diffMins < 43200) { // less than 1 month (30 days)
+            display = Math.floor(diffMins / 10080) + "w";
+        } else { // 1 month or more
+            display = Math.floor(diffMins / 43200) + "mo";
+        }
+
+        $(this).text(display);
+    });
+
+    // real all notification after page load
+    $(document).ready(function () {
+        userId = $(".notifications").data("userid");
+        $.ajax({
+            url: `/notifications/mark_read/${userId}`,
+            success: function (response) {
+                user_id = $(".div1").attr("class").split(" ")[1];
+                checkForNotifications(user_id);
+                console.log("Notifications marked as read:", response);
+            },
+            error: function (err) {
+                console.error("Error marking notifications as read:", err);
+            }
+        });
+    });
+
+</script>

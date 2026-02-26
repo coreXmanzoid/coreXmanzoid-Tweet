@@ -76,6 +76,18 @@
         user_choice = confirm("Are you sure you want to update your profile picture?");
         if (user_choice) {
             uploadProfileImage(this, `/update-profile/${userId}`);
+            sendNotification({
+                recipientId: null, // All followers recipient for profile update
+                title: "Profile Updated",
+                type: "profile_update",
+                identifier: userId,
+                message: "Has updated his profile picture.",
+                state: 2
+            }).done(function (res) {
+                console.log("Notification sent:", res);
+            }).fail(function (err) {
+                console.error("Failed to send notification:", err);
+            });
         }
     });
 
@@ -171,5 +183,7 @@
         } else if (option === "Reposts") {
             showPosts(4, userId);
         }
-    })
+    });
+    user_id = $(".div1").attr("class").split(" ")[1];
+    checkForNotifications(user_id);
 </script>

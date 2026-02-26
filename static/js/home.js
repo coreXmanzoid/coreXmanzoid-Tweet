@@ -82,6 +82,7 @@ $(".div3").load("/showPosts/0/0");
 // Refresh button functionality
 $(".div4 button").click(function (e) {
     $(".ai-bar").hide();
+    $(".notifications-tab").hide();
     $(".full-post").hide();
     $(".explore-tab").show();
     $(".div3").load("/showPosts/0/0");
@@ -96,13 +97,44 @@ $(".switch-account-link").click(function () {
         Backtohome();
     }
 });
-// AI tab functionality
+
+// Notification tab functionality
+$(".notifications-button").click(function () {
+    $(".notifications-tab").load("/notifications");
+    $.ajax({
+        url: "/notifications",
+        method: "GET",
+        success: function (response) {
+            $(".full-post").hide();
+            $(".notifications-tab").show();
+            $(".explore-tab").hide();
+            $(".ai-bar").hide();
+            // Create dummy container to extract HTML + scripts
+            let dummy = $("<div>").html(response);
+            // Extract script tags
+            let scripts = dummy.find("script");
+            // Remove scripts from HTML
+            dummy.find("script").remove();
+            // Insert cleaned HTML into notifications-tab
+            $(".notifications-tab").html(dummy.html());
+            // Execute extracted scripts manually
+            scripts.each(function () {
+                let code = $(this).text();
+                if (code.trim() !== "") {
+                    eval(code);
+                }
+            });
+        }
+    });
+});
+
 $(".ai-button").click(function () {
     $(".full-post").hide();
     $(".div2").hide();
     $(".div3").load("/Manzoid-AI");
     $(".explore-tab").hide();
     $(".ai-bar").show();
+    $(".notifications-tab").hide();
 });
 
 $(".post-button").click(function () {
@@ -115,6 +147,7 @@ $(".explore-button").click(function () {
     $(".ai-bar").hide();
     $(".explore-tab").show();
     $(".search input").focus();
+    $(".notifications-tab").hide();
 });
 // fetching likes posts
 $(".likes-button").click(function () {
@@ -126,6 +159,7 @@ $(".likes-button").click(function () {
     $(".full-post").hide();
     $(".ai-bar").hide();
     $(".explore-tab").show();
+    $(".notifications-tab").hide();
 });
 
 // show profile on clicking profile link
@@ -156,6 +190,7 @@ function showProfile(user_id) {
             $(".full-post").hide();
             $(".ai-bar").hide();
             $(".explore-tab").show();
+            $(".notifications-tab").hide();
             showPosts(1, user_id);
         }
     })
@@ -169,6 +204,7 @@ function Backtohome() {
     $(".div2").load("/profile/0");
     $(".full-post").hide();
     $(".ai-bar").hide();
+    $(".notifications-tab").hide();
     $(".explore-tab").show();
     $(".nav a").removeClass("active link-dark");
     $(".nav a").addClass("link-dark");
@@ -176,6 +212,7 @@ function Backtohome() {
     $(".home-link").removeClass("link-dark");
     $(".div2").show();
     showPosts(0, 0);
+    // requestNotificationPermission();
 }
 $(".home-link").click(Backtohome);
 // show posts based on for you and following tabs
@@ -204,6 +241,7 @@ function showFullPost(e) {
     if ($post.length === 0) {
         $(".explore-tab").show();
         $(".full-post").hide();
+        $(".notifications-tab").hide();
         return;
     }
     var post_id = $post.data("postid");
@@ -216,18 +254,109 @@ function showFullPost(e) {
         $(".explore-tab").hide();
         $(".ai-bar").hide();
         $(".full-post").show();
+        $(".notifications-tab").hide();
         // reload sepecific part of page without refreshing entire page and implementing on specific div
-        $('.coreXmanzoid').load('/comments/' + post_id + '/nill/0');
+        $('.coreXmanzoid').load('/comments/' + post_id);
     } else {
         $post.removeClass("active-post");
         $(".explore-tab").show();
         $(".full-post").hide();
     }
 }
+
+function sendNotification({
+    recipientId,
+    title,
+    identifier,
+    message,
+    type = "general",
+    senderId,
+    state,
+    Push = "false"
+}) {
+    return $.ajax({
+        url: "/send-notification-route/" + state + "/" + Push,
+        type: "POST",
+        data: JSON.stringify({
+            recipient_id: recipientId,
+            title: title,
+            identifier: identifier,
+            message: message,
+            type: type,
+            sender_id: senderId
+        }),
+        contentType: "application/json"
+    });
+}
+
+// newPost.html script
+
+// Control foryou and following active link
+$(".div2 a").click(function () {
+    $(".div2 a").removeClass("active-a");
+    $(this).addClass("active-a");
+});
+
+$(".submit button").on("click", function () {
+    var content = $("textarea[name='post-input']").val();
+    var userId = $(this).data("userid");
+    $.ajax({
+        url: "/managePosts/1",
+        method: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({ content: content, user_id: userId }),
+        success: function (response) {
+            if (response.status === "success") {
+                // Optionally, you can clear the textarea and reset the progress circle
+                $("textarea").val("");
+                $(".progress-circle-indicator").css("stroke-dashoffset", 0);
+                $(".progress-circle-indicator").attr("stroke", "#3b82f6");
+                $(".submit button").prop("disabled", true);
+                // Prepend the new post to the feed without refreshing
+                showPosts(0, 0);
+                sendNotification({
+                    title: "New Post",
+                    type: "new_post",
+                    identifier: response.post_id,
+                    senderId: userId,
+                    message: response.username + " has just posted a new tweet.",
+                    state: 2, // send the notification to all followers.
+                    Push: "true"
+                }).done(function (res) {
+                    console.log("Notification saved:", res);
+                }).fail(function (err) {
+                    console.error("Failed to send notification:", err);
+                });
+
+                $.ajax({
+                    url: "/send-mention-notifications",
+                    method: "POST",
+                    data: JSON.stringify({
+                        post_id: response.post_id,
+                        state: "post"
+                    }),
+                    headers: { "Content-Type": "application/json" },
+                    success: function (res) {
+                        console.log("Mention notifications sent:", res);
+                    },
+                    error: function (err) {
+                        console.error("Failed to send mention notifications:", err);
+                    }
+                });
+
+            } else {
+                alert("Failed to post. Please try again.");
+            }
+        },
+        error: function () {
+            alert("An error occurred. Please try again.");
+        }
+    });
+});
 // Control textarea input characters and progress of circle
 $("textarea").on("input", function () {
     var inputLength = $(this).val().length;
-    var maxLength = 200;
+    var maxLength = 180;
     var progress = (inputLength / maxLength) * 100;
 
     var circumference = 2 * Math.PI * 22;
@@ -242,8 +371,48 @@ $("textarea").on("input", function () {
     $(".progress-circle-indicator").css("stroke-dashoffset", offset);
 
     if (inputLength > 0 && inputLength <= maxLength) {
-        $("button[type='submit']").prop("disabled", false);
+        $(".submit button").prop("disabled", false);
     } else {
-        $("button[type='submit']").prop("disabled", true);
+        $(".submit button").prop("disabled", true);
     }
 });
+
+// see if the user have recieved any notification and show notification tab dot.
+user_id = $(".div1").attr("class").split(" ")[1];
+checkForNotifications(user_id);
+function checkForNotifications(id) {
+    $.ajax({
+        url: "/check-notifications/" + id,
+        method: "GET",
+        success: function (response) {
+
+            const $btn = $(".notifications-button");
+            const $svg = $btn.find("svg");
+
+            // Wrap SVG only once
+            if (!$svg.parent().hasClass("bell-wrapper")) {
+                $svg.wrap('<span class="bell-wrapper position-relative d-inline-block"></span>');
+            }
+
+            const $wrapper = $btn.find(".bell-wrapper");
+
+            if (response.unread_count > 0) {
+
+                if ($wrapper.find(".notification-dot").length === 0) {
+                    $wrapper.append(`
+                        <span class="notification-dot 
+                                     translate-middle 
+                                     badge rounded-circle p-1">
+                        </span>
+                    `);
+                }
+
+            } else {
+                $wrapper.find(".notification-dot").remove();
+            }
+        },
+        error: function () {
+            console.error("Failed to check notifications");
+        }
+    });
+}

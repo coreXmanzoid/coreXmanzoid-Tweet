@@ -6,6 +6,11 @@ __pycache__/
 # C extensions
 *.so
 
+# senstive and private data
+corexmanzoid-twitter-notify-firebase-adminsdk-fbsvc-206481a110.json
+corexmanzoid-twitter-notify-firebase.json
+static/js/firebase.js
+
 # Distribution / packaging
 .Python
 build/

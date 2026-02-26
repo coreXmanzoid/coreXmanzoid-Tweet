@@ -1,4 +1,4 @@
-<div class="post-button" >
+<div class="post-button">
     <div class="back-post">
         <i class="bi bi-arrow-left" style="cursor: pointer;"></i>
         <a href="">Post</a>
@@ -9,13 +9,13 @@
     <div class="post-heading">
         <img src="{{ post.user.profile_image_url if post.user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
             alt="" width="40" height="40" class="rounded-circle me-2">
-        <h5 class="{{ post.user.id}}">{{ post.user.name }}<br/><span>@{{ post.user.username }}</span></h5>
+        <h5 data-userid="{{ post.user.id}}">{{ post.user.name }}<br /><span>@{{ post.user.username }}</span></h5>
     </div>
     <div class="post-content">
         <p class="content">{{ post.content }}</p>
         <p class="hashtag">{{" ".join(post.hashtags) }}</p>
     </div>
-    <div class="post-actions commmentpost-action">
+    <div class="post-actions commment post-action">
         <a class="comments"><i class="bi bi-chat-heart"></i> <span>{{ post.comments }}</span></a>
         <a class="retweets"><i class="bi bi-repeat"></i> <span>{{ post.retweets }}</span></a>
         <a class="likes"><i class="bi bi-heart"></i> <span>{{ post.likes }}</span></a>
@@ -28,26 +28,28 @@
     <img src="{{ current_user.profile_image_url if current_user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
         alt="" width="35" height="35" class="rounded-circle me-2">
     <input type="text" name="content" maxlength="130" placeholder="Leave your Comment">
-    <button id="submitComment">Reply</button>
+    <button id="submitComment" data-current_user_name="{{ current_user.name }}">Reply</button>
 </div>
 <hr />
 <div class="all-comments">
     {% if not comments %}
     <div class="no-data text-center py-3">No comments yet.</div>
     {% else %}
+    <div id="SMN" data-smn="{{ comment_id }}"></div>
     {% for comment in comments %}
     <div class="post-top">
         <div class="post-heading">
             <img src="{{ comment.user.profile_image_url if comment.user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
                 alt="" width="30" height="30" class="rounded-circle me-2">
-            <h5 data-userid="{{ comment.user.id }}">{{ comment.user.name }} <br><span>@{{ comment.user.username }}</span></h5>
+            <h5 data-userid="{{ comment.user.id }}">{{ comment.user.name }} <br><span>@{{ comment.user.username
+                    }}</span></h5>
         </div>
         <div class="post-actions comment-actions" data-postId="{{ comment.id }}">
             <a class="like-comment"><i class="bi bi-heart"></i> {{ comment.likes }}</a>
         </div>
     </div>
-    <div class="post-content">
-        <p>{{ comment.content }}</p>
+    <div class="post-content comment-content">
+        <p class="content" data-mentions='{{ comment.mentions | tojson | safe }}'>{{ comment.content }}</p>
     </div>
     <hr>
     {% endfor %}
@@ -55,11 +57,28 @@
 </div>
 <script>
 
+    // customise mentioned user display in posts
+    document.querySelectorAll('.comment-content .content').forEach(el => {
+        const mentions = JSON.parse(el.dataset.mentions || '[]');
+        let text = el.innerText;
+
+        mentions.forEach(m => {
+            // Escape special regex chars in username
+            const username = m.username.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`@${username}\\b`, 'g');
+
+            text = text.replace(regex, `<span class="mention">@${m.username}</span>`);
+        });
+
+        el.innerHTML = text;
+    });
+
+
     $(".post-heading h5").click(function () {
         user_id = $(this).data("userid");
         showProfile(user_id);
     });
-    
+
     $(".like-comment").click(function (e) {
         e.preventDefault();
 
@@ -106,12 +125,79 @@
 
     function submitComment() {
         var post_id = $(".active-post").data("postid");
+        var post_user_id = $(".post-detail .post-heading h5").data("userid");
         var post_content = $(".my-comment input").val().trim();
-        post_content = encodeURIComponent(post_content);
+        var current_user_name = $("#submitComment").data("current_user_name");
+        var comments = parseInt($(".comments span").text()) || 0 + 1; // Increment comment count for notification message
         if (post_content === "") {
             return;
         }
-        $('.coreXmanzoid').load('/comments/' + post_id + '/' + post_content + '/1');
+        $.ajax({
+            url: '/comments/' + post_id,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                content: post_content,
+                state: 1
+            }),
+            headers: { "Content-Type": "application/json" },
+            success: function (response) {
+                $('.coreXmanzoid').html(response);
+
+                sendNotification({
+                    recipientId: post_user_id,
+                    title: "New Comment",
+                    type: "new_comment",
+                    identifier: post_id,
+                    message: comments > 1
+                        ? `${current_user_name} and ${comments} others commented on your post.`
+                        : `${current_user_name} commented on your post.`,
+                    Push: comments > 0 ? "false" : "true", // only send push for the first comment to avoid spamming
+                    state: 3
+                }).done(function (response) {
+                    console.log("Notification sent:", response);
+                }).fail(function (err) {
+                    console.error("Failed to send notification:", err);
+                });
+                // check for milstone and send push
+                if (comments == 100 || comments == 1000 || comments == 10000) {
+                    sendNotification({
+                        recipientId: post_user_id,
+                        title: (comments / 1000) + "k Comments 🎉",
+                        type: "post_comment_milestone",
+                        identifier: post_id,
+                        message: "Your post has reached " + (comments / 1000) + "k comments!",
+                        Push: "true",
+                        state: 3
+                    }).done(function (res) {
+                        console.log("Notification sent:", res);
+                    }).fail(function (err) {
+                        console.error("Failed to send notification:", err);
+                    });
+                }
+                // send mentioned notifications
+                comment_id = $("#SMN").data("smn");
+                $.ajax({
+                    url: "/send-mention-notifications",
+                    method: "POST",
+                    data: JSON.stringify({
+                        post_id: comment_id,
+                        state: "comment"
+                    }),
+                    headers: { "Content-Type": "application/json" },
+                    success: function (res) {
+                        console.log("Mention notifications sent:", res);
+                    },
+                    error: function (err) {
+                        console.error("Failed to send mention notifications:", err);
+                    }
+                });
+            },
+            error: function (err) {
+                console.error('Failed to submit comment:', err);
+            }
+        });
+
     }
     $("#submitComment").click(submitComment);
 
@@ -121,4 +207,6 @@
             submitComment();
         }
     });
+    user_id = $(".div1").attr("class").split(" ")[1];
+    checkForNotifications(user_id);
 </script>
