@@ -12,8 +12,16 @@
 </head>
 
 <body>
+    {% if not is_user_verified %}
+    <div class="verification-overlay">
+        <div class="verification-box">
+            <h2>Email Verification Required</h2>
+            <p>Please verify your email to access all features.</p>
+            <button id="verifyBtn">Send Verification Email</button>
+        </div>
+    </div>
+    {% endif %}
     <div class="parent">
-
         <div class="div1 {{current_user.id}}">
             <div class="d-none d-sm-block">
                 <div class="d-flex flex-column flex-shrink-0 p-3 bg-light me-0" style="width: 280px; height: 100vh;">
@@ -177,20 +185,20 @@
         <script>
             window.firebaseRuntimeConfig = {
                 firebaseEnabled: {{ firebase_enabled | tojson }},
-            vapidKey: { { fcm_vapid_key | tojson } },
-            const firebaseConfig = {
-                apiKey: "<YOUR_API_KEY_HERE>",
-                authDomain: "corexmanzoid-twitter-notify.firebaseapp.com",
-                projectId: "corexmanzoid-twitter-notify",
-                storageBucket: "corexmanzoid-twitter-notify.firebasestorage.app",
-                messagingSenderId: "465761356424",
-                appId: "1:465761356424:web:64b333e53e7b45ef37ed3d",
-                measurementId: "G-PG8P4FC5L7"
-            };
+                vapidKey: {{ fcm_vapid_key | tojson }},
+                firebaseConfig: {
+                    apiKey: "<your-api-key>",
+                    authDomain: "corexmanzoid-twitter-7a86a.firebaseapp.com",
+                    projectId: "corexmanzoid-twitter-7a86a",
+                    storageBucket: "corexmanzoid-twitter-7a86a.firebasestorage.app",
+                    messagingSenderId: "266928901713",
+                    appId: "1:266928901713:web:b092a1071e9467deccf270",
+                    measurementId: "G-5BXH7TMB3S"
+                }
             };
         </script>
-        <script src="../static/js/firebase.js"></script>
-        <script src="../static/js/home.js"></script>
+        <script src="{{ url_for('static', filename='js/firebase.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/home.js') }}"></script>
 
 </body>
 

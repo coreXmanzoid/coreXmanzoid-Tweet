@@ -1,3 +1,5 @@
+from functools import wraps
+
 from flask import Flask, render_template, redirect, url_for, request, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
@@ -10,6 +12,7 @@ from flask_login import (
     login_required,
     current_user,logout_user,
 )
+from itsdangerous import BadSignature, BadSignature, SignatureExpired, URLSafeTimedSerializer
 import emailHandling, random, json, requests, os
 from datetime import datetime, timedelta
 from sqlalchemy.ext.mutable import MutableList
@@ -18,7 +21,7 @@ import cloudinary.uploader
 import cloudinary.api
 from groq import Groq
 import firebase_admin
-from firebase_admin import credentials, messaging
+from firebase_admin import credentials, messaging, initialize_app
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -49,7 +52,7 @@ app = Flask(__name__)
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 app.config["SECRET_KEY"] = "8BYkEfBA6O6donzWlSihBXox7C0sKR6b"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///coreXmanzoidTweet.db"
-
+serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
 
 client = Groq(api_key=GROQ_API_KEY)
 db = SQLAlchemy(model_class=Base)
@@ -70,6 +73,7 @@ class UserData(UserMixin, db.Model):
     liked_posts: Mapped[list] = mapped_column(MutableList.as_mutable(JSON),default=list)
     birth_date: Mapped[Date] = mapped_column(Date, nullable=True)
     reposted_posts: Mapped[list] = mapped_column(MutableList.as_mutable(JSON),default=list)
+    status: Mapped[str] = mapped_column(String, default="Non-Verified")
 
     tweets = relationship("TweetData", back_populates="user")
     comments = relationship("Comments", back_populates="user")
@@ -366,6 +370,7 @@ def notifications():
 
 @app.route("/notifications/mark_read/<int:user_id>")
 @login_required
+@verified_user
 def mark_as_read(user_id):
     if user_id != current_user.id:
         return jsonify({"status": "error", "message": "Unauthorized"}), 403
@@ -390,69 +395,78 @@ login_manager.init_app(app)
 def load_user(user_id):
     return db.get_or_404(UserData, user_id)
 
+def verified_user(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if current_user.status != "Verified":
+            return "Email not verified. Access Denied.", 403
+        return func(*args, **kwargs)
+    return wrapper
 
 @app.route("/signup/<int:st>", methods=["GET", "POST"])
 def signup(st):
-    global name, email, username, password, phone, data, OTP, birth_date
+
+    data['current_date'] = datetime.now().strftime("%Y-%m-%d")  # '2025-10-30'
     if request.method == "POST":
-        if st == 1:  # signup form completed
-            name = request.form.get("name")
-            username = request.form.get("username")
-            phone = request.form.get("phone")
-            email = str(request.form.get("email"))
-            birth_date_str = request.form.get("birthDate")  # "2007-01-11"
-            birth_date = (
-                datetime.strptime(birth_date_str, "%Y-%m-%d").date()
-                if birth_date_str
-                else None
-            )
-            password = request.form.get("pin")
+        if st == 1: # username verification 
+            username = request.get_json().get("username", None) 
+            isUserExist = db.session.execute( db.select(UserData).where((UserData.username == username)) ).scalar() 
+            if isUserExist: 
+                return jsonify({"status": "abondonded"}) 
+            return jsonify({"status": "success"}) 
+        name = request.form.get("name")
+        username = request.form.get("username")
+        phone = request.form.get("phone")
+        email = request.form.get("email")
+        birth_date_str = request.form.get("birthDate")
+        password = request.form.get("pin")
 
-            data["email"] = email
-            isUserExist = db.session.execute(
-                db.select(UserData).where((UserData.email == email))
-            ).scalar()
-            if isUserExist:
-                data["page"] = "signup"
-                data["emailAlreadyExist"] = "true"
-                return render_template("signup.html", data=data)
-            data["page"] = "confirmEmail"
-            OTP = emailHandling.sendEmail(email)
-            if OTP == "0000":
-                data["page"] = "signup"  # change page if OTP is unsuccessfull
-                flash("Failed to send verification email. Please try again.")
-            return render_template("signup.html", data=data)
-        elif st == 2:  # email-verification
-            userOTP = f'{request.form.get("OTP1")}{request.form.get("OTP2")}{request.form.get("OTP3")}{request.form.get("OTP4")}'
-            if emailHandling.checkOTP(OTP, userOTP):
-                new_user = UserData(
-                    name=name,
-                    username=username,
-                    email=email,
-                    birth_date=birth_date,
-                    number=phone,
-                    password=generate_password_hash(password, method="pbkdf2:sha256", salt_length=8),
-                )
-                db.session.add(new_user)
-                db.session.commit()
-                data["page"] = "signup"
-                return redirect(url_for("login"))
-            flash("INVALID OTP")
-            data["page"] = "signup"
-            return redirect(url_for("signup", st=0))
-        elif st == 3:  # username verification
-            username = request.get_json().get("username")
-            isUserExist = db.session.execute(
-                db.select(UserData).where((UserData.username == username))
-            ).scalar()
-            if isUserExist:
-                return jsonify({"status": "abondonded"})
-            return jsonify({"status": "success"})
-    current_date = datetime.now().strftime("%Y-%m-%d")
-    data["current_date"] = current_date
-    data["page"] = "signup"
+        # Convert birth date
+        birth_date = (
+            datetime.strptime(birth_date_str, "%Y-%m-%d").date()
+            if birth_date_str
+            else None
+        )
+
+        # Check if email already exists
+        existing_user = db.session.execute(
+            db.select(UserData).where(UserData.email == email)
+        ).scalar()
+
+        if existing_user:
+            flash("Email already exists.")
+            return redirect(url_for('signup', st= 0))
+
+        # Check if username already exists
+        existing_username = db.session.execute(
+            db.select(UserData).where(UserData.username == username)
+        ).scalar()
+
+        if existing_username:
+            flash("Username already taken.")
+            return redirect(url_for('signup', st= 0))
+
+        # Create new user
+        new_user = UserData(
+            name=name,
+            username=username,
+            email=email,
+            birth_date=birth_date,
+            number=phone,
+            password=generate_password_hash(
+                password,
+                method="pbkdf2:sha256",
+                salt_length=8
+            ),
+        )
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash("Account created successfully. Please verify your email.")
+        return redirect(url_for("login"))
+
     return render_template("signup.html", data=data)
-
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -477,9 +491,107 @@ def login():
             flash("Wrong Password Try Again.")
     return render_template("login.html")
 
+@app.route("/email-verification", methods=["POST"])
+@login_required
+def email_verification():
+    user = current_user
+
+    if not user:
+        return jsonify({"status": "error", "message": "User not found"}), 404
+
+    # Generate token
+    token = serializer.dumps(
+        {"user_id": user.id},
+        salt="email-verification-salt"
+    )
+
+    verify_link = url_for(
+        "verify_email_with_token",
+        token=token,
+        _external=True
+    )
+
+    emailHandling.sendLinkEmail(user.email, verify_link, st=1)
+
+    return jsonify({"status": "success"})
+
+@app.route("/verify-email/<token>")
+def verify_email_with_token(token):
+    try:
+        data = serializer.loads(
+            token,
+            salt="email-verification-salt",
+            max_age=900  # 15 minutes
+        )
+    except Exception:
+        return "Verification link expired or invalid.", 400
+
+    user = db.session.get(UserData, data["user_id"])
+
+    if not user:
+        return "User not found.", 404
+
+    if user.status == "Verified":
+        return "Email already verified."
+
+    user.status = "Verified"
+    db.session.commit()
+
+    return redirect(url_for("homepage"))
+
+@app.route("/reset-password", methods=["GET", "POST"])
+def reset_password():
+    if request.method == "POST":
+        post_data = request.get_json()
+        email = post_data.get("email")
+        print(email)
+        user = db.session.execute(
+            db.select(UserData).where(UserData.email == email)
+        ).scalar()
+
+        if user:
+            token = serializer.dumps(user.id, salt="password-reset-salt")
+            reset_link = url_for("reset_password_with_token", token=token, _external=True)
+            emailHandling.sendLinkEmail(email, reset_link, st=2)
+
+        flash("If this email exists, a reset link has been sent.")
+        return jsonify({"status": "success", "message": "If this email exists, a reset link has been sent."})
+
+    return render_template("resetPassword.html", data={"page": "resetPassword"})
+
+@app.route("/reset-password/<token>", methods=["GET", "POST"])
+def reset_password_with_token(token):
+    try:
+        user_id = serializer.loads(token, salt="password-reset-salt", max_age=900)
+    except:
+        flash("This reset link is invalid or expired.")
+        return redirect(url_for("reset_password"))
+
+    user = db.session.get(UserData, user_id)
+    if not user:
+        flash("Invalid reset link.")
+        return redirect(url_for("reset_password"))
+
+    if request.method == "POST":
+        post_data = request.get_json(silent=True) or {}
+        new_password = post_data.get("newPassword")
+        confirm_password = post_data.get("confirmNewPassword")
+
+        if new_password != confirm_password:
+            flash("Passwords do not match.")
+            return render_template("resetPassword.html", data={"page": "newPassword"})
+
+        user.password = generate_password_hash(new_password, method="pbkdf2:sha256", salt_length=8)
+        db.session.commit()
+
+        flash("Your password has been reset successfully.")
+        return jsonify({"status": "success", "message": "Password reset successfully. Please log in with your new password."})
+
+    return render_template("resetPassword.html", data={"page": "newPassword"})
 
 @app.route("/update-profile/<int:id>", methods=["POST"])
 @login_required
+@verified_user
 def upload_profile(id):
     if "profile" not in request.files:
         return jsonify({"status": "error", "message": "No file provided"}), 400
@@ -522,8 +634,9 @@ def upload_profile(id):
 @app.route("/home", methods=["GET", "POST"])
 @login_required
 def homepage():
+    is_user_verified = current_user.status == "Verified"
     current_time = datetime.now().isoformat()  # '2025-10-30T14:22:15'
-    return render_template("home.html", ct=current_time)
+    return render_template("home.html", ct=current_time, is_user_verified=is_user_verified)
 
 def mentions_parser(content):
     mentioned_usernames = [word[1:] for word in content.split() if word.startswith("@")]
@@ -535,6 +648,8 @@ def mentions_parser(content):
     return mentioned_objects
 
 @app.route("/send-mention-notifications", methods=["POST"])
+@login_required
+@verified_user
 def send_mention_notifications():
     data = request.get_json()
     post_id = data.get("post_id")
@@ -573,19 +688,28 @@ def send_mention_notifications():
     return jsonify({"status": "success", "message": "Mention notifications sent"}), 200
 @app.route("/managePosts/<int:state>", methods=["GET", "POST"])
 @login_required
+@verified_user
 def managePosts(state):
     if request.method == "POST":
         if state == 1:
             data = request.get_json()
             if data.get("user_id") != current_user.id:
                 return jsonify({"status": "Unauthorized Access Denied"}), 403
-            post_content = data.get("content", "").strip()
+            post_content = data.get("content", "")
+            if not post_content or not post_content.strip():
+                return jsonify({"status": "error", "message": "Empty post"}), 400
             hashtags = [word for word in post_content.split() if word.startswith("#")]
             mentioned_objects = mentions_parser(post_content)
 
-            post = " ".join(
-                [word for word in post_content.split() if not word.startswith("#")]
-            )
+            # Preserve newlines while removing hashtags
+            lines = post_content.split("\n")
+            clean_lines = []
+            for line in lines:
+                # Remove hashtags from each line
+                clean_words = [word for word in line.split() if not word.startswith("#")]
+                clean_lines.append(" ".join(clean_words))
+
+            post = "\n".join(clean_lines)  # keeps original line breaks
             datetime_now = datetime.utcnow()  # '2025-10-30T14:22:15'
             new_tweet = TweetData(
                 content=post,
@@ -618,6 +742,7 @@ def managePosts(state):
 
 @app.route("/comments/<int:post_id>", methods=["GET", "POST"])
 @login_required
+@verified_user
 def comments(post_id):
     data = request.get_json(silent=True) or {}
     st = data.get("state", 0)
@@ -747,6 +872,7 @@ def showPosts(state, id):
 
 @app.route("/likePost/<int:state>", methods=["POST"])
 @login_required
+@verified_user
 def post_Action(state):
     data = request.get_json()
     post_id = data.get("post_id")
@@ -798,6 +924,7 @@ def post_Action(state):
 
 @app.route("/Manzoid-AI", methods=["GET", "POST"])
 @login_required
+@verified_user
 def manzoid_ai():
     if request.method == "POST":
         data = request.get_json()
@@ -928,6 +1055,7 @@ def logout(st):
 
 @app.route("/follows/<int:id>/<int:st>", methods=["GET", "POST"])
 @login_required
+@verified_user
 def follows(id, st):
     if request.method == "POST":
         if st == 1:
@@ -966,7 +1094,6 @@ def profile(id):
         is not None
     )
     return render_template("profile.html", user=user, is_following=is_following)
-
 
 if __name__ == "__main__":
     app.run(debug=True)

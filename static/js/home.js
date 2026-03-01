@@ -77,6 +77,43 @@ function showPosts(state, id) {
         }
     });
 }
+
+$(".verification-box button").click(function () {
+    userId = $(".div1").attr("class").split(" ")[1];
+    const button = $("#verifyBtn");
+    button.prop("disabled", true);
+    button.html(`
+            <span class="btn-loader"></span>
+            Sending...
+        `);
+    $.ajax({
+        url: "/email-verification",
+        method: "POST",
+        data: JSON.stringify({ user_id: userId }),
+        contentType: "application/json",
+        success: function (response) {
+
+            if (response.status === "success") {
+                button.html(`
+                    <span class="btn-loader"></span>
+                    Verification in progress...
+                `);
+                if ($("#verification-status").length === 0) {
+                    button.after(`
+                <small id="verification-status" class="verification-tag">
+                    Verification email sent! Please check your inbox.
+                </small>
+            `);
+                }
+
+            } else {
+
+                alert("Failed to send verification email. Please try again.");
+            }
+        }
+    });
+});
+
 // Show posts.html
 $(".div3").load("/showPosts/0/0");
 // Refresh button functionality

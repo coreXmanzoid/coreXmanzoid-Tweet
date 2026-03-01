@@ -120,7 +120,11 @@ button:hover {
         right: 100px;
     }
 }
-
+.flashes{
+    color: #F14F20;
+    padding: 0px 20px;
+    border-radius: 5px;
+}
 .confirm-email-form {
     padding: 10% 0%;
 

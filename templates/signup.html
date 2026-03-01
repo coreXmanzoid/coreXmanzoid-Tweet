@@ -24,8 +24,7 @@
                         style="color: #FBF3D1;">Privacy</a>
             </div>
             <center>
-                {% if data.page == "signup" %}
-                <form action="/signup/1" method="post">
+                <form action="/signup/0" method="post">
                     <div class="signup-form">
                         <h1>Sign-up</h1>
                         {% with messages = get_flashed_messages() %}
@@ -49,20 +48,6 @@
                     </div>
                 </form>
                 <h6 class="my-3">Already have account?<a href="{{ url_for('login') }}">Login</a></h6>
-                {% elif data.page == "confirmEmail" %}
-                <form action="/signup/2" method="post">
-                    <div class="confirm-email-form">
-                        <h1>Confirm Email</h1>
-                        <h4>We have sent a 4 digit OTP to your {{ data.email }}.<br /> Enter below to confirm your
-                            identification</h4>
-                        <input type="number" name="OTP1" required>
-                        <input type="number" name="OTP2" required>
-                        <input type="number" name="OTP3" required>
-                        <input type="number" name="OTP4" required>
-                        <a href=""><button type="submit" class="submitbutton">Confirm Email</button></a>
-                    </div>
-                </form>
-                {% endif %}
             </center>
 
         </div>

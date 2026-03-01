@@ -4,7 +4,7 @@ var usernameFound = false;
 $("input[name = 'username']").on("keydown", function (event) {
     var username = $("input[name = 'username']").val() + event.key;
     $.ajax({
-        url: "/signup/3",
+        url: "/signup/1",
         type: "POST",
         contentType: "application/json",
         data: JSON.stringify({"username": username}),
@@ -44,8 +44,7 @@ function isEmailValid(){
     }
 }
 
-isEmailValid();
-
+// isEmailValid();
 $("#userPassword").on("keyup", function () {
     var password = $(this).val();
     var strength = 0;
@@ -80,32 +79,4 @@ $("#userPassword").on("keyup", function () {
         $(".submitbutton").prop("disabled", false);
     }
     $('#passwordStrength').text("Password Strength: " + strengthText);
-});
-
-$(".submitbutton").click(function () {
-    if (data.page == "signup"){
-        confirm("We will send you an OTP on your email. Make sure to entered a correct Email.");
-    }
-});
-
-if (data.page == "confirmEmail") {
-    $("input[name='OTP1']").focus();
-}
-
-$(".confirm-email-form input").on("keydown", function (event) {
-    var index = $(this).index(".confirm-email-form input");
-    if (event.key >= 0 && event.key <= 9) {
-        event.preventDefault();
-        $(this).val(event.key);
-
-        if (index < $('.confirm-email-form input').length - 1) {
-            $(".confirm-email-form input").eq(index + 1).focus();
-        } else if (event.key == "Backspace") {
-            event.preventDefault();
-            $(this).val("");
-            if (index > 0) {
-                $(".confirm-email-form input").eq(index - 1).focus();
-            }
-        }
-    }
 });

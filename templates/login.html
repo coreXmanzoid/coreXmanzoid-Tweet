@@ -43,7 +43,7 @@
                         <input type="password" name="pin" id="userPassword" placeholder="Enter your Password*"
                             required><br>
                         <a href=""><button type="submit" class="submitbutton">Login</button></a>
-                        <a href="">Forget Password?</a> <br> <br>
+                        <a href="{{ url_for('reset_password') }}">Forget Password?</a> <br> <br>
                         <h6>Don't have account? <a href="{{url_for('signup', st=0)}}">SignUp</a> instead.</h6>
                     </div>
                 </form>

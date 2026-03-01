@@ -9,6 +9,7 @@ __pycache__/
 # senstive and private data
 corexmanzoid-twitter-notify-firebase-adminsdk-fbsvc-206481a110.json
 corexmanzoid-twitter-notify-firebase.json
+static/firebase-messaging-sw.js
 static/js/firebase.js
 
 # Distribution / packaging
