@@ -132,7 +132,7 @@
                         <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
                             <li><a class="dropdown-item LActive" href="#">Help</a></li>
                             <li><a class="dropdown-item LActive" href="#">Settings</a></li>
-                            <li><a class="dropdown-item LActive" href="#">Profile</a></li>
+                            <li><a class="dropdown-item LActive profile-link" href="#">Profile</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
@@ -187,7 +187,7 @@
                 firebaseEnabled: {{ firebase_enabled | tojson }},
                 vapidKey: {{ fcm_vapid_key | tojson }},
                 firebaseConfig: {
-                    apiKey: "<your-api-key>",
+                    apiKey: "{{ firebase_api_key }}",
                     authDomain: "corexmanzoid-twitter-7a86a.firebaseapp.com",
                     projectId: "corexmanzoid-twitter-7a86a",
                     storageBucket: "corexmanzoid-twitter-7a86a.firebasestorage.app",

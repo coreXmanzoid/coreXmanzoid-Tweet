@@ -15,7 +15,7 @@ $(".reset-password-form button").on("click", function(e) {
     $.ajax({
         type: "POST",
         url: "/reset-password",
-        data: JSON.stringify({ 'email': email }),
+        data: JSON.stringify({ 'email': email, 'cf-turnstile-response': window.turnstile.getResponse() }),
         headers: { "Content-Type": "application/json" },
         success: function(response) {
             if (response.status === "success") {

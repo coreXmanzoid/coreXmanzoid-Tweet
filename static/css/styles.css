@@ -85,9 +85,11 @@ button:hover {
 
 .signup-text {
     padding: 0px 0px;
+
     ul {
         padding-left: 0px;
     }
+
     li {
         list-style: none;
         font-size: 18px;
@@ -108,7 +110,7 @@ button:hover {
     input {
         width: 50%;
         padding: 10px;
-        margin: 10px 0px;
+        margin: 10px auto;
         border-radius: 8px;
         border: 1px solid #999681;
     }
@@ -120,11 +122,13 @@ button:hover {
         right: 100px;
     }
 }
-.flashes{
+
+.flashes {
     color: #F14F20;
     padding: 0px 20px;
     border-radius: 5px;
 }
+
 .confirm-email-form {
     padding: 10% 0%;
 

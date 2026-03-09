@@ -236,6 +236,7 @@ $(".profile-link").click(function () {
     user_id = $(".div1").attr("class").split(" ")[1]
     showProfile(user_id);
 });
+
 // show Home on clicking home link & back to home from profile
 function Backtohome() {
     $(".div2").load("/profile/0");

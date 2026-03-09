@@ -42,6 +42,10 @@
                         <input type="text" name="username" placeholder="Enter Username or Email*" required>
                         <input type="password" name="pin" id="userPassword" placeholder="Enter your Password*"
                             required><br>
+                        <center>
+                            <div class="cf-turnstile" data-sitekey="0x4AAAAAACmwFzmV2GwylvEi">
+                            </div>
+                        </center>
                         <a href=""><button type="submit" class="submitbutton">Login</button></a>
                         <a href="{{ url_for('reset_password') }}">Forget Password?</a> <br> <br>
                         <h6>Don't have account? <a href="{{url_for('signup', st=0)}}">SignUp</a> instead.</h6>
@@ -65,6 +69,7 @@
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <script>
     </script>
 </body>

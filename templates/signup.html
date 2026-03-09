@@ -16,12 +16,13 @@
                 <img src="../static/assets/logo2.png" class="logoimg img-fluid">
                 <h1>Welcome! We’re glad you’re here.</h1>
                 <ul>
-                    <li>Create your account to get started, share your thoughts, and connect with people in real life.</li>
+                    <li>Create your account to get started, share your thoughts, and connect with people in real life.
+                    </li>
                     <li>Your security matters — we’ve built a platform designed to keep your account safe.</li>
                     <li>Get high quality refining, generating, and visualizing a post through Manzoid-AI.</li>
                 </ul>
-                <h6>By signing up, you agree to our <a href="" style="color: #FBF3D1">Terms of Service</a> and <a href=""
-                        style="color: #FBF3D1;">Privacy</a>
+                <h6>By signing up, you agree to our <a href="" style="color: #FBF3D1">Terms of Service</a> and <a
+                        href="" style="color: #FBF3D1;">Privacy</a>
             </div>
             <center>
                 <form action="/signup/0" method="post">
@@ -41,9 +42,11 @@
                         <input type="number" name="phone" placeholder="Phone Number">
                         <input type="email" name="email" placeholder="Email*" required>
                         <input type="text" name="birthDate" placeholder="Enter your birthdate"
-                        onfocus="this.type='date'" max="{{ data['current_date'] }}" required>
+                            onfocus="this.type='date'" max="{{ data['current_date'] }}" required>
                         <input type="password" name="pin" id="userPassword" placeholder="Password*" required>
                         <br><small id="passwordStrength" style="color: red;"></small>
+                        <div class="cf-turnstile" data-sitekey="0x4AAAAAACmwFzmV2GwylvEi">
+                        </div>
                         <a href=""><button type="submit" class="submitbutton" disabled>Signup</button></a>
                     </div>
                 </form>
@@ -68,7 +71,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script> const data = {{ data | tojson }};</script>
     <script src="{{ url_for('static', filename='js/signup.js') }}"></script>
-
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </body>
 
 </html>

@@ -10,10 +10,18 @@ from flask_login import (
     login_user,
     LoginManager,
     login_required,
-    current_user,logout_user,
+    current_user,
+    logout_user,
 )
-from itsdangerous import BadSignature, BadSignature, SignatureExpired, URLSafeTimedSerializer
-import emailHandling, random, json, requests, os
+from datetime import datetime, UTC
+from authlib.integrations.flask_client import OAuth
+from itsdangerous import (
+    BadSignature,
+    BadSignature,
+    SignatureExpired,
+    URLSafeTimedSerializer,
+)
+import emailHandling, random, json, requests, os, re, secrets
 from datetime import datetime, timedelta
 from sqlalchemy.ext.mutable import MutableList
 import cloudinary
@@ -58,6 +66,7 @@ client = Groq(api_key=GROQ_API_KEY)
 db = SQLAlchemy(model_class=Base)
 db.init_app(app)
 
+
 class UserData(UserMixin, db.Model):
     __tablename__ = "user_data"
 
@@ -70,25 +79,27 @@ class UserData(UserMixin, db.Model):
     password: Mapped[str] = mapped_column(String, nullable=False)
     Auth_token: Mapped[str] = mapped_column(String, nullable=True, default=None)
     is_pro_member: Mapped[bool] = mapped_column(Boolean, default=False)
-    liked_posts: Mapped[list] = mapped_column(MutableList.as_mutable(JSON),default=list)
+    liked_posts: Mapped[list] = mapped_column(
+        MutableList.as_mutable(JSON), default=list
+    )
     birth_date: Mapped[Date] = mapped_column(Date, nullable=True)
-    reposted_posts: Mapped[list] = mapped_column(MutableList.as_mutable(JSON),default=list)
+    reposted_posts: Mapped[list] = mapped_column(
+        MutableList.as_mutable(JSON), default=list
+    )
     status: Mapped[str] = mapped_column(String, default="Non-Verified")
 
     tweets = relationship("TweetData", back_populates="user")
     comments = relationship("Comments", back_populates="user")
 
     received_notifications = relationship(
-    "Notification",
-    foreign_keys="Notification.recipient_id",
-    back_populates="recipient",
-    cascade="all, delete-orphan"
+        "Notification",
+        foreign_keys="Notification.recipient_id",
+        back_populates="recipient",
+        cascade="all, delete-orphan",
     )
 
     sent_notifications = relationship(
-    "Notification",
-    foreign_keys="Notification.sender_id",
-    back_populates="sender"
+        "Notification", foreign_keys="Notification.sender_id", back_populates="sender"
     )
 
     # USERS WHO FOLLOW THIS USER
@@ -126,17 +137,23 @@ class Notification(db.Model):
     # Type of notification (like, comment, follow, etc.)
     type: Mapped[str] = mapped_column(String(50), nullable=True)
 
-    identifier: Mapped[int] = mapped_column(Integer, nullable=True)  # e.g., post_id or comment_id related to the notification
+    identifier: Mapped[int] = mapped_column(
+        Integer, nullable=True
+    )  # e.g., post_id or comment_id related to the notification
     # Status
     is_read: Mapped[bool] = mapped_column(Boolean, default=False)
 
     # Timestamp
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, nullable=False
+        DateTime, default=lambda: datetime.now(UTC), nullable=False
     )
 
-    recipient = relationship("UserData", foreign_keys=[recipient_id], back_populates="received_notifications")
-    sender = relationship("UserData", foreign_keys=[sender_id], back_populates="sent_notifications")
+    recipient = relationship(
+        "UserData", foreign_keys=[recipient_id], back_populates="received_notifications"
+    )
+    sender = relationship(
+        "UserData", foreign_keys=[sender_id], back_populates="sent_notifications"
+    )
 
 
 class Follow(db.Model):
@@ -145,7 +162,9 @@ class Follow(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
     # who follows
-    follower_id: Mapped[int] = mapped_column(Integer,db.ForeignKey("user_data.id"), nullable=False)
+    follower_id: Mapped[int] = mapped_column(
+        Integer, db.ForeignKey("user_data.id"), nullable=False
+    )
 
     # who is being followed
     following_id: Mapped[int] = mapped_column(
@@ -166,8 +185,12 @@ class Follow(db.Model):
 class TweetData(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     content: Mapped[str] = mapped_column(String, nullable=False)
-    user_id: Mapped[int] = mapped_column(Integer, db.ForeignKey("user_data.id"), nullable=False)
-    timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow())
+    user_id: Mapped[int] = mapped_column(
+        Integer, db.ForeignKey("user_data.id"), nullable=False
+    )
+    timestamp: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=lambda: datetime.now(UTC)
+    )
     likes: Mapped[int] = mapped_column(Integer, default=0)
     comments: Mapped[int] = mapped_column(Integer, default=0)
     retweets: Mapped[int] = mapped_column(Integer, default=0)
@@ -183,16 +206,61 @@ class TweetData(db.Model):
 class Comments(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     content: Mapped[str] = mapped_column(String, nullable=False)
-    tweet_id: Mapped[int] = mapped_column(Integer, db.ForeignKey("tweet_data.id"), nullable=False)
-    user_id: Mapped[int] = mapped_column(Integer, db.ForeignKey("user_data.id"), nullable=False)
+    tweet_id: Mapped[int] = mapped_column(
+        Integer, db.ForeignKey("tweet_data.id"), nullable=False
+    )
+    user_id: Mapped[int] = mapped_column(
+        Integer, db.ForeignKey("user_data.id"), nullable=False
+    )
     likes: Mapped[int] = mapped_column(Integer, default=0)
     tweet = relationship("TweetData", back_populates="comment")
     user = relationship("UserData", back_populates="comments")
 
     mentions: Mapped[JSON] = mapped_column(JSON, default=list)
 
+
 with app.app_context():
     db.create_all()
+
+
+# app.secret_key = "secret_key"
+
+oauth = OAuth(app)
+
+google = oauth.register(
+    name='google',
+    client_id= str(os.environ.get("CLIENT_ID")),
+    client_secret= str(os.environ.get("CLIENT_SECRET")),
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={
+        'scope': 'openid email profile'
+    }
+)
+
+def verified_user(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if current_user.status != "Verified":
+            return "Email not verified. Access Denied.", 403
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+import requests
+
+TURNSTILE_SECRET = os.environ.get("CLOUDFARE_SECRET_KEY")
+
+
+def verify_turnstile(token, ip):
+    url = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+
+    data = {"secret": TURNSTILE_SECRET, "response": token, "remoteip": ip}
+
+    r = requests.post(url, data=data)
+    result = r.json()
+
+    return result.get("success", False)
 
 
 def init_firebase() -> tuple[bool, str]:
@@ -227,6 +295,7 @@ def inject_runtime_config():
         "firebase_enabled": FIREBASE_ENABLED,
         "firebase_status": FIREBASE_STATUS,
         "fcm_vapid_key": os.getenv("FCM_VAPID_KEY", ""),
+        "firebase_api_key": os.getenv("FIREBASE_API_KEY", ""),
     }
 
 
@@ -251,21 +320,29 @@ def send_notification(notification: Notification) -> str:
         raise ValueError("Missing FCM token")
 
     message = messaging.Message(
-        notification=messaging.Notification(title=notification.title, body=notification.message),
+        notification=messaging.Notification(
+            title=notification.title, body=notification.message
+        ),
         token=token,
     )
     return messaging.send(message)
 
+
 @app.route("/check-notifications/<int:user_id>")
 @login_required
 def check_notifications(user_id):
-    notifications = db.session.execute(
-        db.select(Notification)
-        .where(Notification.recipient_id == user_id)
-        .order_by(Notification.created_at.desc())
-    ).scalars().all()
+    notifications = (
+        db.session.execute(
+            db.select(Notification)
+            .where(Notification.recipient_id == user_id)
+            .order_by(Notification.created_at.desc())
+        )
+        .scalars()
+        .all()
+    )
     unread_count = sum(1 for n in notifications if not n.is_read)
     return jsonify({"unread_count": unread_count})
+
 
 @app.route("/send-notification-route/<int:st>/<string:Push>", methods=["POST"])
 @login_required
@@ -279,20 +356,24 @@ def send_notification_route(st, Push):
     identifier = data.get("identifier", None)
     if st == 1:  # send notification from anyone to actor (e.g., comment notification)
         new_notification = Notification(
-            sender_id=sender_id, 
-            recipient_id=recipient_id, 
+            sender_id=sender_id,
+            recipient_id=recipient_id,
             title=title,
-            message=message, 
+            message=message,
             type=type,
-            identifier=identifier
+            identifier=identifier,
         )
         db.session.add(new_notification)
         db.session.commit()
     elif st == 2:  # send notification from actor to all followers
-        followers = db.session.execute(
-            db.select(Follow).where(Follow.following_id == sender_id)
-        ).scalars().all()
-        
+        followers = (
+            db.session.execute(
+                db.select(Follow).where(Follow.following_id == sender_id)
+            )
+            .scalars()
+            .all()
+        )
+
         notifications = []
         for follow in followers:
             notifications.append(
@@ -302,7 +383,7 @@ def send_notification_route(st, Push):
                     title=title,
                     message=message,
                     type=type,
-                    identifier=identifier
+                    identifier=identifier,
                 )
             )
         db.session.bulk_save_objects(notifications)
@@ -314,28 +395,30 @@ def send_notification_route(st, Push):
         #             send_notification(notification)
         #         except Exception as e:
         #             print(f"Failed to send notification: {e}")
-        return jsonify({"status": "success", "message": "Notifications save to Database"})
-    elif st == 3: # just update database without sending push notification
-    # fetch notification from databasae by using type and identifier to send only one notification for same action (e.g., like notification for same post)
+        return jsonify(
+            {"status": "success", "message": "Notifications save to Database"}
+        )
+    elif st == 3:  # just update database without sending push notification
+        # fetch notification from databasae by using type and identifier to send only one notification for same action (e.g., like notification for same post)
         new_notification = db.session.execute(
-            db.select(Notification)
-            .where(
-                (Notification.type == type) &
-                (Notification.identifier == identifier)
+            db.select(Notification).where(
+                (Notification.type == type) & (Notification.identifier == identifier)
             )
         ).scalar()
         if new_notification:
-            new_notification.created_at = datetime.utcnow()  # update timestamp to show it as new notification
+            new_notification.created_at = (
+                datetime.now(UTC)
+            )  # update timestamp to show it as new notification
             new_notification.is_read = False  # mark as unread
             new_notification.message = message  # update message in case of any changes
-        else:            
+        else:
             new_notification = Notification(
-                sender_id=sender_id, 
+                sender_id=sender_id,
                 recipient_id=recipient_id,
                 title=title,
-                message=message, 
+                message=message,
                 type=type,
-                identifier=identifier
+                identifier=identifier,
             )
             db.session.add(new_notification)
         db.session.commit()
@@ -344,9 +427,17 @@ def send_notification_route(st, Push):
             send_notification(new_notification)
         except Exception:
             flash("Failed to send test notification.", "error")
-        return jsonify({"status": "success", "message": "Notification sent (or queued)"})
+        return jsonify(
+            {"status": "success", "message": "Notification sent (or queued)"}
+        )
     else:
-        return jsonify({"status": "success", "message": "Notification saved without push"}), 200
+        return (
+            jsonify(
+                {"status": "success", "message": "Notification saved without push"}
+            ),
+            200,
+        )
+
 
 @app.route("/notifications")
 @login_required
@@ -366,7 +457,11 @@ def notifications():
         for notification in notifications_to_delete:
             db.session.delete(notification)
     db.session.commit()
-    return render_template("notifications.html", notifications=notifications,)
+    return render_template(
+        "notifications.html",
+        notifications=notifications,
+    )
+
 
 @app.route("/notifications/mark_read/<int:user_id>")
 @login_required
@@ -382,6 +477,7 @@ def mark_as_read(user_id):
     db.session.commit()
     return jsonify({"status": "success"})
 
+
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -395,25 +491,28 @@ login_manager.init_app(app)
 def load_user(user_id):
     return db.get_or_404(UserData, user_id)
 
-def verified_user(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        if current_user.status != "Verified":
-            return "Email not verified. Access Denied.", 403
-        return func(*args, **kwargs)
-    return wrapper
 
 @app.route("/signup/<int:st>", methods=["GET", "POST"])
 def signup(st):
 
-    data['current_date'] = datetime.now().strftime("%Y-%m-%d")  # '2025-10-30'
+    data["current_date"] = datetime.now().strftime("%Y-%m-%d")  # '2025-10-30'
     if request.method == "POST":
-        if st == 1: # username verification 
-            username = request.get_json().get("username", None) 
-            isUserExist = db.session.execute( db.select(UserData).where((UserData.username == username)) ).scalar() 
-            if isUserExist: 
-                return jsonify({"status": "abondonded"}) 
-            return jsonify({"status": "success"}) 
+        if st == 1:  # username verification
+            username = request.get_json().get("username", None)
+            isUserExist = db.session.execute(
+                db.select(UserData).where((UserData.username == username))
+            ).scalar()
+            if isUserExist:
+                return jsonify({"status": "abondonded"})
+            return jsonify({"status": "success"})
+        
+        captcha_token = request.form.get("cf-turnstile-response")
+        print(captcha_token)
+
+        if not verify_turnstile(captcha_token, request.remote_addr):
+            flash("CAPTCHA verification failed. Please try again.")
+            return redirect(url_for('signup', st=0))
+        
         name = request.form.get("name")
         username = request.form.get("username")
         phone = request.form.get("phone")
@@ -435,7 +534,7 @@ def signup(st):
 
         if existing_user:
             flash("Email already exists.")
-            return redirect(url_for('signup', st= 0))
+            return redirect(url_for("signup", st=0))
 
         # Check if username already exists
         existing_username = db.session.execute(
@@ -444,7 +543,7 @@ def signup(st):
 
         if existing_username:
             flash("Username already taken.")
-            return redirect(url_for('signup', st= 0))
+            return redirect(url_for("signup", st=0))
 
         # Create new user
         new_user = UserData(
@@ -454,9 +553,7 @@ def signup(st):
             birth_date=birth_date,
             number=phone,
             password=generate_password_hash(
-                password,
-                method="pbkdf2:sha256",
-                salt_length=8
+                password, method="pbkdf2:sha256", salt_length=8
             ),
         )
 
@@ -468,11 +565,80 @@ def signup(st):
 
     return render_template("signup.html", data=data)
 
+def build_unique_username(raw_value: str) -> str:
+    base = re.sub(r"[^a-zA-Z0-9_]", "", (raw_value or "").replace(" ", "_")).lower()
+    if not base:
+        base = "user"
+
+    username = base
+    counter = 1
+    while db.session.execute(
+        db.select(UserData).where(UserData.username == username)
+    ).scalar():
+        username = f"{base}{counter}"
+        counter += 1
+    return username
+
+
+@app.route('/login/google')
+def google_login():
+    redirect_uri = url_for('authorize_google', _external=True)
+    return google.authorize_redirect(redirect_uri)
+
+@app.route('/google/authorized')
+def authorize_google():
+    try:
+        token = google.authorize_access_token()
+    except Exception as e:
+        flash("Google sign in failed. Please try again.")
+        print("GOOGLE AUTH ERROR:", e)
+        return redirect(url_for("login"))
+
+    user_info = token.get("userinfo") if token else None
+    if not user_info:
+        user_info = google.get(
+            "https://openidconnect.googleapis.com/v1/userinfo"
+        ).json()
+
+    email = (user_info or {}).get("email")
+    if not email:
+        flash("Google account email is unavailable.")
+        return redirect(url_for("signup"))
+
+    name = user_info.get("name") or email.split("@")[0]
+
+    user = db.session.execute(
+        db.select(UserData).where(UserData.email == email)
+    ).scalar()
+
+    if not user:
+        base_username = user_info.get("given_name") or email.split("@")[0]
+        user = UserData(
+            name=name,
+            username=build_unique_username(base_username),
+            email=email,
+            number=0,
+            password=generate_password_hash(secrets.token_urlsafe(32)),
+            status="Verified",
+        )
+        db.session.add(user)
+        db.session.commit()
+
+    login_user(user)
+    return redirect(url_for("homepage"))
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         username = str(request.form.get("username"))
         password = str(request.form.get("pin"))
+        captcha_token = request.form.get("cf-turnstile-response")
+        print(captcha_token)
+
+        if not verify_turnstile(captcha_token, request.remote_addr):
+            flash("CAPTCHA verification failed. Please try again.")
+            return redirect(url_for('login'))
+
         if username.endswith("@gmail.com"):
             user = db.session.execute(
                 db.select(UserData).where(UserData.email == username)
@@ -491,6 +657,7 @@ def login():
             flash("Wrong Password Try Again.")
     return render_template("login.html")
 
+
 @app.route("/email-verification", methods=["POST"])
 @login_required
 def email_verification():
@@ -500,28 +667,20 @@ def email_verification():
         return jsonify({"status": "error", "message": "User not found"}), 404
 
     # Generate token
-    token = serializer.dumps(
-        {"user_id": user.id},
-        salt="email-verification-salt"
-    )
+    token = serializer.dumps({"user_id": user.id}, salt="email-verification-salt")
 
-    verify_link = url_for(
-        "verify_email_with_token",
-        token=token,
-        _external=True
-    )
+    verify_link = url_for("verify_email_with_token", token=token, _external=True)
 
     emailHandling.sendLinkEmail(user.email, verify_link, st=1)
 
     return jsonify({"status": "success"})
 
+
 @app.route("/verify-email/<token>")
 def verify_email_with_token(token):
     try:
         data = serializer.loads(
-            token,
-            salt="email-verification-salt",
-            max_age=900  # 15 minutes
+            token, salt="email-verification-salt", max_age=900  # 15 minutes
         )
     except Exception:
         return "Verification link expired or invalid.", 400
@@ -539,10 +698,16 @@ def verify_email_with_token(token):
 
     return redirect(url_for("homepage"))
 
+
 @app.route("/reset-password", methods=["GET", "POST"])
 def reset_password():
     if request.method == "POST":
         post_data = request.get_json()
+        captcha_token = post_data.get("cf-turnstile-response")
+        print(captcha_token)
+        if not verify_turnstile(captcha_token, request.remote_addr):
+            return jsonify({"status": "error", "message": "CAPTCHA verification failed."}), 400
+
         email = post_data.get("email")
         print(email)
         user = db.session.execute(
@@ -551,13 +716,21 @@ def reset_password():
 
         if user:
             token = serializer.dumps(user.id, salt="password-reset-salt")
-            reset_link = url_for("reset_password_with_token", token=token, _external=True)
+            reset_link = url_for(
+                "reset_password_with_token", token=token, _external=True
+            )
             emailHandling.sendLinkEmail(email, reset_link, st=2)
 
         flash("If this email exists, a reset link has been sent.")
-        return jsonify({"status": "success", "message": "If this email exists, a reset link has been sent."})
+        return jsonify(
+            {
+                "status": "success",
+                "message": "If this email exists, a reset link has been sent.",
+            }
+        )
 
     return render_template("resetPassword.html", data={"page": "resetPassword"})
+
 
 @app.route("/reset-password/<token>", methods=["GET", "POST"])
 def reset_password_with_token(token):
@@ -581,13 +754,21 @@ def reset_password_with_token(token):
             flash("Passwords do not match.")
             return render_template("resetPassword.html", data={"page": "newPassword"})
 
-        user.password = generate_password_hash(new_password, method="pbkdf2:sha256", salt_length=8)
+        user.password = generate_password_hash(
+            new_password, method="pbkdf2:sha256", salt_length=8
+        )
         db.session.commit()
 
         flash("Your password has been reset successfully.")
-        return jsonify({"status": "success", "message": "Password reset successfully. Please log in with your new password."})
+        return jsonify(
+            {
+                "status": "success",
+                "message": "Password reset successfully. Please log in with your new password.",
+            }
+        )
 
     return render_template("resetPassword.html", data={"page": "newPassword"})
+
 
 @app.route("/update-profile/<int:id>", methods=["POST"])
 @login_required
@@ -636,16 +817,24 @@ def upload_profile(id):
 def homepage():
     is_user_verified = current_user.status == "Verified"
     current_time = datetime.now().isoformat()  # '2025-10-30T14:22:15'
-    return render_template("home.html", ct=current_time, is_user_verified=is_user_verified)
+    return render_template(
+        "home.html", ct=current_time, is_user_verified=is_user_verified
+    )
+
 
 def mentions_parser(content):
     mentioned_usernames = [word[1:] for word in content.split() if word.startswith("@")]
-    users = db.session.execute(
-        db.select(UserData).where(UserData.username.in_(mentioned_usernames))
-    ).scalars().all()
+    users = (
+        db.session.execute(
+            db.select(UserData).where(UserData.username.in_(mentioned_usernames))
+        )
+        .scalars()
+        .all()
+    )
 
     mentioned_objects = [{"user_id": u.id, "username": u.username} for u in users]
     return mentioned_objects
+
 
 @app.route("/send-mention-notifications", methods=["POST"])
 @login_required
@@ -656,7 +845,7 @@ def send_mention_notifications():
     state = data.get("state")
     if state == "post":
         post = db.session.get(TweetData, post_id)
-    else: 
+    else:
         post = db.session.get(Comments, post_id)
     if not post:
         return jsonify({"status": "error", "message": "Post not found"}), 404
@@ -686,6 +875,8 @@ def send_mention_notifications():
     # Commit all notifications at once
     db.session.commit()
     return jsonify({"status": "success", "message": "Mention notifications sent"}), 200
+
+
 @app.route("/managePosts/<int:state>", methods=["GET", "POST"])
 @login_required
 @verified_user
@@ -706,27 +897,38 @@ def managePosts(state):
             clean_lines = []
             for line in lines:
                 # Remove hashtags from each line
-                clean_words = [word for word in line.split() if not word.startswith("#")]
+                clean_words = [
+                    word for word in line.split() if not word.startswith("#")
+                ]
                 clean_lines.append(" ".join(clean_words))
 
             post = "\n".join(clean_lines)  # keeps original line breaks
-            datetime_now = datetime.utcnow()  # '2025-10-30T14:22:15'
+            datetime_now = datetime.now(UTC)  # '2025-10-30T14:22:15'
             new_tweet = TweetData(
                 content=post,
                 hashtags=hashtags,
                 mentions=mentioned_objects,
-                user_id= current_user.id,
+                user_id=current_user.id,
                 timestamp=datetime_now,
             )
             db.session.add(new_tweet)
             db.session.commit()
-            return jsonify({"status": "success", "post_id": new_tweet.id, "username": current_user.username})
+            return jsonify(
+                {
+                    "status": "success",
+                    "post_id": new_tweet.id,
+                    "username": current_user.username,
+                }
+            )
         elif state in [2, 3]:  # Edit or delete post
             data = request.get_json()
             post_id = data.get("post_id")
             post = db.session.get(TweetData, post_id)
             if post:
-                if (datetime.utcnow() - post.timestamp < timedelta(minutes=3) and post.user.id == current_user.id):
+                if (
+                    datetime.now(UTC) - post.timestamp < timedelta(minutes=3)
+                    and post.user.id == current_user.id
+                ):
                     if state == 2:  # Update post content
                         new_content = data.get("content")
                         post.content = new_content
@@ -748,7 +950,7 @@ def comments(post_id):
     st = data.get("state", 0)
     content = data.get("content", "").strip()
     if st == 1:  # Add new comment
-        mentioned_objects  = mentions_parser(content)
+        mentioned_objects = mentions_parser(content)
         new_comment = Comments(
             content=content,
             tweet_id=post_id,
@@ -763,15 +965,20 @@ def comments(post_id):
         post.comments += 1
         db.session.commit()
         comments = (
-        db.session.execute(
-            db.select(Comments)
-            .where(Comments.tweet_id == post_id)
-            .order_by(Comments.likes.desc())
+            db.session.execute(
+                db.select(Comments)
+                .where(Comments.tweet_id == post_id)
+                .order_by(Comments.likes.desc())
+            )
+            .scalars()
+            .all()
         )
-        .scalars()
-        .all()
+        return render_template(
+            "comments.html",
+            comments=comments[:15],
+            post=post,
+            comment_id=new_comment.id,
         )
-        return render_template("comments.html", comments=comments[:15], post=post, comment_id=new_comment.id)
     db.session.commit()
     comments = (
         db.session.execute(
@@ -781,7 +988,7 @@ def comments(post_id):
         )
         .scalars()
         .all()
-        )
+    )
     post = db.session.execute(
         db.select(TweetData).where(TweetData.id == post_id)
     ).scalar()
@@ -860,7 +1067,7 @@ def showPosts(state, id):
             .all()
         )
 
-    current_time = datetime.utcnow()  # '2025-10-30T14:22:15'
+    current_time = datetime.now(UTC)  # '2025-10-30T14:22:15'
     return render_template(
         "posts.html",
         posts=posts,
@@ -919,7 +1126,14 @@ def post_Action(state):
             post.shares = max(post.shares - 1, 0)
         db.session.commit()
         return jsonify({"status": "success", "shares": post.shares})
-    return jsonify({"current_user_name": current_user.name, "likes": post.likes, "user_id": post.user_id, "reposts": post.retweets})
+    return jsonify(
+        {
+            "current_user_name": current_user.name,
+            "likes": post.likes,
+            "user_id": post.user_id,
+            "reposts": post.retweets,
+        }
+    )
 
 
 @app.route("/Manzoid-AI", methods=["GET", "POST"])
@@ -1074,7 +1288,14 @@ def follows(id, st):
         follower_count = db.session.execute(
             db.select(func.count(Follow.id)).where(Follow.following_id == id)
         ).scalar()
-        return jsonify({"status": "success", "follower_id": current_user.id, "follower_name": current_user.name, "followersCount": follower_count})
+        return jsonify(
+            {
+                "status": "success",
+                "follower_id": current_user.id,
+                "follower_name": current_user.name,
+                "followersCount": follower_count,
+            }
+        )
     return jsonify({"status": "failed"})
 
 
@@ -1094,6 +1315,7 @@ def profile(id):
         is not None
     )
     return render_template("profile.html", user=user, is_following=is_following)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
