@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Manzoid AI</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='../static/css/AI.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/AI.css') }}">
 </head>
 
 <body>
@@ -13,7 +13,7 @@
         <!-- Main Content Area -->
         <div class="main-content">
             <div class="ai-header">
-                <img src="../static/assets/logo.png" alt=""> Manzoid AI
+                <img src="{{ url_for('static', filename='assets/logo.png') }}" alt=""> Manzoid AI
             </div>
 
             <div id="chat-box" class="chat-box">
@@ -31,6 +31,7 @@
 
     </div>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script>
         $(".chat-input input").keydown(function (e) {
             if (e.key === "Enter") {

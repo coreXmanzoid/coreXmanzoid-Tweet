@@ -20,18 +20,18 @@
             <div class="col-md-6 col-sm-12">
                 <div class="myText text-center">
                     <h1>Join Our Platform & share your Tweets</h1>
-                    <a href="{{ url_for('google_login') }}">
+                    <a href="{{ url_for('auth.google_login') }}">
                         <button><img src="{{ url_for('static', filename='assets/googleLogo.png') }}" class="img-fluid">Sign up with Google</button>
                     </a>
                     <button><img src="{{ url_for('static', filename='assets/appleLogo.png') }}" class="img-fluid">Sign up with Apple</button>
                     <h4>Or</h4>
-                    <a href="{{ url_for('signup', st=0)}}"><button>Create New Account</button></a>
+                    <a href="{{ url_for('auth.signup', st=0)}}"><button>Create New Account</button></a>
                     <h6>By signing up, you agree to our <a href="" style="color: red" >Terms of Service</a> and <a href="" style="color: red;">Privacy
                         Policy</a>.
                     </h6>
                     
                     <h6><br>Already Have Account?</h6>
-                    <a href="{{ url_for('login') }}"><button>Log in</button></a>
+                    <a href="{{ url_for('auth.login') }}"><button>Log in</button></a>
                 </div>
 
             </div>
