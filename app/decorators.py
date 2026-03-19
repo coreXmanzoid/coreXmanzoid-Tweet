@@ -6,7 +6,7 @@ def verified_user(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
 
-        if current_user.status != "Verified":
+        if current_user.status != "VERIFIED":
             return "Email not verified. Access Denied.", 403
 
         return func(*args, **kwargs)
@@ -17,7 +17,7 @@ def pro_user(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
 
-        if current_user.status != "Pro":
+        if current_user.status != "PRO":
             return "Pro user required. Access Denied.", 403
 
         return func(*args, **kwargs)

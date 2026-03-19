@@ -76,20 +76,5 @@
         $(this).text(display);
     });
 
-    // real all notification after page load
-    $(document).ready(function () {
-        userId = $(".notifications").data("userid");
-        $.ajax({
-            url: `/notifications/mark_read/${userId}`,
-            success: function (response) {
-                user_id = $(".div1").attr("class").split(" ")[1];
-                checkForNotifications(user_id);
-                console.log("Notifications marked as read:", response);
-            },
-            error: function (err) {
-                console.error("Error marking notifications as read:", err);
-            }
-        });
-    });
 
 </script>

@@ -50,7 +50,7 @@ def notifications():
 
 @notification_bp.route("/notifications/mark_read/<int:user_id>")
 @login_required
-@verified_user
+# @verified_user
 def mark_as_read(user_id):
 
     if user_id != current_user.id:

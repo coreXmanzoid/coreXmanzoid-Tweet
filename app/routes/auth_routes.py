@@ -37,10 +37,10 @@ def verify_email_with_token(token):
     if not user:
         return "Verification link expired or invalid.", 400
 
-    if user.status == "Verified":
+    if user.status == "VERIFIED":
         return "Email already verified."
 
-    user.status = "Verified"
+    user.status = "VERIFIED"
     db.session.commit()
 
     return redirect(url_for("main.homepage"))

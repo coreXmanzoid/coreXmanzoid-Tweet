@@ -11,7 +11,7 @@ from app.routes.auth_routes import auth_bp
 from app.routes.main_routes import main_bp
 from app.routes.comment_routes import comment_bp
 from app.routes.account_routes import account_bp
-
+from app.routes.setting_routes import setting_bp
 def create_app():
 
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -37,6 +37,7 @@ def create_app():
     app.register_blueprint(main_bp)
     app.register_blueprint(comment_bp)
     app.register_blueprint(account_bp)
+    app.register_blueprint(setting_bp)
 
     with app.app_context():
         from app import models

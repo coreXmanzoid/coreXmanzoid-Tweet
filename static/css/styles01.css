@@ -31,6 +31,7 @@ body {
 }
 
 .verification-box {
+    position: relative; /* Important for absolute positioning of the cross */
     background: #DEDED1;
     padding: 40px;
     border-radius: 12px;
@@ -43,12 +44,21 @@ body {
         font-size: 25px;
         margin-bottom: 15px;
     }
-
     p {
         color: #46423b;
         font-size: 16px;
     }
 
+    small {
+        position: absolute;
+        top: 0px;
+        margin: 0;
+        left: 9px;
+        font-size: 30px;
+        font-weight: bold;
+        cursor: pointer;
+        color: #F94818; /* cross color */
+    }
 }
 
 .btn-loader {
@@ -381,120 +391,161 @@ button:hover {
 
 .profile {
     background-color: #DEDED1 !important;
+}
 
-    .info {
-        position: relative;
-        bottom: 50px;
-        left: 10px;
+.profile .info {
+    position: relative;
+    bottom: 50px;
+    left: 10px;
+}
+.profile .profile-pic-wrapper {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+}
 
-        .profile-pic-wrapper {
-            position: relative;
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            overflow: hidden;
-            cursor: pointer;
-        }
+.profile .profile-pic {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s ease;
+    border-radius: 50%;
+}
 
-        .profile-pic {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: opacity 0.3s ease;
-            border-radius: 50%;
-        }
+.profile .profile-pic-overlay {
+    position: absolute;
+    inset: 0;
+    background: #deded190;
+    color: #F94818;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    font-size: 14px;
+    transition: opacity 0.3s ease;
+}
 
-        .profile-pic-overlay {
-            position: absolute;
-            inset: 0;
-            background: #deded190;
-            color: #F94818;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            font-size: 14px;
-            font-weight: 600;
-            transition: opacity 0.3s ease;
-        }
+.profile #profileInput {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
 
-        #profileInput {
-            position: absolute;
-            inset: 0;
-            opacity: 0;
-            cursor: pointer;
-        }
+.profile .profile-pic-wrapper:hover .profile-pic {
+    opacity: 0.4;
+}
 
-        .profile-pic-wrapper:hover .profile-pic {
-            opacity: 0.4;
-        }
+.profile .profile-pic-wrapper:hover .profile-pic-overlay {
+    opacity: 1;
+}
 
-        .profile-pic-wrapper:hover .profile-pic-overlay {
-            opacity: 1;
-        }
+.profile .info i {
+    color: #3b82f6;
+}
 
-        i {
-            color: #3b82f6;
-        }
+.profile .info small {
+    color: #2e2a22;
+    font-weight: 600;
+}
 
-        small {
-            color: #2e2a22;
-            font-weight: 600;
-        }
+.profile .info h5 {
+    color: #2e2a22;
+    font-weight: 600;
+    font-size: 18px;
+    i{
+        font-size: 15px;
+    }
+}
 
-        h5 {
-            color: #2e2a22;
-            font-weight: 600;
-        }
+.profile .info h6 {
+    color: #F94818;
+    font-size: 16px;
+    font-weight: 700;
+}
 
-        h6 {
-            color: #F94818;
-            font-size: 17px;
-            font-weight: 700;
-        }
+/* Audience */
+
+.profile .audience {
+    position: relative;
+}
+
+.profile .audience small {
+    position: absolute;
+    top: 2px;
+    right: 5px;
+    text-decoration: underline;
+    color: #2e2a22;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.profile .audience-box {
+    display: flex;
+    justify-content: center;
+    margin-top: 14%;
+    gap: 10px;
+}
+
+.audience-box strong{
+    font-size: 14px;
+}
+
+/* Mobile Fix */
+
+@media (max-width: 991px) {
+
+    .profile .info {
+        bottom: 0;
+        margin-top: -40px;
     }
 
-    .audience {
-
-        small {
-            position: relative;
-            left: 55%;
-            bottom: 5%;
-            text-decoration: underline;
-            color: #2e2a22;
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 30px;
-            cursor: pointer;
-        }
-
-        strong {
-            font-weight: 600;
-            margin: 0px 5px;
-            position: relative;
-            top: 22%;
-            cursor: pointer;
-            padding-top: 10px;
-            font-size: 15px;
-        }
+    .profile .audience small {
+        display: none;
     }
 
-    .profileOptions {
-
-        display: flex;
-        justify-content: space-between;
-
-        hr {
-            transform: rotate(0deg);
-            height: 40px;
-            margin: 3px 8px;
-            border: none;
-            border-right: 2px solid #a0a090;
-            opacity: 1;
-        }
-
+    .profile .audience-box {
+        margin-top: 5px;
+        margin-bottom: 13px;
+        justify-content: flex-start;
     }
+}
+
+/* Profile Options */
+
+.profile .profileOptions {
+    display: flex;
+    justify-content: space-between;
+}
+
+.profile .profileOptions hr {
+    transform: rotate(0deg);
+    height: 40px;
+    margin: 3px 8px;
+    border: none;
+    border-right: 2px solid #a0a090;
+    opacity: 1;
+}
+
+.profileOptions {
+
+    display: flex;
+    justify-content: space-between;
+
+    hr {
+        transform: rotate(0deg);
+        height: 40px;
+        margin: 3px 8px;
+        border: none;
+        border-right: 2px solid #a0a090;
+        opacity: 1;
+    }
+
 }
 
 
@@ -516,6 +567,7 @@ button:hover {
 
 
 .explore-tab,
+.profile-tab,
 .ai-bar {
     padding-top: 20px;
     grid-row: span 3 / span 3;

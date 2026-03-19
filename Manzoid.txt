@@ -1,3 +1,132 @@
 if user delete a post then we have to clear all his likes repossts, notifications and comments from database
 scrollTo(0,0);
 newpost double click problem
+
+
+
+Spawn a subagent to exSpawn a subagent to explore this repo.
+
+
+
+
+
+
+
+
+
+setting
+---
+
+## **1. Account Information**
+
+* **Profile Info**
+
+  * Name / Username
+  * Email address
+  * Phone number
+  * Profile picture
+  * Bio / About me
+* **Password Management**
+
+  * Change password
+  * Two-factor authentication (2FA)
+  * Security questions (optional)
+
+---
+
+## **2. Privacy & Security**
+
+* **Account Visibility**
+
+  * Public / Private account toggle
+* **Blocked & Muted Users**
+
+  * List and manage blocked users
+  * List and manage muted users
+* **Login Activity**
+
+  * View devices and locations logged in
+  * Logout from all devices
+* **Data Sharing**
+
+  * Allow or restrict third-party apps
+  * Ad personalization preferences
+
+---
+
+## **3. Notifications**
+
+* Email notifications
+* Push notifications
+* SMS notifications (if applicable)
+* Customize what type of activity triggers a notification:
+
+  * New followers
+  * Mentions
+  * Likes / Retweets / Comments
+  * Reposts
+
+---
+
+## **4. Content & Display**
+
+* Theme / Appearance
+
+  * Light / Dark / System default
+  * Font size / density
+* Language preferences
+* Accessibility settings
+
+  * High contrast mode
+  * Screen reader support
+
+---
+
+## **5. Connected Apps & Devices**
+
+* OAuth / social login integrations (Google, Facebook, Apple, etc.)
+* Connected third-party apps
+* Revoke app access
+
+---
+
+## **6. Data & Activity**
+
+* Download account data
+* View your activity history
+* Clear search history
+* Manage posts (delete multiple / archive)
+
+---
+
+## **7. Account Actions**
+
+* Deactivate account
+* Delete account permanently
+* Link or unlink email/phone
+
+---
+
+## **8. Support & Help**
+* Download account data
+* Light / Dark / System default
+* Report a problem
+* FAQs
+* Contact support
+
+---
+
+### **UI/UX Tips**
+
+* **Organize by tabs or sections** – avoids overwhelming the user.
+* **Use toggles for simple on/off settings** (privacy, notifications).
+* **Provide confirmations** for sensitive actions (password change, account deletion).
+* **Show “last updated” timestamps** for changes.
+* Keep **mobile-friendly design** in mind with collapsible sections.
+* Include **save/cancel buttons** at the bottom or inline.
+
+---
+
+If you want, I can **sketch a wireframe layout** of the settings page for a Twitter-like app with all these sections, so you’ll have a ready-to-implement visual structure. It will include tabs, toggles, and key fields for a responsive design.
+
+Do you want me to do that?

@@ -8,59 +8,94 @@
     </div>
     <img class="img-fluid ps-5 w-75 ms-5 " src="../static/assets/logo1.png">
     <div class="profile row">
-        <div class="info col-lg-6" data-user-id="{{user.id}}">
+
+        <div class="info col-lg-6 col-md-12" data-user-id="{{user.id}}">
+
             <div class="profile-pic-wrapper">
                 <img class="profile-pic"
                     src="{{ user.profile_image_url if user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
-                    style="border-radius:50px;border: 2px solid #DEDED1;" width="100" height="100" class="m-2">
+                    style="border-radius:50px;border: 2px solid #DEDED1;" width="100" height="100">
+
                 {% if current_user.id == user.id %}
                 <div class="profile-pic-overlay">Update</div>
                 <input title="Update Profile Picture" type="file" name="profile" id="profileInput">
                 {% endif %}
-                <br>
             </div>
-            <small>
-                <h5 style="display: inline;"><b>{{user.name}}</b></h5><i class="bi bi-patch-check-fill m-1"></i>
-            </small>
+
+            <h5>
+                <b>{{user.name}}</b>
+                {% if user.status == "PRO"%}
+                <i class="bi bi-patch-check-fill m-1"></i>
+                {% endif %}
+            </h5>
+
             <h6>@{{user.username}}</h6>
+
             <small>
                 <i class="bi bi-calendar-heart m-1"></i>
                 <span id="birthDate">{{ user.birth_date }}</span>
-            </small> <br>
-            <small><em>Busy in Coding...</em></small>
-        </div>
-        <div class="audience {{user.id}} col-lg-6 pt-3">
-            {% if current_user.id == user.id %}
-            <small class="edit-profile">Edit Profile</small> <br>
-            {% elif is_following %}
-            <small class="Following ps-3">Following</small> <br>
-            {% else %}
-            <small class="Follow ps-4">Follow</small> <br>
-            {% endif %}
-            <strong class="followers {{user.id}}" style="color: #F94818;">{{user.followers | length}} Followers</strong>
-            <strong class="following {{user.id}}">{{user.following | length}} following</strong>
-        </div>
-        <hr style="margin:0px;">
-        <div class="ProfileOptions {{user.id}}">
-            {% if current_user.id == user.id %}
-            <a>Posts</a>
-            <hr>
-            <a>Likes</a>
-            <hr>
-            <a>Reposts</a>
-            <hr>
-            <a>Dummy</a>
-            {% else %}
-            <a>Posts</a>
-            <hr>
-            <a>Reposts</a>
-            <hr>
-            <a>Dummy</a>
-            {% endif %}
-        </div>
-    </div>
+            </small>
 
-    <hr style="margin: 0px 0px 15px 0px;">
+            <br>
+
+            <small><em>Busy in Coding...</em></small>
+
+        </div>
+
+
+        <div class="audience {{user.id}} col-lg-6 col-md-12 pt-3">
+
+            {% if current_user.id == user.id %}
+            <small class="edit-profile">Edit Profile</small>
+            {% elif is_following %}
+            <small class="Following ps-3">Following</small>
+            {% else %}
+            <small class="Follow ps-4">Follow</small>
+            {% endif %}
+
+            <div class="audience-box">
+                <strong class="followers {{user.id}}" style="color: #F94818;">
+                    {{user.followers | length}} Followers
+                </strong>
+
+                <strong class="following {{user.id}}">
+                    {{user.following | length}} Following
+                </strong>
+            </div>
+
+        </div>
+
+    </div>
+    <hr style="margin:0px;">
+    <div class="ProfileOptions {{user.id}}">
+        {% if current_user.id == user.id %}
+        <a>Posts</a>
+        <hr>
+        <a>Likes</a>
+        <hr>
+        <a>Reposts</a>
+        <hr>
+        <a>Dummy</a>
+        {% else %}
+        <a>Posts</a>
+        <hr>
+        <a>Reposts</a>
+        <hr>
+        <a>Dummy</a>
+        {% endif %}
+    </div>
+</div>
+
+<hr style="margin: 0px 0px 15px 0px;">
+{% if current_user.status != "PRO" %}
+<div class="profile-tab" style="padding: 0;">
+    <div class="premium">
+        <h4>You aren't Verified Yet <i class="bi bi-patch-check-fill m-1" style="font-size: 18px;"></i></h4>
+        <p>Get verified for boosted replies, analytics, ad-free browsing, and more. Upgrade your profile now.</p>
+        <button style="width: 140px">Get Verified</button>
+    </div>
+</div>
+{% endif %}
 </div>
 <script>
     $(".backtohome").click(Backtohome);

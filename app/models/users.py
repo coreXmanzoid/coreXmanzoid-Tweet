@@ -39,7 +39,7 @@ class UserData(UserMixin, db.Model):
         MutableList.as_mutable(JSON), default=list
     )
 
-    status: Mapped[str] = mapped_column(String, default="UnVerified")
+    status: Mapped[str] = mapped_column(String, default="UNVERIFIED")
 
     # Relationships
     posts = relationship("Post", back_populates="user")

@@ -135,6 +135,22 @@ $(".switch-account-link").click(function () {
     }
 });
 
+// real all notification after page load
+function markAsRead() {
+    userId = $(".notifications").data("userid");
+    $.ajax({
+        url: `/notifications/mark_read/${userId}`,
+        success: function (response) {
+            user_id = $(".div1").attr("class").split(" ")[1];
+            checkForNotifications(user_id);
+            console.log("Notifications marked as read:", response);
+        },
+        error: function (err) {
+            console.error("Error marking notifications as read:", err);
+        }
+    });
+};
+
 // Notification tab functionality
 $(".notifications-button").click(function () {
     $(".notifications-tab").load("/notifications");
@@ -161,6 +177,7 @@ $(".notifications-button").click(function () {
                     eval(code);
                 }
             });
+            markAsRead();
         }
     });
 });

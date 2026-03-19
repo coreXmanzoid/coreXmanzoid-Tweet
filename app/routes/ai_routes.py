@@ -8,8 +8,7 @@ ai_bp = Blueprint("ai", __name__)
 
 @ai_bp.route("/Manzoid-AI", methods=["GET", "POST"])
 @login_required
-# @pro_user
-@verified_user
+# @verified_user
 def manzoid_ai():
     
     if request.method == "POST":
