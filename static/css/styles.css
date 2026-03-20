@@ -57,7 +57,8 @@ button:hover {
 }
 
 #logoImage {
-    width: 500px;
+    width: 450px;
+    height: 400px;
 }
 
 #logoTitle {
@@ -70,7 +71,7 @@ button:hover {
 }
 
 #smLogo {
-    width: 100px;
+    width: 450px;
 }
 
 .signup-page {
@@ -169,4 +170,7 @@ button:hover {
 
 .logoimg {
     width: 200px;
+    margin-bottom: 20%;
+    background-color: #FBF3D1;
+    border-radius: 0 20px 0 20px;    
 }

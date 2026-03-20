@@ -154,6 +154,14 @@ button:hover {
     height: 100vh;
     overflow-y: auto;
 }
+.logostyle img[alt='icon']{
+    height: 60px;
+    width: 60px;
+}
+.logostyle img[alt='wordle']{
+    height: 60px;
+    width: 160px;
+}
 
 .notification-dot {
     position: absolute;

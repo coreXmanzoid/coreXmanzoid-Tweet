@@ -38,7 +38,6 @@ def send_mention_notifications():
 
 @post_bp.route("/managePosts/<int:state>", methods=["POST"])
 @login_required
-@verified_user
 def manage_posts(state):
     data = request.get_json()
 
@@ -112,7 +111,6 @@ def show_posts(state, id):
 
 @post_bp.route("/likePost/<int:state>", methods=["POST"])
 @login_required
-@verified_user
 def post_action(state):
 
     data = request.get_json()

@@ -25,10 +25,9 @@
         <div class="div1 {{current_user.id}}">
             <div class="d-none d-sm-block">
                 <div class="d-flex flex-column flex-shrink-0 p-3 bg-light me-0" style="width: 280px; height: 100vh;">
-                    <a href="/"
-                        class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
-                        <img class="img-fluid w-25" src="{{ url_for('static', filename='assets/logo.png') }}" alt="">
-                        <span class="fs-4 logotitle">coreXmanzoid</span>
+                    <a  class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none logostyle">
+                        <img class="img-fluid" src="{{ url_for('static', filename='assets/logo_icon.png') }}" alt="icon">
+                        <img src="{{ url_for('static', filename='assets/logo_wordle.png')}}" class="img-fluid" alt="wordle">
                     </a>
                     <hr>
                     <ul class="nav nav-pills flex-column mb-auto">

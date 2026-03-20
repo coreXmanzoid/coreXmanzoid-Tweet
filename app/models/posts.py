@@ -17,9 +17,8 @@ class Post(db.Model):
     mentions: Mapped[JSON] = mapped_column(JSON, default=list)
 
     timestamp: Mapped[datetime] = mapped_column(
-        # Store UTC as naive to avoid offset-aware/naive mixing
-        DateTime, nullable=False, default=lambda: datetime.now(UTC)
-    )
+    DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+)
 
     likes: Mapped[int] = mapped_column(Integer, default=0)
     comments: Mapped[int] = mapped_column(Integer, default=0)

@@ -7,6 +7,13 @@ from app.utils.mentions import mentions_parser
 class PostService:
 
     @staticmethod
+    def _normalize_timestamp(timestamp):
+        if timestamp.tzinfo is None:
+            return timestamp.replace(tzinfo=UTC)
+
+        return timestamp.astimezone(UTC)
+
+    @staticmethod
     def create_post(content, user_id):
 
         hashtags = [word for word in content.split() if word.startswith("#")]
@@ -48,7 +55,9 @@ class PostService:
 
     @staticmethod
     def can_modify(post, user_id):
+        post_timestamp = PostService._normalize_timestamp(post.timestamp)
+
         return (
-            datetime.now(UTC) - post.timestamp < timedelta(minutes=3)
+            datetime.now(UTC) - post_timestamp < timedelta(minutes=3)
             and post.user.id == user_id
         )

@@ -12,7 +12,7 @@ def home():
 @login_required
 def homepage():
 
-    is_user_verified = current_user.status == "Verified" or current_user.status == "ProMember"
+    is_user_verified = current_user.status == "VERIFIED" or current_user.status == "PRO"
     return render_template(
         "home.html",
         is_user_verified=is_user_verified

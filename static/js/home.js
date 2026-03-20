@@ -100,9 +100,9 @@ $(".verification-box button").click(function () {
                 `);
                 if ($("#verification-status").length === 0) {
                     button.after(`
-                <small id="verification-status" class="verification-tag">
+                <strong id="verification-status" class="verification-tag">
                     Verification email sent! Please check your inbox.
-                </small>
+                </strong>
             `);
                 }
 

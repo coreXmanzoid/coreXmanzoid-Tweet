@@ -31,7 +31,7 @@ class AuthService:
             username=username,
             email=email,
             birth_date=birth_date,
-            number=phone,
+            contact=phone,
             password=generate_password_hash(
                 password, method="pbkdf2:sha256", salt_length=8
             ),
