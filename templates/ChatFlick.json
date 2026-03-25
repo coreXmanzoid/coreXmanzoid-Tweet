@@ -1,0 +1,273 @@
+{
+    "app": {
+        "name": "ChatFlick by coreXmanzoid",
+        "description": "A Flask-based social microblogging web application with email and Google authentication, follower relationships, post creation and engagement, comments, notifications, profile management, settings navigation, and a Groq-powered AI assistant."
+    },
+    "modules": {
+        "authentication": {
+            "description": "Handles account registration, credential-based login, Google OAuth login, password reset, logout, and email-based identity flows.",
+            "user_actions": [
+                "Sign up with name, username, phone, email, birth date, and password",
+                "Check username availability during signup",
+                "Log in with username or email plus password",
+                "Log in with Google OAuth",
+                "Request a password reset link",
+                "Reset password using a tokenized link",
+                "Log out from the current session"
+            ],
+            "system_responses": [
+                "Creates users with hashed passwords and default UNVERIFIED status",
+                "Rejects duplicate emails and duplicate usernames",
+                "Requires CAPTCHA validation for signup, login, and password reset request flows",
+                "Creates authenticated sessions after successful credential or Google login",
+                "Returns a generic success message for password reset requests whether the email exists or not",
+                "Redirects users to landing, login, or home pages depending on the flow"
+            ],
+            "edge_cases": [
+                "Password reset and email verification tokens expire after 20 minutes",
+                "Google login fails if Google user info does not contain an email",
+                "Google-created accounts are stored with status 'Verified' instead of exact 'VERIFIED', which can conflict with strict verification checks",
+                "Signup username availability returns status 'abondonded' when the username exists",
+                "Logout behavior changes by route state value rather than by a dedicated session policy"
+            ]
+        },
+        "membership_and_verification": {
+            "description": "Manages user status tiers and feature gating across the application, including email verification and future premium or pro access.",
+            "user_actions": [
+                "Request a verification email after login",
+                "Verify email using a signed token link",
+                "Access verified-only features such as follow, comment, mention notification, and profile image upload",
+                "View premium or verified upgrade prompts in the UI"
+            ],
+            "system_responses": [
+                "Transitions verified users from UNVERIFIED to VERIFIED",
+                "Shows an email verification overlay on the home screen for unverified users",
+                "Blocks verified-only routes with a 403 response when the status is not exactly VERIFIED",
+                "Treats PRO users as verified on the home page experience"
+            ],
+            "edge_cases": [
+                "The verification guard only accepts exact status 'VERIFIED' and rejects 'PRO' and 'Verified' in protected routes",
+                "Some routes are protected only by login and not by verification status",
+                "A pro_user decorator exists but is not actively applied to routes",
+                "Premium and verified upgrade UI exists, but there is no implemented backend upgrade or billing flow"
+            ]
+        },
+        "account_discovery": {
+            "description": "Supports discovery of accounts through random suggestions, follower/following views, and username-based search.",
+            "user_actions": [
+                "Load random account suggestions",
+                "Search accounts by username substring",
+                "View the accounts a user follows",
+                "View the followers of a user"
+            ],
+            "system_responses": [
+                "Returns up to 10 random user accounts for discovery",
+                "Returns a target user's follower or following lists based on route state",
+                "Searches usernames using partial matching and ranks results by follower count",
+                "Returns current user's following IDs so the UI can mark already-followed accounts"
+            ],
+            "edge_cases": [
+                "Search only targets usernames, not names or other profile fields",
+                "If search results exceed 10, a random sample of 10 is returned",
+                "Follower and following exploration depends on a valid target user ID",
+                "Route behavior is state-string driven and falls back to search logic for unknown non-special states"
+            ]
+        },
+        "social_graph": {
+            "description": "Manages follow and unfollow relationships between users and exposes follower counts for profile and discovery views.",
+            "user_actions": [
+                "Follow another user",
+                "Unfollow another user",
+                "View follower and following counts on profiles"
+            ],
+            "system_responses": [
+                "Creates a Follow relationship when following",
+                "Deletes the Follow relationship when unfollowing",
+                "Returns updated follower counts and current user identity data after follow state changes"
+            ],
+            "edge_cases": [
+                "Following and unfollowing require the user to be verified",
+                "There is no explicit prevention for self-following",
+                "There is no explicit prevention for duplicate follow rows",
+                "Unfollowing a non-existent relationship silently succeeds without error"
+            ]
+        },
+        "posting": {
+            "description": "Handles post creation, editing, deletion, hashtag extraction, mention parsing, and author ownership checks.",
+            "user_actions": [
+                "Create a new text post",
+                "Edit a recent post",
+                "Delete a recent post",
+                "Mention other users inside a post"
+            ],
+            "system_responses": [
+                "Rejects empty post content",
+                "Rejects post creation when the submitted user_id does not match the logged-in user",
+                "Extracts hashtags into a separate field and removes hashtag tokens from stored post content",
+                "Parses @mentions into structured user references",
+                "Allows edit and delete only for the post owner within a 3-minute window",
+                "Returns the created post ID and author username after successful creation"
+            ],
+            "edge_cases": [
+                "Backend does not enforce the frontend 180-character post limit",
+                "Editing a post does not re-parse hashtags or mentions",
+                "Post modification failure returns generic status messages instead of consistent HTTP error codes",
+                "Missing posts during edit or delete return a non-standard error payload"
+            ]
+        },
+        "feed": {
+            "description": "Builds post collections for the home timeline, profile timeline, following feed, liked posts, reposted posts, and random discovery feed.",
+            "user_actions": [
+                "Load the default random home feed",
+                "Load posts from followed accounts",
+                "Load posts created by a specific profile",
+                "Load posts previously liked by a user",
+                "Load posts previously reposted by a user"
+            ],
+            "system_responses": [
+                "Returns profile posts ordered by newest first",
+                "Returns followed-account posts ordered by newest first and limited to 10",
+                "Returns liked posts using the user's liked_posts JSON list",
+                "Returns reposted posts using the user's reposted_posts JSON list",
+                "Returns random posts for discovery when no specialized feed is requested"
+            ],
+            "edge_cases": [
+                "Following feed returns an empty list when the user follows nobody",
+                "Liked and reposted feeds return empty when the tracking arrays are empty",
+                "Random feed is not personalized",
+                "Reposted feed returns both posts and the reposting username for template rendering"
+            ]
+        },
+        "engagement": {
+            "description": "Handles likes, reposts, shares, and comment likes as lightweight engagement actions on content.",
+            "user_actions": [
+                "Like or unlike a post",
+                "Repost or undo repost on a post",
+                "Share or unshare a post",
+                "Like or unlike a comment"
+            ],
+            "system_responses": [
+                "Increments or decrements post like counts and tracks user-liked post IDs",
+                "Increments or decrements repost counts and tracks user-reposted post IDs",
+                "Increments or decrements share counts without per-user uniqueness tracking",
+                "Increments or decrements comment like counts"
+            ],
+            "edge_cases": [
+                "Post likes and reposts are unique per user because they are tracked in user JSON arrays",
+                "Comment likes are not uniquely tracked per user and can be repeatedly toggled without historical ownership checks",
+                "Counters are floored at zero on decrement operations",
+                "Missing posts or comments are not defensively handled before mutation, which can lead to runtime errors",
+                "Self-like, self-repost, and self-share are not blocked at the backend"
+            ]
+        },
+        "comments": {
+            "description": "Supports threaded post discussion through comment retrieval and comment creation with mention parsing.",
+            "user_actions": [
+                "Open a post's comment thread",
+                "Add a comment to a post",
+                "Mention other users inside a comment"
+            ],
+            "system_responses": [
+                "Returns the target post and up to 15 comments sorted by like count",
+                "Creates a new comment linked to the current user and target post",
+                "Parses mentions from comment content into structured user references",
+                "Increments the parent post's comment counter when a comment is added"
+            ],
+            "edge_cases": [
+                "Adding comments requires the user to be verified",
+                "Backend does not reject empty comment content before persistence",
+                "Comment retrieval is capped to the first 15 sorted results with no pagination",
+                "Invalid post handling is weak during comment creation and depends on database integrity behavior"
+            ]
+        },
+        "notifications": {
+            "description": "Provides in-app and push notifications for follower broadcasts, single-recipient events, mention alerts, unread tracking, and token storage.",
+            "user_actions": [
+                "Save a Firebase push token",
+                "Open the notifications inbox",
+                "Mark all notifications as read",
+                "Check unread notification count",
+                "Send follower-broadcast notifications",
+                "Send single-recipient notifications",
+                "Send mention notifications for posts and comments"
+            ],
+            "system_responses": [
+                "Stores notification records with sender, recipient, title, message, type, identifier, and read state",
+                "Returns the 15 most recent notifications for the current user",
+                "Marks all notifications for a user as read",
+                "Returns unread notification counts",
+                "Deduplicates generic notifications by type, identifier, and recipient via update_or_create",
+                "Attempts Firebase push delivery when requested and when configuration and recipient tokens are available",
+                "Skips self-notifications in single-recipient notification flow"
+            ],
+            "edge_cases": [
+                "Mention notifications do not use deduplication and can create repeated entries",
+                "Unread-count lookup does not verify that the requested user ID matches the logged-in user",
+                "Push delivery silently fails when Firebase is not initialized or the recipient lacks an FCM token",
+                "Mark-as-read enforces ownership, but other notification routes rely on partial sender checks",
+                "Follower-broadcast notifications exclude the sender from receiving their own broadcast"
+            ]
+        },
+        "profile": {
+            "description": "Displays user profiles, exposes follower and following counts, and supports profile picture uploads through Cloudinary.",
+            "user_actions": [
+                "Open a user profile",
+                "Open the new post composer via profile route with ID 0",
+                "Upload a new profile picture for the current account",
+                "Inspect follower and following counts",
+                "Switch between profile post tabs in the UI"
+            ],
+            "system_responses": [
+                "Returns profile details along with whether the current user follows the target profile",
+                "Returns the new post template when profile ID is 0",
+                "Uploads the selected profile image to Cloudinary with overwrite and resize transformations",
+                "Persists the uploaded image URL to the user record"
+            ],
+            "edge_cases": [
+                "Profile image upload requires login, verified status, file presence, and ownership match",
+                "Uploading with no file or an empty filename returns an error",
+                "Uploading for a non-existent user returns a not-found error",
+                "Only the image URL is editable; broader profile editing is not implemented in the backend"
+            ]
+        },
+        "settings": {
+            "description": "Provides section-based settings page navigation for account and support views without backend persistence for preference updates.",
+            "user_actions": [
+                "Open the settings page",
+                "Switch between settings sections such as profile-info, account-info, change-password, privacy-setting, notifications-setting, support, and delete-account"
+            ],
+            "system_responses": [
+                "Redirects the base settings route to the profile-info section",
+                "Renders the settings template when a valid section is requested",
+                "Redirects invalid sections back to the default profile-info section"
+            ],
+            "edge_cases": [
+                "There are no backend endpoints for saving settings changes",
+                "Delete-account exists as a settings section label but has no implemented deletion logic",
+                "Settings is currently a navigation shell rather than a full account management module"
+            ]
+        },
+        "ai_assistant": {
+            "description": "Exposes two chat endpoints powered by Groq: an authenticated assistant with short per-user memory and a public stateless chat endpoint.",
+            "user_actions": [
+                "Open the Manzoid-AI page after login",
+                "Send an authenticated AI message with user_id and message",
+                "Send a public AI message to the stateless API endpoint"
+            ],
+            "system_responses": [
+                "Rejects missing or empty messages",
+                "Limits authenticated chat messages to 130 characters",
+                "Limits public chat messages to 100 characters",
+                "Uses a short in-memory conversation history of the last 2 exchanges for authenticated chat",
+                "Returns generated replies from the Groq model",
+                "Returns a 503-style error response when the AI service is unavailable"
+            ],
+            "edge_cases": [
+                "Authenticated AI route requires user_id in the payload but does not verify that it matches current_user.id",
+                "Conversation history is stored in process memory and resets on app restart",
+                "Verified-user and pro-user gating are present in codebase concepts but not actively enforced on AI routes",
+                "AI availability depends on external API configuration and network connectivity"
+            ]
+        }
+    }
+}

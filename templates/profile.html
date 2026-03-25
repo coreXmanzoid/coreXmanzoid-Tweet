@@ -31,14 +31,27 @@
 
             <h6>@{{user.username}}</h6>
 
-            <small>
-                <i class="bi bi-calendar-heart m-1"></i>
-                <span id="birthDate">{{ user.birth_date }}</span>
-            </small>
-
-            <br>
-
-            <small><em>Busy in Coding...</em></small>
+            <div id="profile-data">
+                {% if user.setting["privacy-setting"]['show_birthdate']%}
+                <small>
+                    <i class="bi bi-calendar-heart m-1"></i>
+                    <span id="birthDate">{{ user.birth_date }}</span>
+                </small>
+                <br>
+                {% endif %}
+                {% if user.setting["privacy-setting"]['show_bio'] %}
+                <small><em>{{ user.setting['profile-info']['bio'] }}</em></small>
+                {% endif %}
+                <small>
+                    <a href="{{ user.setting['account-info']['website'] }}" target="_blank" rel="noopener noreferrer">
+                        {% if user.setting['account-info']['website']|length > 30 %}
+                        {{ user.setting['account-info']['website'][:30] }}...
+                        {% else %}
+                        {{ user.setting['account-info']['website'] }}
+                        {% endif %}
+                    </a>
+                </small>
+            </div>
 
         </div>
 
@@ -54,11 +67,11 @@
             {% endif %}
 
             <div class="audience-box">
-                <strong class="followers {{user.id}}" style="color: #F94818;">
+                <strong class="{% if user.setting['privacy-setting']['show_status']%}followers{% endif %} {{user.id}}" style="color: #F94818;">
                     {{user.followers | length}} Followers
                 </strong>
 
-                <strong class="following {{user.id}}">
+                <strong class="{% if user.setting['privacy-setting']['show_status']%}following {% endif %} {{user.id}}">
                     {{user.following | length}} Following
                 </strong>
             </div>
@@ -69,19 +82,19 @@
     <hr style="margin:0px;">
     <div class="ProfileOptions {{user.id}}">
         {% if current_user.id == user.id %}
-        <a>Posts</a>
+        <h6>Posts</h6>
         <hr>
-        <a>Likes</a>
+        <h6>Likes</h6>
         <hr>
-        <a>Reposts</a>
+        <h6>Reposts</h6>
         <hr>
-        <a>Dummy</a>
+        <h6>Dummy</h6>
         {% else %}
-        <a>Posts</a>
+        <h6>Posts</h6>
         <hr>
-        <a>Reposts</a>
+        <h6>Reposts</h6>
         <hr>
-        <a>Dummy</a>
+        <h6>Dummy</h6>
         {% endif %}
     </div>
 </div>
@@ -186,11 +199,11 @@
                 url: '/follows/' + accountId + '/1',
                 type: 'POST',
                 success: function (response) {
-                    btn.text('following');      // update text
+                    btn.text('Following');      // update text
                     btn.attr('class', 'following ps-3'); // update class
                 }
             });
-        } else {
+        } else if (button === "Following") {
             $.ajax({
                 url: '/follows/' + accountId + '/2',
                 type: 'POST',
@@ -199,6 +212,8 @@
                     btn.attr('class', 'Follow ps-4');
                 }
             });
+        } else {
+            window.location.href = '/setting';
         }
     });
     $(".followers").click(function () {
@@ -207,8 +222,13 @@
     $(".following").click(function () {
         exploreAccounts("/exploreAccounts/" + $(".following").attr("class").split(' ')[1] + "/following");
     });
-    $(".ProfileOptions a:first").addClass("active-a");
-    $(".profileOptions a").click(function () {
+    $(".ProfileOptions h6:first").addClass("active-a");
+    $(".ProfileOptions h6").click(function () {
+        // e.preventDefault();   // STOP navigation
+        // e.stopPropagation();  // EXTRA safety
+
+        $(".ProfileOptions h6").removeClass("active-a");
+        $(this).addClass("active-a")
         let option = $(this).text();
         let userId = $(".ProfileOptions").attr("class").split(' ')[1];
         if (option === "Posts") {

@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Account Settings</title>
+  <link rel="shortcut icon" href="../static/assets/logo.png" type="image/x-icon">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles01.css') }}" />
@@ -12,7 +13,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
 </head>
 
-<body class="settings-page">
+<body
+  class="settings-page {% if (current_user.setting or {}).get('support', {}).get('theme', 'dark') == 'light' %}settings-theme-light{% else %}settings-theme-dark{% endif %}"
+  data-theme="{% if (current_user.setting or {}).get('support', {}).get('theme', 'dark') == 'light' %}light{% else %}dark{% endif %}">
   <header class="settings-hero">
     <div class="hero-copy">
       <span class="eyebrow">Account</span>
@@ -20,8 +23,8 @@
       <p class="hero-subtitle">Manage your profile, privacy, notifications, and connected apps all in one place.</p>
     </div>
     <div class="hero-actions">
-      <button type="button">Save Changes</button>
-      <button class="btn btn-ghost" type="button" style="width: 100px;">Cancel</button>
+      <button class="save-button" type="button" data-userid="{{ current_user.id }}">Save Changes</button>
+      <button class="btn btn-ghost cancel-button" type="button" style="width: 100px;">Cancel</button>
     </div>
   </header>
 
@@ -32,12 +35,12 @@
         <span class="brand-title">coreXmanzoid</span>
       </div>
 
-      <div class="profile-card">
+      <div class="profile-card .profile-pic-wrapper user-account-info">
         <div class="profile-avatar"><img
             src="{{ current_user.profile_image_url if current_user.profile_image_url else url_for('static', filename='assets/default-profile.jpg')}}"
-            alt="Profile image"></div>
+            class="profile-pic"></div>
         <h2>{{ current_user.name }}</h2>
-        <p>@{{ current_user.username }}</p>
+        <p data-userid="{{ current_user.id }}">@{{ current_user.username }}</p>
       </div>
 
       <div class="settings-menu-toggle" aria-expanded="false" aria-controls="settings-nav-menu">
@@ -128,7 +131,7 @@
           </div>
           <div class="field field-wide bio ms-3">
             <label for="bio">Bio</label>
-            <textarea id="bio">Hi, I love coding!</textarea>
+            <textarea id="bio">{{ (current_user.setting or {}).get('profile-info', {}).get('bio', '') }}</textarea>
           </div>
         </div>
       </section>
@@ -146,8 +149,8 @@
 
               <div class="form-grid">
                 <div class="field">
-                  <label for="phone">Email</label>
-                  <input id="phone" type="email" value="{{ current_user.email }}">
+                  <label for="email">Email</label>
+                  <input id="email" type="email" value="{{ current_user.email }}">
                 </div>
                 <div class="field">
                   <label for="birthday">Birthday</label>
@@ -155,14 +158,16 @@
                 </div>
                 <div class="field">
                   <label for="website">Website</label>
-                  <input id="website" type="url" placeholder="https://example.com">
+                  <input id="website" type="url" placeholder="https://example.com"
+                    value="{{ (current_user.setting or {}).get('account-info', {}).get('website', '') }}">
                 </div>
               </div>
             </div>
             <div class="col-md-6">
               <div class="field about-info">
                 <label for="bussiness-info">Enter your bussiness detail or About You</label>
-                <textarea name="About-info" id="About-info"></textarea>
+                <textarea name="about-info"
+                  id="about-info">{{ (current_user.setting or {}).get('account-info', {}).get('about', '') }}</textarea>
               </div>
             </div>
           </div>
@@ -235,22 +240,26 @@
               <div class="col-md-6">
                 <label class="toggle my-1" data-info="private-account">
                   <span>Private Account</span>
-                  <input type="checkbox">
+                  <input type="checkbox" id="privacyStatus" {% if
+                    current_user.setting["privacy-setting"]['private_account']%} checked {% endif %}>
                 </label>
 
                 <label class="toggle my-1" data-info="show-birthdate">
                   <span>Show Birthdate</span>
-                  <input type="checkbox">
+                  <input type="checkbox" id="birthdate" {% if current_user.setting["privacy-setting"]['show_birthdate']
+                    %}checked{% endif %}>
                 </label>
 
                 <label class="toggle my-1" data-info="show-bio">
                   <span>Show Bio</span>
-                  <input type="checkbox" checked>
+                  <input type="checkbox" id="bio" {% if current_user.setting["privacy-setting"]['show_bio']
+                    %}checked{%endif %}>
                 </label>
 
                 <label class="toggle my-1" data-info="show-status">
-                  <span>Show Online Status</span>
-                  <input type="checkbox">
+                  <span>Show Followers / Followings</span>
+                  <input type="checkbox" id="status" {% if current_user.setting["privacy-setting"]['show_status']
+                    %}checked{% endif %}>
                 </label>
               </div>
               <div class="col-md-6 privecy-info mt-3">
@@ -296,11 +305,13 @@
         <div class="toggle-grid">
           <label class="toggle">
             <span>Email Notifications</span>
-            <input type="checkbox" checked>
+            <input id="emailz" type="checkbox" {% if
+              current_user.setting['notifications-setting']['email_notifications'] %} checked {% endif %}>
           </label>
           <label class="toggle">
             <span>Push Notifications</span>
-            <input type="checkbox" checked>
+            <input id="push" type="checkbox" {% if current_user.setting['notifications-setting']['push_notifications']
+              %} checked {% endif %}>
           </label>
           <div class="field">
             <label>*Customize what type of activity triggers a notification</label>
@@ -311,28 +322,32 @@
 
                 <label class="toggle">
                   <span>New Followers</span>
-                  <input type="checkbox" checked>
+                  <input id="followerz" type="checkbox" {% if
+                    current_user.setting['notifications-setting']['new_followers']%} checked {% endif %}>
                 </label>
               </div>
               <div class="col-sm-6">
 
                 <label class="toggle">
                   <span>Mentions</span>
-                  <input type="checkbox" checked>
+                  <input id="mentionz" type="checkbox" {% if current_user.setting['notifications-setting']['mentions']%}
+                    checked {% endif %}>
                 </label>
               </div>
               <div class="col-sm-6">
 
                 <label class="toggle">
-                  <span>Likes / Reposts / Comments</span>
-                  <input type="checkbox" checked>
+                  <span>Likes / Comments</span>
+                  <input id="likeXcomment" type="checkbox" {% if
+                    current_user.setting['notifications-setting']['likes_comments']%} checked {% endif %}>
                 </label>
               </div>
               <div class="col-sm-6">
 
                 <label class="toggle">
                   <span>Reposts</span>
-                  <input type="checkbox" checked>
+                  <input id="repostz" type="checkbox" {% if current_user.setting['notifications-setting']['reposts']%}
+                    checked {% endif %}>
                 </label>
               </div>
             </div>
@@ -353,7 +368,7 @@
               <strong>Download account data</strong>
               <span class="muted">Export a copy of your account information.</span>
             </div>
-            <button type="button">Download</button>
+            <a href="/setting/download-account-data/{{ current_user.id }}"><button type="button">Download</button></a>
           </div>
           <div class="app-item">
             <div>
@@ -361,9 +376,10 @@
               <span class="muted">Choose the appearance that fits your preference.</span>
             </div>
             <select name="theme" id="manage-theme">
-              <option value="1">Light</option>
-              <option value="2">Dark</option>
-              <option value="0">System Default</option>
+              <option value="light" {% if (current_user.setting or {}).get('support', {}).get('theme')=='light'
+                %}selected{% endif %}>Light</option>
+              <option value="dark" {% if (current_user.setting or {}).get('support', {}).get('theme', 'dark' ) !='light'
+                %}selected{% endif %}>Dark</option>
             </select>
           </div>
           <div class="app-item report-section">
@@ -453,18 +469,18 @@
               <div class="select-problem">
                 <strong>Category: </strong>
                 <select name="issue-category" id="issue-category">
-                  <option value="">Select an issue</option>
-                  <option value="">Account Issues</option>
-                  <option value="">Login / Sign-in Problem</option>
-                  <option value="">Password Reset Problem</option>
-                  <option value="">Profile / Setting</option>
-                  <option value="">Bug / Technical Issue</option>
-                  <option value="">App Performance Issue</option>
-                  <option value="">Feature Request</option>
-                  <option value="">General Feedback</option>
-                  <option value="">Privecy / Security Concern</option>
-                  <option value="">Report a User/ Content</option>
-                  <option value="">Others</option>
+                  <option value="No Problem Selected">Select an issue</option>
+                  <option value="Account Issue">Account Issues</option>
+                  <option value="Login / Sign-in Problem">Login / Sign-in Problem</option>
+                  <option value="Password Reset Problem">Password Reset Problem</option>
+                  <option value="Profile / Setting">Profile / Setting</option>
+                  <option value="Bug / Technical Issue">Bug / Technical Issue</option>
+                  <option value="App Performance Issue">App Performance Issue</option>
+                  <option value="Feature Request">Feature Request</option>
+                  <option value="General Feedback">General Feedback</option>
+                  <option value="Privacy / Security Concern">Privacy / Security Concern</option>
+                  <option value="Report a User / Content">Report a User/ Content</option>
+                  <option value="Others">Others</option>
                 </select>
               </div>
               <textarea name="help" id="help-center-input" placeholder="How can we help you Today?"
@@ -482,268 +498,54 @@
             <p>Delete or deactivate your account. This action is irreversible.</p>
           </div>
         </div>
-        <div class="inline-actions danger-area">
-          <button style="background-color: #F94818;" type="button">Deactivate Account</button>
-          <button style="background-color: #F94818;" type="button">Delete Account</button>
+        <div class="container">
+          <div class="row">
+            <div class="inline-actions danger-area col-md-6">
+              <button id="1" style="background-color: #F94818;" type="button">Deactivate Account</button>
+              <button id="2" style="background-color: #F94818;" type="button">Delete Account</button>
+            </div>
+            <div class="col-md-6 mt-3">
+              <p class="">
+                <b>Deactivate Account</b> <br>
+                Deactivating your account is a temporary action. you will not able to use your account , but nothing is
+                permanently removed. You can reactivate your account at any time by simply logging
+                back in, and everything will be restored as it was.
+              </p>
+              <p class="">
+                <b>Delete Account</b> <br>
+                Deleting your account is permanent and cannot be undone. All your data, including your profile, posts,
+                comments, and settings, will be permanently removed from our system. Once deleted, you will not be able
+                to recover your account or any associated information. Please make sure you are certain and download data before
+                proceeding.
+              </p>
+
+            </div>
+          </div>
         </div>
         <div class="verification-overlay username-verification" style="display: none;">
           <div class="verification-box">
             <small>&times;</small>
             <h2>Username Verification Required</h2>
-            <p>Please Enter your username <b>@{{ current_user.username }}</b> to proceed further.</p>
-            <input type="text">
-            <button id="verifyBtn">Delete/Deactivate Account</button>
+            <p data-id="{{ current_user.id }}">Please Enter your username <b>@{{ current_user.username }}</b> to proceed further.</p>
+            <input id="username-input" type="text" data-target="@{{current_user.username}}">
+            <button id="submitBtn" disabled>Delete/Deactivate Account</button>
           </div>
         </div>
       </section>
       {% endif %}
     </main>
   </div>
+
+  {% with flashed_messages = get_flashed_messages(with_categories=true) %}
+  {% if flashed_messages %}
+  <script id="setting-flash-data" type="application/json">{{ flashed_messages|tojson }}</script>
+  {% endif %}
+  {% endwith %}
+
+  <div id="settingsToastStack" class="settings-toast-stack" aria-live="polite" aria-atomic="true"></div>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="{{ url_for('static', filename='js/setting.js') }}"></script>
   <script>
-
-    document.addEventListener("DOMContentLoaded", function () {
-
-      let cropper = null;
-
-      const uploadBtn = document.getElementById("upload-btn");
-      const fileInput = document.getElementById("profile-image");
-      const modal = document.getElementById("cropModal");
-      const cropImage = document.getElementById("crop-image");
-      const avatarPreview = document.getElementById("avatar-preview");
-      const cancelBtn = document.getElementById("crop-cancel");
-      const confirmBtn = document.getElementById("crop-confirm");
-      const settingsMenuToggle = document.querySelector(".settings-menu-toggle");
-      const settingsNav = document.getElementById("settings-nav-menu");
-
-
-      /* Open file selector */
-
-      if (uploadBtn && fileInput && modal && cropImage && avatarPreview && cancelBtn && confirmBtn) {
-        uploadBtn.addEventListener("click", () => {
-          fileInput.click();
-        });
-
-
-        /* When user selects image */
-
-        fileInput.addEventListener("change", function (e) {
-
-          const file = e.target.files[0];
-
-          if (!file) return;
-
-          const reader = new FileReader();
-
-          reader.onload = function (event) {
-
-            cropImage.src = event.target.result;
-
-            modal.style.display = "flex";
-
-            cropImage.onload = function () {
-
-              if (cropper) {
-                cropper.destroy();
-              }
-
-              cropper = new Cropper(cropImage, {
-                aspectRatio: 1,
-                viewMode: 1,
-                autoCropArea: 0.9,
-                responsive: true,
-                movable: true,
-                zoomable: true,
-                cropBoxMovable: true,
-                cropBoxResizable: true,
-
-                ready() {
-                  cropper.reset(); // centers image
-                }
-              });
-
-            };
-
-          };
-
-          reader.readAsDataURL(file);
-
-        });
-      }
-      document.querySelectorAll(".faq-question").forEach((item) => {
-        item.addEventListener("click", () => {
-
-          const parent = item.parentElement;
-
-          // close others (optional - remove if you want multiple open)
-          document.querySelectorAll(".faq").forEach(faq => {
-            if (faq !== parent) {
-              faq.classList.remove("active");
-            }
-          });
-
-          // toggle current
-          parent.classList.toggle("active");
-        });
-      });
-
-      /* Confirm crop */
-
-      if (confirmBtn && avatarPreview && modal) {
-        confirmBtn.addEventListener("click", function (e) {
-
-          e.preventDefault();
-
-          if (!cropper) return;
-
-          const canvas = cropper.getCroppedCanvas({
-            width: 300,
-            height: 300
-          });
-
-          avatarPreview.src = canvas.toDataURL("image/png");
-
-          modal.style.display = "none";
-
-          cropper.destroy();
-          cropper = null;
-
-        });
-      }
-
-
-      /* Cancel */
-
-      if (cancelBtn && modal) {
-        cancelBtn.addEventListener("click", function (e) {
-
-          e.preventDefault();
-
-          modal.style.display = "none";
-
-          if (cropper) {
-            cropper.destroy();
-            cropper = null;
-          }
-
-        });
-      }
-
-      if (settingsMenuToggle && settingsNav) {
-        settingsMenuToggle.addEventListener("click", function () {
-          const isOpen = settingsNav.classList.toggle("is-open");
-          settingsMenuToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
-        });
-
-        settingsNav.querySelectorAll("a").forEach((link) => {
-          link.addEventListener("click", function () {
-            if (window.innerWidth <= 980) {
-              settingsNav.classList.remove("is-open");
-              settingsMenuToggle.setAttribute("aria-expanded", "false");
-            }
-          });
-        });
-      }
-
-    });
-
-    $(".report-section button").click(function () {
-      const reportInput = $("#report-input");
-
-      if (reportInput.is(":visible")) {
-        // Textarea is visible → treat as submit
-        reportInput.hide();// Replace with actual submit logic later
-      } else {
-        // Textarea is hidden → show it
-        reportInput.show();
-        reportInput.focus(); // Optional: focus for better UX
-      }
-    });
-
-    $(".faq-badge").click(function () {
-      $(".help-center").show();
-    });
-
-    $(document).ready(function () {
-
-      function validate() {
-        let value = $("#new_password").val();
-        let confirmValue = $("#confirm_password").val();
-
-        // Length check
-        if (value.length >= 8) {
-          $("#length span").text("✔️");
-        } else {
-          $("#length span").text("❌");
-        }
-
-        // Number check
-        if (/\d/.test(value)) {
-          $("#number span").text("✔️");
-        } else {
-          $("#number span").text("❌");
-        }
-
-        // Special character check
-        if (/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
-          $("#special span").text("✔️");
-        } else {
-          $("#special span").text("❌");
-        }
-
-        // Match check
-        if (value && value === confirmValue) {
-          $("#match span").text("✔️");
-        } else {
-          $("#match span").text("❌");
-        }
-      }
-
-      // 🔥 This is the correct way
-      $("#new_password, #confirm_password").on("input", validate);
-
-    });
-
-    $(".verification-overlay small").click(function () {
-      $(".verification-overlay").hide();
-    });
-    $(document).ready(function () {
-
-      const container = $(".privecy-info");
-
-      function showInfo(target) {
-        container.find("p").removeClass("active");
-
-        if (target) {
-          container.find("." + target).addClass("active");
-        } else {
-          container.find(".general").addClass("active");
-        }
-      }
-
-      // Hover (desktop)
-      $(".toggle").on("mouseenter", function () {
-        showInfo($(this).data("info"));
-      });
-
-      $(".toggle").on("mouseleave", function () {
-        showInfo(null);
-      });
-
-      // Click (mobile support)
-      $(".toggle").on("click", function () {
-        showInfo($(this).data("info"));
-      });
-
-      // Default state
-      showInfo(null);
-
-    });
-
-    $(".danger-area button").click(function () {
-      $(".username-verification").show();
-    });
-
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 </body>

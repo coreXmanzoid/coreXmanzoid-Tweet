@@ -26,5 +26,5 @@ class Post(db.Model):
     shares: Mapped[int] = mapped_column(Integer, default=0)
 
     user = relationship("UserData", back_populates="posts")
-    comment_entries = relationship("Comments", back_populates="post")
+    comment_entries = relationship("Comments", back_populates="post", cascade="all, delete-orphan")
 

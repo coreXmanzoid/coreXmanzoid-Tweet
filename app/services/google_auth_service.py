@@ -32,7 +32,7 @@ class GoogleAuthService:
             email=email,
             contact=0,
             password=generate_password_hash(secrets.token_urlsafe(32)),
-            status="Verified",
+            status="VERIFIED",
         )
 
         db.session.add(user)

@@ -192,8 +192,8 @@ button:hover {
         border-right: 2px solid #1d1b17;
         opacity: 1;
     }
-
-    a {
+    .ProfileOptions h6,
+    .top-pages h6 {
         display: inline-block;
         text-decoration: none;
         font-weight: 600;
@@ -203,7 +203,8 @@ button:hover {
         cursor: pointer;
     }
 
-    a::after {
+    .ProfileOptions h6::after,
+    .top-pages h6::after {
         content: '';
         display: block;
         height: 3px;
@@ -212,17 +213,20 @@ button:hover {
         background-color: #2e2a22;
     }
 
-    a:hover::after {
+    .ProfileOptions h6:hover::after,
+    .top-pages h6:hover::after {
         width: 100%;
         transition: width .3s;
     }
 
-    .active-a {
+    .ProfileOptions .active-a,
+    .top-pages .active-a {
         color: #F94818;
     }
 
     /* ⭐ Active link underline effect */
-    .active-a::after {
+    .ProfileOptions .active-a::after,
+    .top-pages .active-a::after {
         width: 100%;
     }
 

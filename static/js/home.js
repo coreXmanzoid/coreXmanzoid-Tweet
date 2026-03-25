@@ -271,11 +271,11 @@ function Backtohome() {
 }
 $(".home-link").click(Backtohome);
 // show posts based on for you and following tabs
-$(document).on("click", ".div2 a", function (e) {
+$(document).on("click", ".top-pages h6", function (e) {
     e.preventDefault();   // STOP navigation
     e.stopPropagation();  // EXTRA safety
 
-    $(".div2 a").removeClass("active-a");
+    $(".top-pages h6").removeClass("active-a");
     $(this).addClass("active-a");
 
     var state = parseInt($(this).data("state"));

@@ -1,5 +1,6 @@
 import os
 from flask import Flask
+
 from app.extensions import db, login_manager, oauth as oauth_client
 
 from app.routes.notification_routes import notification_bp
