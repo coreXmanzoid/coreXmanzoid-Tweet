@@ -1,4 +1,4 @@
-$(".reset-password-form input").on("input", function() {
+$(".reset-password-form input").on("input", function () {
     var email = $(".reset-password-form input[name='email']").val();
     if (email.trim() !== "") {
         $(".reset-password-form .submitbutton").prop("disabled", false);
@@ -6,33 +6,43 @@ $(".reset-password-form input").on("input", function() {
         $(".reset-password-form .submitbutton").prop("disabled", true);
     }
 });
-$(".reset-password-form button").on("click", function(e) {
+$(".reset-password-form button").on("click", function (e) {
     e.preventDefault();
     var email = $(".reset-password-form input[name='email']").val();
+    $(".reset-password-form .submitbutton").html(`
+            <span class="btn-loader"></span>
+            Sending...
+        `);
     $(".reset-password-form .submitbutton").prop("disabled", true);
     $(".reset-password-form input[name='email']").prop("disabled", true);
-    
+
     $.ajax({
         type: "POST",
         url: "/reset-password",
         data: JSON.stringify({ 'email': email, 'cf-turnstile-response': window.turnstile.getResponse() }),
         headers: { "Content-Type": "application/json" },
-        success: function(response) {
+        success: function (response) {
             if (response.status === "success") {
-                window.location.href = "/reset-password";
-                $(".reset-password-form input[name='email']").val(email);
-                $(".reset-password-form input[name='email']").prop("disabled", true);
+                $(".reset-password-form .submitbutton").html(`
+                    <span class="btn-loader"></span>
+                    See Inbox...
+                `);
+                $(".send-button").after(`
+                <strong id="verification-status" class="verification-tag">
+                    ${response.message}
+                </strong>
+            `);
             } else {
                 alert("Error: " + response.message);
             }
         },
-        error: function() {
+        error: function () {
             alert("An error occurred while sending the reset email. Please try again.");
         }
     });
 });
 
-$(".new-password-form button").on("click", function(e) {
+$(".new-password-form button").on("click", function (e) {
     e.preventDefault();
     var newPassword = $(".new-password-form input[name='newPassword']").val();
     var confirmNewPassword = $(".new-password-form input[name='confirmNewPassword']").val();
@@ -41,14 +51,14 @@ $(".new-password-form button").on("click", function(e) {
         url: window.location.pathname,
         data: JSON.stringify({ 'newPassword': newPassword, 'confirmNewPassword': confirmNewPassword }),
         headers: { "Content-Type": "application/json" },
-        success: function(response) {
+        success: function (response) {
             if (response.status === "success") {
                 window.location.href = "/login";
             } else {
                 alert("Error: " + response.message);
             }
         },
-        error: function() {
+        error: function () {
             alert("An error occurred while resetting the password. Please try again.");
         }
     });

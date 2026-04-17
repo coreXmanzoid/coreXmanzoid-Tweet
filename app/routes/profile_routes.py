@@ -61,5 +61,4 @@ def profile(id):
         ).scalar()
         is not None
     )
-
     return render_template("profile.html", user=user, is_following=is_following)

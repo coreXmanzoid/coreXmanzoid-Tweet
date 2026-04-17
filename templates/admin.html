@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,8 +10,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../static/css/admin.css">
 </head>
+
 <body>
     <div class="admin-bg-shape admin-bg-shape-one"></div>
     <div class="admin-bg-shape admin-bg-shape-two"></div>
@@ -19,7 +21,7 @@
         <aside class="sidebar-panel" id="sidebarPanel">
             <div class="sidebar-brand">
                 <div class="brand-mark">
-                    <img src="static/assets/logo_icon.png" alt="ChatFlick logo">
+                    <img src="../static/assets/logo_icon.png" alt="ChatFlick logo">
                 </div>
                 <div>
                     <p class="brand-kicker">Control Center</p>
@@ -46,6 +48,11 @@
                     <span class="nav-label">Reports</span>
                     <span class="nav-badge" id="reportsPendingBadge">0</span>
                 </button>
+                <button class="nav-item" type="button" data-section="users">
+                    <span class="nav-icon"><i class="bi bi-people-fill"></i></span>
+                    <span class="nav-label">Users</span>
+                    <span class="nav-badge" id="usersBlockedBadge">0</span>
+                </button>
             </nav>
 
             <div class="sidebar-footer">
@@ -62,7 +69,8 @@
         <main class="main-panel">
             <header class="topbar">
                 <div class="topbar-title-wrap">
-                    <button class="sidebar-toggle d-lg-none" id="sidebarOpenButton" type="button" aria-label="Open menu">
+                    <button class="sidebar-toggle d-lg-none" id="sidebarOpenButton" type="button"
+                        aria-label="Open menu">
                         <i class="bi bi-list"></i>
                     </button>
                     <div>
@@ -71,6 +79,10 @@
                     </div>
                 </div>
                 <div class="topbar-actions">
+                    <button class="sidebar-toggle d-none d-lg-inline-grid" id="sidebarCollapseButton" type="button"
+                        aria-label="Collapse sidebar" aria-pressed="false">
+                        <i class="bi bi-layout-sidebar-inset"></i>
+                    </button>
                     <div class="admin-chip">
                         <span class="chip-dot"></span>
                         <span>Admin Online</span>
@@ -83,8 +95,9 @@
                 <div class="hero-card">
                     <div>
                         <span class="eyebrow-text">Operations</span>
-                        <h3>Keep support and moderation moving without leaving the ChatFlick workflow.</h3>
-                        <p>Review incoming help requests, inspect user reports, and respond quickly from one focused admin workspace.</p>
+                        <h3>Run support, moderation, and account access from one focused admin workspace.</h3>
+                        <p>Track help requests, review reports, approve premium access, and monitor blocked accounts
+                            without leaving the ChatFlick control flow.</p>
                     </div>
                     <div class="hero-stats">
                         <div class="hero-stat">
@@ -95,6 +108,49 @@
                             <span>Pending Reports</span>
                             <strong id="dashboardReportsPending">0</strong>
                         </div>
+                        <div class="hero-stat">
+                            <span>Pending Pro</span>
+                            <strong id="dashboardPendingPro">0</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-12 col-md-6 col-xl-3">
+                        <article class="metric-card">
+                            <div class="metric-icon reviewed-icon"><i class="bi bi-people-fill"></i></div>
+                            <div>
+                                <p>Total Users</p>
+                                <h3 id="usersTotalMetric">0</h3>
+                            </div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-md-6 col-xl-3">
+                        <article class="metric-card">
+                            <div class="metric-icon support-icon"><i class="bi bi-patch-check-fill"></i></div>
+                            <div>
+                                <p>Verified Users</p>
+                                <h3 id="verifiedUsersMetric">0</h3>
+                            </div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-md-6 col-xl-3">
+                        <article class="metric-card">
+                            <div class="metric-icon reviewed-icon"><i class="bi bi-shield-check"></i></div>
+                            <div>
+                                <p>Reviewed Reports</p>
+                                <h3 id="reviewedMetric">0</h3>
+                            </div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-md-6 col-xl-3">
+                        <article class="metric-card">
+                            <div class="metric-icon pending-icon"><i class="bi bi-shield-slash-fill"></i></div>
+                            <div>
+                                <p>Blocked Users</p>
+                                <h3 id="blockedUsersMetric">0</h3>
+                            </div>
+                        </article>
                     </div>
                 </div>
 
@@ -110,15 +166,6 @@
                     </div>
                     <div class="col-12 col-md-6 col-xl-3">
                         <article class="metric-card">
-                            <div class="metric-icon pending-icon"><i class="bi bi-hourglass-split"></i></div>
-                            <div>
-                                <p>Pending Reviews</p>
-                                <h3 id="pendingTotalMetric">0</h3>
-                            </div>
-                        </article>
-                    </div>
-                    <div class="col-12 col-md-6 col-xl-3">
-                        <article class="metric-card">
                             <div class="metric-icon reply-icon"><i class="bi bi-reply-fill"></i></div>
                             <div>
                                 <p>Answered Requests</p>
@@ -128,41 +175,24 @@
                     </div>
                     <div class="col-12 col-md-6 col-xl-3">
                         <article class="metric-card">
-                            <div class="metric-icon reviewed-icon"><i class="bi bi-shield-check"></i></div>
+                            <div class="metric-icon pending-icon"><i class="bi bi-hourglass-split"></i></div>
                             <div>
-                                <p>Reviewed Reports</p>
-                                <h3 id="reviewedMetric">0</h3>
+                                <p>Pending Pro Requests</p>
+                                <h3 id="pendingProMetric">0</h3>
+                            </div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-md-6 col-xl-3">
+                        <article class="metric-card">
+                            <div class="metric-icon pending-icon"><i class="bi bi-hourglass-split"></i></div>
+                            <div>
+                                <p>Pending Reviews</p>
+                                <h3 id="pendingTotalMetric">0</h3>
                             </div>
                         </article>
                     </div>
                 </div>
 
-                <div class="row g-4">
-                    <div class="col-12 col-xl-7">
-                        <section class="content-card">
-                            <div class="section-heading">
-                                <div>
-                                    <span class="eyebrow-text">Queue Snapshot</span>
-                                    <h3>Recent support requests</h3>
-                                </div>
-                                <button class="text-action" type="button" data-section-jump="support">Open Support</button>
-                            </div>
-                            <div class="list-stack" id="supportSnapshotList"></div>
-                        </section>
-                    </div>
-                    <div class="col-12 col-xl-5">
-                        <section class="content-card">
-                            <div class="section-heading">
-                                <div>
-                                    <span class="eyebrow-text">Safety Desk</span>
-                                    <h3>Recent reports</h3>
-                                </div>
-                                <button class="text-action" type="button" data-section-jump="reports">Open Reports</button>
-                            </div>
-                            <div class="list-stack" id="reportSnapshotList"></div>
-                        </section>
-                    </div>
-                </div>
             </section>
 
             <section class="content-section" id="supportSection" data-section-panel="support">
@@ -171,12 +201,14 @@
                         <div>
                             <span class="eyebrow-text">Support Desk</span>
                             <h3>Support Requests</h3>
-                            <p class="section-copy">Review help tickets, reply inline, and update request status as the admin workflow evolves.</p>
+                            <p class="section-copy">Review help tickets, reply inline, and update request status as the
+                                admin workflow evolves.</p>
                         </div>
                         <div class="toolbar-controls">
                             <div class="search-shell">
                                 <i class="bi bi-search"></i>
-                                <input type="search" id="supportSearchInput" placeholder="Search request, user, or category">
+                                <input type="search" id="supportSearchInput"
+                                    placeholder="Search request, user, or category">
                             </div>
                             <select class="filter-select" id="supportStatusFilter">
                                 <option value="all">All Statuses</option>
@@ -217,12 +249,14 @@
                         <div>
                             <span class="eyebrow-text">Moderation</span>
                             <h3>User Reports</h3>
-                            <p class="section-copy">Inspect reported behavior, track review progress, and keep moderation work organized.</p>
+                            <p class="section-copy">Inspect reported behavior, track review progress, and keep
+                                moderation work organized.</p>
                         </div>
                         <div class="toolbar-controls">
                             <div class="search-shell">
                                 <i class="bi bi-search"></i>
-                                <input type="search" id="reportsSearchInput" placeholder="Search report ID, user, or text">
+                                <input type="search" id="reportsSearchInput"
+                                    placeholder="Search report ID, user, or text">
                             </div>
                             <select class="filter-select" id="reportsStatusFilter">
                                 <option value="all">All Statuses</option>
@@ -255,10 +289,142 @@
                     </div>
                 </div>
             </section>
+
+            <section class="content-section" id="usersSection" data-section-panel="users">
+                <div class="content-card">
+                    <div class="section-toolbar">
+                        <div>
+                            <span class="eyebrow-text">Account Control</span>
+                            <h3>User Management</h3>
+                            <p class="section-copy">Track account verification, premium access, and moderation status
+                                from the same admin workspace.</p>
+                        </div>
+                        <div class="toolbar-controls">
+                            <div class="search-shell">
+                                <i class="bi bi-search"></i>
+                                <input type="search" id="usersSearchInput" placeholder="Search user name, email, or ID">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-chip-row" id="usersFilterTabs" role="tablist" aria-label="User filters">
+                        <button class="filter-chip is-active" type="button" data-user-filter="all">All Users</button>
+                        <button class="filter-chip" type="button" data-user-filter="verified">Verified Users</button>
+                        <button class="filter-chip" type="button" data-user-filter="pending-pro">Pending Pro</button>
+                        <button class="filter-chip" type="button" data-user-filter="pro">Pro Users</button>
+                        <button class="filter-chip" type="button" data-user-filter="blocked">Blocked Users</button>
+                    </div>
+
+                    <div class="users-overview-grid" id="usersOverviewGrid"></div>
+
+                    <div class="users-workspace">
+                        <aside class="user-management-panel" id="userManagementPanel">
+                            <div class="user-management-top">
+                                <div class="selected-user-showcase">
+                                    <div class="selected-user-heading">
+                                        <div class="user-management-header">
+                                            <span class="eyebrow-text">Selected User</span>
+                                            <h3 id="selectedUserName">Harper Blake</h3>
+                                            <p id="selectedUserMeta">USR-3101</p>
+                                        </div>
+                                        <div class="selected-user-avatar selected-user-avatar-lg"
+                                            id="selectedUserInitials">HB</div>
+                                    </div>
+
+                                    <div class="selected-user-identity">
+                                        <div class="selected-user-copy">
+                                            <span class="selected-user-label">Primary Email</span>
+                                            <strong id="selectedUserEmail">harper.blake@chatflick.dev</strong>
+                                        </div>
+                                        <div class="selected-user-state">
+                                            <span class="selected-user-label">Current State</span>
+                                            <div class="selected-user-badges" id="selectedUserBadges"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="selected-user-note" id="selectedUserNote">
+                                        Pick a user from the table to review account state and run management actions
+                                        here.
+                                    </div>
+
+                                    <button class="row-action-button profile-link-button" type="button"
+                                        id="selectedUserProfileButton">See Profile</button>
+                                </div>
+                            </div>
+
+                            <div class="management-stack">
+                                <section class="management-card">
+                                    <div class="management-copy">
+                                        <span class="mini-label">Verification</span>
+                                        <h4>Confirm trusted access</h4>
+                                        <p>Approve this account for advanced access and feature eligibility.</p>
+                                    </div>
+                                    <button class="row-action-button action-verify panel-action-button" type="button"
+                                        id="panelVerifyButton">Verify User</button>
+                                </section>
+
+                                <section class="management-card">
+                                    <div class="management-copy">
+                                        <span class="mini-label">Pro Access</span>
+                                        <h4 id="panelProTitle">Review premium request</h4>
+                                        <p id="panelProDescription">Grant Pro only after the account has already been
+                                            verified.</p>
+                                    </div>
+                                    <div class="panel-action-group">
+                                        <button class="row-action-button action-pro panel-action-button" type="button"
+                                            id="panelProPrimaryButton">Approve Pro</button>
+                                        <button class="row-action-button panel-secondary-button" type="button"
+                                            id="panelProSecondaryButton">Reject Pro</button>
+                                    </div>
+                                </section>
+
+                                <section class="management-card danger-card">
+                                    <div class="management-copy">
+                                        <span class="mini-label">Moderation</span>
+                                        <h4 id="panelBlockTitle">Restrict this account</h4>
+                                        <p id="panelBlockDescription">Block the user and visually disable the remaining
+                                            actions.</p>
+                                    </div>
+                                    <div class="panel-action-group">
+                                        <button class="row-action-button action-warning panel-action-button"
+                                            type="button" id="panelWarningButton">Send Warning</button>
+                                        <button class="row-action-button action-block panel-action-button" type="button"
+                                            id="panelBlockButton">Block User</button>
+                                    </div>
+                                </section>
+                            </div>
+                        </aside>
+
+                        <div class="table-shell users-table-shell">
+                            <div class="table-responsive">
+                                <table class="table admin-table users-table align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Email</th>
+                                            <th>Verification</th>
+                                            <th>Pro Plan</th>
+                                            <th>Account</th>
+                                            <th class="text-end">Manage</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usersTableBody"></tbody>
+                                </table>
+                            </div>
+                            <div class="empty-state d-none" id="usersEmptyState">
+                                <i class="bi bi-people"></i>
+                                <h4>No users found</h4>
+                                <p>Try adjusting the search or switching to a different user filter.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
-    <div class="modal fade" id="supportDetailsModal" tabindex="-1" aria-labelledby="supportDetailsLabel" aria-hidden="true">
+    <div class="modal fade" id="supportDetailsModal" tabindex="-1" aria-labelledby="supportDetailsLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content admin-modal">
                 <div class="modal-header border-0">
@@ -266,7 +432,8 @@
                         <span class="eyebrow-text">Support Details</span>
                         <h4 class="modal-title" id="supportDetailsLabel">Request Overview</h4>
                     </div>
-                    <button type="button" class="btn-close admin-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close admin-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="detail-grid">
@@ -299,7 +466,8 @@
 
                     <div class="message-panel">
                         <label for="adminReplyInput">Admin Reply</label>
-                        <textarea id="adminReplyInput" rows="5" placeholder="Write a reply that can later be sent through your backend workflow..."></textarea>
+                        <textarea id="adminReplyInput" rows="5"
+                            placeholder="Write a reply that can later be sent through your backend workflow..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer border-0">
@@ -310,7 +478,8 @@
         </div>
     </div>
 
-    <div class="modal fade" id="reportDetailsModal" tabindex="-1" aria-labelledby="reportDetailsLabel" aria-hidden="true">
+    <div class="modal fade" id="reportDetailsModal" tabindex="-1" aria-labelledby="reportDetailsLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content admin-modal">
                 <div class="modal-header border-0">
@@ -318,7 +487,8 @@
                         <span class="eyebrow-text">Report Details</span>
                         <h4 class="modal-title" id="reportDetailsLabel">Moderation Report</h4>
                     </div>
-                    <button type="button" class="btn-close admin-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close admin-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="detail-grid">
@@ -353,6 +523,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="script.js"></script>
+    <script src="../static/js/admin.js"></script>
 </body>
+
 </html>

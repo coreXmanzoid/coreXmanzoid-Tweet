@@ -58,8 +58,8 @@ function readFlashedMessages() {
         const parsed = JSON.parse(flashNode.textContent);
         return Array.isArray(parsed) ? parsed : [];
     } catch (error) {
-        console.error("Unable to read flashed messages.", error);
-        return [];
+        const message = err?.responseJSON?.message || "Unable to submit request Request.";
+        showSettingToast(message, "error");
     }
 }
 
@@ -144,7 +144,7 @@ document.addEventListener("DOMContentLoaded", function () {
         document.body.dataset.theme = activeTheme;
     }
 
-    const initialTheme = document.body.dataset.theme || "dark";
+    const initialTheme = document.body.dataset.theme || "light";
     applyTheme(initialTheme);
     showFlashedMessages();
 
@@ -298,8 +298,8 @@ $(".report-section button").click(function () {
                 window.location.reload();
             },
             error: function (err) {
-                console.error(err.responseJSON || err);
-                showSettingToast("Unable to submit your report right now.", "error");
+                const message = err?.responseJSON?.message || "Unable to save your changes right now.";
+                showSettingToast(message, "error");
             }
         });
     } else {
@@ -335,10 +335,15 @@ $("#verifyBtn").click(function () {
             window.location.reload();
         },
         error: function (err) {
-            console.error(err.responseJSON || err);
-            showSettingToast("Unable to submit your support request right now.", "error");
+            const message = err?.responseJSON?.message || "Unable to save your changes right now.";
+            showSettingToast(message, "error");
         }
     });
+});
+
+
+$(".cancel-button").click(function () {
+    window.location.href = "/home";
 });
 
 $(document).ready(function () {
@@ -346,10 +351,10 @@ $(document).ready(function () {
         const value = $("#new_password").val();
         const confirmValue = $("#confirm_password").val();
 
-        $("#length span").text(value.length >= 8 ? "OK" : "X");
-        $("#number span").text(/\d/.test(value) ? "OK" : "X");
-        $("#special span").text(/[!@#$%^&*(),.?":{}|<>]/.test(value) ? "OK" : "X");
-        $("#match span").text(value && value === confirmValue ? "OK" : "X");
+        $("#length span").text(value.length >= 8 ? "✔️" : "❌");
+        $("#number span").text(/\d/.test(value) ? "✔️" : "❌");
+        $("#special span").text(/[!@#$%^&*(),.?":{}|<>]/.test(value) ? "✔️" : "❌");
+        $("#match span").text(value && value === confirmValue ? "✔️" : "❌");
     }
 
     $("#new_password, #confirm_password").on("input", validate);
@@ -448,10 +453,10 @@ $(".save-button").click(function () {
         saveChanges("account-setting", data);
     } else if (sectionName === "password") {
         const isValid =
-            $("#length span").text() === "OK" &&
-            $("#number span").text() === "OK" &&
-            $("#special span").text() === "OK" &&
-            $("#match span").text() === "OK";
+            $("#length span").text() === "✔️" &&
+            $("#number span").text() === "✔️" &&
+            $("#special span").text() === "✔️" &&
+            $("#match span").text() === "✔️";
 
         if (!isValid) {
             showSettingToast("Please complete all password requirements first.", "error");

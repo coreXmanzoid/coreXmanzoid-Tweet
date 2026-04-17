@@ -121,12 +121,12 @@
                         </a>
                     </ul>
                     <hr>
-                    <div class="dropdown">
+                    <div class="dropdown datadrop">
                         <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle"
                             id="dropdownUser2" data-bs-toggle="dropdown" aria-expanded="false">
                             <img src="{{ current_user.profile_image_url if current_user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
                                 alt="" width="32" height="32" class="rounded-circle me-2">
-                            <strong>{{ current_user.name }}</strong>
+                            <strong data-username="{{ current_user.username }}">{{ current_user.name }}</strong>
                         </a>
                         <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
                             <li><a class="dropdown-item LActive" href="#">Help</a></li>
@@ -150,9 +150,7 @@
 
         <div class="div3">
             <!-- Load posts.html here -->
-            <div class="loader-wrapper">
-                <span class="loader"></span>
-            </div>
+            <span class="loader1"></span>
         </div>
 
         <div class="div4">

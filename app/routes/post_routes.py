@@ -57,6 +57,9 @@ def manage_posts(state):
             "status": "success",
             "post_id": post.id,
             "username": current_user.username,
+            "hashtags": post.hashtags,
+            "mentions": post.mentions,
+            "timestamp": post.timestamp.isoformat()
         })
 
 

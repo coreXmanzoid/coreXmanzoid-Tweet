@@ -11,11 +11,12 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles01.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/setting.css') }}" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
+
 </head>
 
 <body
-  class="settings-page {% if (current_user.setting or {}).get('support', {}).get('theme', 'dark') == 'light' %}settings-theme-light{% else %}settings-theme-dark{% endif %}"
-  data-theme="{% if (current_user.setting or {}).get('support', {}).get('theme', 'dark') == 'light' %}light{% else %}dark{% endif %}">
+  class="settings-page {% if current_user.get_setting('support', 'theme') == 'light' %}settings-theme-light{% else %}settings-theme-dark{% endif %}"
+  data-theme="{% if current_user.get_setting('support', 'theme', 'light') == 'light' %}light{% else %}dark{% endif %}">
   <header class="settings-hero">
     <div class="hero-copy">
       <span class="eyebrow">Account</span>
@@ -24,7 +25,7 @@
     </div>
     <div class="hero-actions">
       <button class="save-button" type="button" data-userid="{{ current_user.id }}">Save Changes</button>
-      <button class="btn btn-ghost cancel-button" type="button" style="width: 100px;">Cancel</button>
+      <button class="cancel-button" type="button" style="width: 100px;">Home</button>
     </div>
   </header>
 
@@ -131,7 +132,7 @@
           </div>
           <div class="field field-wide bio ms-3">
             <label for="bio">Bio</label>
-            <textarea id="bio">{{ (current_user.setting or {}).get('profile-info', {}).get('bio', '') }}</textarea>
+            <textarea id="bio">{{ current_user.get_setting('profile-info', 'bio') }}</textarea>
           </div>
         </div>
       </section>
@@ -159,7 +160,7 @@
                 <div class="field">
                   <label for="website">Website</label>
                   <input id="website" type="url" placeholder="https://example.com"
-                    value="{{ (current_user.setting or {}).get('account-info', {}).get('website', '') }}">
+                    value="{{ current_user.get_setting('account-info', 'website') }}">
                 </div>
               </div>
             </div>
@@ -167,7 +168,7 @@
               <div class="field about-info">
                 <label for="bussiness-info">Enter your bussiness detail or About You</label>
                 <textarea name="about-info"
-                  id="about-info">{{ (current_user.setting or {}).get('account-info', {}).get('about', '') }}</textarea>
+                  id="about-info">{{ current_user.get_setting('account-info', 'about') }}</textarea>
               </div>
             </div>
           </div>
@@ -241,24 +242,24 @@
                 <label class="toggle my-1" data-info="private-account">
                   <span>Private Account</span>
                   <input type="checkbox" id="privacyStatus" {% if
-                    current_user.setting["privacy-setting"]['private_account']%} checked {% endif %}>
+                    current_user.get_setting("privacy-setting", 'private_account' ) %} checked {% endif %}>
                 </label>
 
                 <label class="toggle my-1" data-info="show-birthdate">
                   <span>Show Birthdate</span>
-                  <input type="checkbox" id="birthdate" {% if current_user.setting["privacy-setting"]['show_birthdate']
-                    %}checked{% endif %}>
+                  <input type="checkbox" id="birthdate" {% if
+                    current_user.get_setting("privacy-setting", 'show_birthdate' ) %}checked{% endif %}>
                 </label>
 
                 <label class="toggle my-1" data-info="show-bio">
                   <span>Show Bio</span>
-                  <input type="checkbox" id="bio" {% if current_user.setting["privacy-setting"]['show_bio']
+                  <input type="checkbox" id="bio" {% if current_user.get_setting("privacy-setting", 'show_bio' )
                     %}checked{%endif %}>
                 </label>
 
                 <label class="toggle my-1" data-info="show-status">
                   <span>Show Followers / Followings</span>
-                  <input type="checkbox" id="status" {% if current_user.setting["privacy-setting"]['show_status']
+                  <input type="checkbox" id="status" {% if current_user.get_setting("privacy-setting", 'show_status' )
                     %}checked{% endif %}>
                 </label>
               </div>
@@ -306,12 +307,12 @@
           <label class="toggle">
             <span>Email Notifications</span>
             <input id="emailz" type="checkbox" {% if
-              current_user.setting['notifications-setting']['email_notifications'] %} checked {% endif %}>
+              current_user.get_setting('notifications-setting', 'email_notifications' ) %} checked {% endif %}>
           </label>
           <label class="toggle">
             <span>Push Notifications</span>
-            <input id="push" type="checkbox" {% if current_user.setting['notifications-setting']['push_notifications']
-              %} checked {% endif %}>
+            <input id="push" type="checkbox" {% if
+              current_user.get_setting('notifications-setting', 'push_notifications' ) %} checked {% endif %}>
           </label>
           <div class="field">
             <label>*Customize what type of activity triggers a notification</label>
@@ -323,15 +324,15 @@
                 <label class="toggle">
                   <span>New Followers</span>
                   <input id="followerz" type="checkbox" {% if
-                    current_user.setting['notifications-setting']['new_followers']%} checked {% endif %}>
+                    current_user.get_setting('notifications-setting', 'new_followers' ) %} checked {% endif %}>
                 </label>
               </div>
               <div class="col-sm-6">
 
                 <label class="toggle">
                   <span>Mentions</span>
-                  <input id="mentionz" type="checkbox" {% if current_user.setting['notifications-setting']['mentions']%}
-                    checked {% endif %}>
+                  <input id="mentionz" type="checkbox" {% if
+                    current_user.get_setting('notifications-setting', 'mentions' ) %} checked {% endif %}>
                 </label>
               </div>
               <div class="col-sm-6">
@@ -339,15 +340,15 @@
                 <label class="toggle">
                   <span>Likes / Comments</span>
                   <input id="likeXcomment" type="checkbox" {% if
-                    current_user.setting['notifications-setting']['likes_comments']%} checked {% endif %}>
+                    current_user.get_setting('notifications-setting', 'likes_comments' ) %} checked {% endif %}>
                 </label>
               </div>
               <div class="col-sm-6">
 
                 <label class="toggle">
                   <span>Reposts</span>
-                  <input id="repostz" type="checkbox" {% if current_user.setting['notifications-setting']['reposts']%}
-                    checked {% endif %}>
+                  <input id="repostz" type="checkbox" {% if current_user.get_setting('notifications-setting', 'reposts'
+                    ) %} checked {% endif %}>
                 </label>
               </div>
             </div>
@@ -376,10 +377,10 @@
               <span class="muted">Choose the appearance that fits your preference.</span>
             </div>
             <select name="theme" id="manage-theme">
-              <option value="light" {% if (current_user.setting or {}).get('support', {}).get('theme')=='light'
-                %}selected{% endif %}>Light</option>
-              <option value="dark" {% if (current_user.setting or {}).get('support', {}).get('theme', 'dark' ) !='light'
-                %}selected{% endif %}>Dark</option>
+              <option value="light" {% if current_user.get_setting('support', 'theme' )=='light' %}selected{% endif %}>
+                Light</option>
+              <option value="dark" {% if current_user.get_setting('support', 'theme' )=='dark' %}selected{% endif %}>
+                Dark</option>
             </select>
           </div>
           <div class="app-item report-section">
@@ -515,7 +516,8 @@
                 <b>Delete Account</b> <br>
                 Deleting your account is permanent and cannot be undone. All your data, including your profile, posts,
                 comments, and settings, will be permanently removed from our system. Once deleted, you will not be able
-                to recover your account or any associated information. Please make sure you are certain and download data before
+                to recover your account or any associated information. Please make sure you are certain and download
+                data before
                 proceeding.
               </p>
 
@@ -526,7 +528,8 @@
           <div class="verification-box">
             <small>&times;</small>
             <h2>Username Verification Required</h2>
-            <p data-id="{{ current_user.id }}">Please Enter your username <b>@{{ current_user.username }}</b> to proceed further.</p>
+            <p data-id="{{ current_user.id }}">Please Enter your username <b>@{{ current_user.username }}</b> to proceed
+              further.</p>
             <input id="username-input" type="text" data-target="@{{current_user.username}}">
             <button id="submitBtn" disabled>Delete/Deactivate Account</button>
           </div>

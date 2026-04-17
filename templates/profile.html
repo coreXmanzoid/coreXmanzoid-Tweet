@@ -32,22 +32,22 @@
             <h6>@{{user.username}}</h6>
 
             <div id="profile-data">
-                {% if user.setting["privacy-setting"]['show_birthdate']%}
+                {% if user.get_setting("privacy-setting", 'show_birthdate') %}
                 <small>
                     <i class="bi bi-calendar-heart m-1"></i>
                     <span id="birthDate">{{ user.birth_date }}</span>
                 </small>
                 <br>
                 {% endif %}
-                {% if user.setting["privacy-setting"]['show_bio'] %}
-                <small><em>{{ user.setting['profile-info']['bio'] }}</em></small>
+                {% if user.get_setting("privacy-setting", 'show_bio') %}
+                <small><em>{{ user.get_setting('profile-info', 'bio') }}</em></small>
                 {% endif %}
                 <small>
-                    <a href="{{ user.setting['account-info']['website'] }}" target="_blank" rel="noopener noreferrer">
-                        {% if user.setting['account-info']['website']|length > 30 %}
-                        {{ user.setting['account-info']['website'][:30] }}...
+                    <a href="{{ user.get_setting('account-info', 'website') }}" target="_blank" rel="noopener noreferrer">
+                        {% if user.get_setting('account-info', 'website')|length > 30 %}
+                        {{ user.get_setting('account-info', 'website')[:30] }}...
                         {% else %}
-                        {{ user.setting['account-info']['website'] }}
+                        {{ user.get_setting('account-info', 'website') }}
                         {% endif %}
                     </a>
                 </small>
@@ -67,11 +67,11 @@
             {% endif %}
 
             <div class="audience-box">
-                <strong class="{% if user.setting['privacy-setting']['show_status']%}followers{% endif %} {{user.id}}" style="color: #F94818;">
+                <strong class="{% if user.get_setting('privacy-setting', 'show_status') %}followers{% endif %} {{user.id}}" style="color: #F94818;">
                     {{user.followers | length}} Followers
                 </strong>
 
-                <strong class="{% if user.setting['privacy-setting']['show_status']%}following {% endif %} {{user.id}}">
+                <strong class="{% if user.get_setting('privacy-setting', 'show_status') %}following {% endif %} {{user.id}}">
                     {{user.following | length}} Following
                 </strong>
             </div>

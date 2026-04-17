@@ -31,7 +31,8 @@ body {
 }
 
 .verification-box {
-    position: relative; /* Important for absolute positioning of the cross */
+    position: relative;
+    /* Important for absolute positioning of the cross */
     background: #DEDED1;
     padding: 40px;
     border-radius: 12px;
@@ -44,6 +45,7 @@ body {
         font-size: 25px;
         margin-bottom: 15px;
     }
+
     p {
         color: #46423b;
         font-size: 16px;
@@ -57,7 +59,8 @@ body {
         font-size: 30px;
         font-weight: bold;
         cursor: pointer;
-        color: #F94818; /* cross color */
+        color: #F94818;
+        /* cross color */
     }
 }
 
@@ -154,11 +157,13 @@ button:hover {
     height: 100vh;
     overflow-y: auto;
 }
-.logostyle img[alt='icon']{
+
+.logostyle img[alt='icon'] {
     height: 60px;
     width: 60px;
 }
-.logostyle img[alt='wordle']{
+
+.logostyle img[alt='wordle'] {
     height: 60px;
     width: 160px;
 }
@@ -192,6 +197,7 @@ button:hover {
         border-right: 2px solid #1d1b17;
         opacity: 1;
     }
+
     .ProfileOptions h6,
     .top-pages h6 {
         display: inline-block;
@@ -410,6 +416,7 @@ button:hover {
     bottom: 50px;
     left: 10px;
 }
+
 .profile .profile-pic-wrapper {
     position: relative;
     width: 100px;
@@ -469,7 +476,8 @@ button:hover {
     color: #2e2a22;
     font-weight: 600;
     font-size: 18px;
-    i{
+
+    i {
         font-size: 15px;
     }
 }
@@ -504,7 +512,7 @@ button:hover {
     gap: 10px;
 }
 
-.audience-box strong{
+.audience-box strong {
     font-size: 14px;
 }
 
@@ -892,4 +900,111 @@ h5:hover {
     100% {
         transform: rotate(360deg);
     }
+}
+
+.loader1 {
+    width: 100%;
+    height: 150px;
+    display: block;
+    margin: auto;
+    position: relative;
+    box-sizing: border-box;
+    border-radius: 18px;
+}
+
+.loader1::after {
+    content: '';
+    width: calc(100% - 30px);
+    height: calc(100% - 30px);
+    top: 15px;
+    left: 15px;
+    position: absolute;
+    background-image: linear-gradient(100deg, transparent, rgba(249, 72, 24, 0.18) 50%, transparent 80%), radial-gradient(circle 28px at 28px 28px, #b6ae9f 99%, transparent 0), linear-gradient(#8f8674 24px, transparent 0), linear-gradient(#c7c0b1 18px, transparent 0), linear-gradient(#deded1 66px, transparent 0);
+    background-repeat: no-repeat;
+    background-size: 
+    20% 130px,
+    55px 56px,
+    40% 20px,
+    50% 20px,
+    100% 65px;
+    background-position: 0% 0, 0 0, 70px 5px, 70px 38px, 0px 66px;
+    box-sizing: border-box;
+    animation: animloader1 1s linear infinite;
+}
+
+@keyframes animloader1 {
+    0% {
+        background-position: 0% 0, 0 0, 70px 5px, 70px 38px, 0px 66px;
+    }
+
+    100% {
+        background-position: 150% 0, 0 0, 70px 5px, 70px 38px, 0px 66px;
+    }
+}
+
+
+
+.loader2 {
+    width: 84px;
+    height: 30vh;
+    margin: 50px;
+    position: relative;
+    overflow: hidden;
+    display: block;
+}
+
+.loader2:before,
+.loader2:after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #f94818;
+    transform: translate(-50%, 100%) scale(0);
+    animation: push 2s infinite ease-in;
+}
+
+.loader2:after {
+    animation-delay: 1s;
+}
+
+@keyframes push {
+    0% {
+        transform: translate(-50%, 100%) scale(1);
+    }
+
+    15%,
+    25% {
+        transform: translate(-50%, 50%) scale(1);
+    }
+
+    50%,
+    75% {
+        transform: translate(-50%, -30%) scale(0.5);
+    }
+
+    80%,
+    100% {
+        transform: translate(-50%, -50%) scale(0);
+    }
+}
+
+.page-loader {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.page-loader--posts {
+    min-height: 220px;
+    padding: 24px 0;
+}
+
+.page-loader--profile {
+    min-height: 180px;
+    padding: 28px 0 12px;
 }

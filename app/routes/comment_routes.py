@@ -1,4 +1,4 @@
-from flask import Blueprint, request, render_template
+from flask import Blueprint, jsonify, request, render_template
 from flask_login import login_required
 from app.decorators import verified_user
 from app.services.comment_service import CommentService
@@ -20,12 +20,11 @@ def comments(post_id):
 
         comments = CommentService.get_comments(post_id)
 
-        return render_template(
-            "comments.html",
-            comments=comments[:15],
-            post=post,
-            comment_id=new_comment.id
-        )
+        return jsonify({
+            'mentions': new_comment.mentions,
+            'comment_id': new_comment.id,
+            'comments_count': post.comments if post else 0
+        })
 
     comments = CommentService.get_comments(post_id)
     post = CommentService.get_post(post_id)

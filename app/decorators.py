@@ -23,3 +23,14 @@ def pro_user(func):
         return func(*args, **kwargs)
 
     return wrapper
+
+def only_admin(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+
+        if current_user.id != 1:  # Assuming user with ID 1 is the admin
+            return "Admin user required. Access Denied.", 403
+
+        return func(*args, **kwargs)
+
+    return wrapper

@@ -13,6 +13,8 @@ from app.routes.main_routes import main_bp
 from app.routes.comment_routes import comment_bp
 from app.routes.account_routes import account_bp
 from app.routes.setting_routes import setting_bp
+from app.routes.admin_routes import admin_bp
+
 def create_app():
 
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -22,7 +24,8 @@ def create_app():
         static_folder=os.path.join(base_dir, "static"),
     )
     app.config["SECRET_KEY"] = "8BYkEfBA6O6donzWlSihBXox7C0sKR6b"
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///coreXmanzoidTweet.db"
+    # app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///coreXmanzoidTweet.db"
+    app.config["SQLALCHEMY_DATABASE_URI"] = str(os.environ.get("SQLALCHEMY_DATABASE_URI"))
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     db.init_app(app)
@@ -39,6 +42,7 @@ def create_app():
     app.register_blueprint(comment_bp)
     app.register_blueprint(account_bp)
     app.register_blueprint(setting_bp)
+    app.register_blueprint(admin_bp)
 
     with app.app_context():
         from app import models

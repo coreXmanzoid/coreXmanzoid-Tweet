@@ -12,7 +12,7 @@
     <div class="post-heading">
         <img src="{{ post.user.profile_image_url if post.user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
             alt="" width="40" height="40" class="rounded-circle me-2">
-        <h5 class="{{ post.user.id }}">{{ post.user.name }}<br /><span>@{{ post.user.username }}</span></h5>
+        <h5 data-userid="{{ post.user.id }}">{{ post.user.name }}<br /><span>@{{ post.user.username }}</span></h5>
         {% if reposts %}
         <p class="ps-2 text-muted fs-6 d-none d-md-inline">
             <svg xmlns="http://www.w3.org/2000/svg" height="15" width="15" viewBox="0 0 640 640">
@@ -29,41 +29,41 @@
             <span> {{ reposts }} </span> reposted
         </p>
         {% else %}
-        <small class="post-time" data-timestamp="{{ post.timestamp.isoformat() }}Z">
-            {{ post.timestamp.strftime('%d %b %Y, %I:%M %p') }}Z
+        <small class="post-time" data-timestamp="{{ post.timestamp.isoformat() }}">
+            {{ post.timestamp.strftime('%d %b %Y, %I:%M %p UTC') }}
         </small>
 
         {% endif %}
 
-        {% if current_time - post.timestamp < timedelta(minutes=3) and post.user.id==current_user.id %} 
-        <div class="edit-post ms-auto me-2" title="Edit Post">
+        {% if (current_time.replace(tzinfo=None) - post.timestamp.replace(tzinfo=None)) < timedelta(minutes=3) and
+            post.user.id==current_user.id %} <div class="edit-post ms-auto me-2" title="Edit Post">
             <svg style="width: 22px; cursor:pointer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
                 <path
                     d="M505 122.9L517.1 135C526.5 144.4 526.5 159.6 517.1 168.9L488 198.1L441.9 152L471 122.9C480.4 113.5 495.6 113.5 504.9 122.9zM273.8 320.2L408 185.9L454.1 232L319.8 366.2C316.9 369.1 313.3 371.2 309.4 372.3L250.9 389L267.6 330.5C268.7 326.6 270.8 323 273.7 320.1zM437.1 89L239.8 286.2C231.1 294.9 224.8 305.6 221.5 317.3L192.9 417.3C190.5 425.7 192.8 434.7 199 440.9C205.2 447.1 214.2 449.4 222.6 447L322.6 418.4C334.4 415 345.1 408.7 353.7 400.1L551 202.9C579.1 174.8 579.1 129.2 551 101.1L538.9 89C510.8 60.9 465.2 60.9 437.1 89zM152 128C103.4 128 64 167.4 64 216L64 488C64 536.6 103.4 576 152 576L424 576C472.6 576 512 536.6 512 488L512 376C512 362.7 501.3 352 488 352C474.7 352 464 362.7 464 376L464 488C464 510.1 446.1 528 424 528L152 528C129.9 528 112 510.1 112 488L112 216C112 193.9 129.9 176 152 176L264 176C277.3 176 288 165.3 288 152C288 138.7 277.3 128 264 128L152 128z" />
             </svg>
-        </div>
-        {% endif %}
     </div>
-    <div class="post-content">
-        <p class="content" data-mentions='{{ post.mentions | tojson }}'>{{ post.content }}</p>
-        <p class="hashtag">{{ ' '.join(post.hashtags) }}</p>
-    </div>
+    {% endif %}
+</div>
+<div class="post-content">
+    <p class="content" data-mentions='{{ post.mentions | tojson }}'>{{ post.content }}</p>
+    <p class="hashtag">{{ ' '.join(post.hashtags) }}</p>
+</div>
 
-    <div class="post-actions">
-        <a class="comment"><i class="bi bi-chat-heart"></i> {{ post.comments }}</a>
-        {% if post.id in current_user.reposted_posts %}
-        <a class="retweet text-warning"><i class="bi bi-repeat"></i> {{ post.reposts }}</a>
-        {% else %}
-        <a class="retweet"><i class="bi bi-repeat"></i> {{ post.reposts }}</a>
-        {% endif %}
-        {% if post.id in current_user.liked_posts %}
-        <a class="like"><i class="bi bi-heart-fill"></i> {{ post.likes }}</a>
-        {% else %}
-        <a class="like"><i class="bi bi-heart"></i> {{ post.likes }}</a>
-        {% endif %}
-        <a class="share"><i class="bi bi-share"></i> {{ post.shares }}</a>
-    </div>
-    <hr>
+<div class="post-actions">
+    <a class="comment"><i class="bi bi-chat-heart"></i> {{ post.comments }}</a>
+    {% if post.id in current_user.reposted_posts %}
+    <a class="retweet text-warning"><i class="bi bi-repeat"></i> {{ post.reposts }}</a>
+    {% else %}
+    <a class="retweet"><i class="bi bi-repeat"></i> {{ post.reposts }}</a>
+    {% endif %}
+    {% if post.id in current_user.liked_posts %}
+    <a class="like text-warning"><i class="bi bi-heart-fill"></i> {{ post.likes }}</a>
+    {% else %}
+    <a class="like"><i class="bi bi-heart"></i> {{ post.likes }}</a>
+    {% endif %}
+    <a class="share"><i class="bi bi-share"></i> {{ post.shares }}</a>
+</div>
+<hr>
 </div>
 {% endfor %}
 <script>
@@ -82,7 +82,7 @@
 
         el.innerHTML = text;
     });
-    $(".edit-post").click(function () {
+    $(document).off("click.editPost", ".edit-post").on("click.editPost", ".edit-post", function () {
         var editLink = $(this);
         var postDiv = editLink.closest(".post");
         var postId = postDiv.data("postid");
@@ -166,48 +166,56 @@
         });
     });
 
-    // Like button functionality
-    // Like / Unlike handler (works with AJAX-loaded content)
-    $(document).on("click", ".like", function (e) {
-        e.preventDefault();
+$(document).on("click", ".like", function (e) {
+    e.preventDefault();
 
-        var $btn = $(this);
-        var $icon = $btn.find("i");
+    var $btn = $(this);
 
-        var wasLiked = $icon.hasClass("bi-heart-fill");
-        var postId = $btn.closest(".post").data("postid");
+    var $icon = $btn.find("i");
+    var postId = $btn.closest(".post").data("postid");
 
-        $.ajax({
-            url: "/likePost/1",
-            method: "POST",
-            contentType: "application/json",
-            data: JSON.stringify({
-                post_id: postId,
-                like: !wasLiked
-            }),
-            success: function (res) {
+    var wasLiked = $btn.hasClass("text-warning") || $icon.hasClass("bi-heart-fill");
 
-                // Update UI ONLY after backend success
-                if (wasLiked) {
-                    // Was liked, now unliked
-                    $btn.removeClass("text-warning");
-                    $icon.removeClass("bi-heart-fill").addClass("bi-heart");
-                } else {
-                    // Was unliked, now liked
-                    $btn.addClass("text-warning");
-                    $icon.removeClass("bi-heart").addClass("bi-heart-fill");
-                }
-                // Update count safely
-                var textNode = $btn.contents().filter(function () {
-                    return this.nodeType === 3;
-                }).first();
+    // Get or create text node
+    var textNode = $btn.contents().filter(function () {
+        return this.nodeType === 3;
+    }).first();
 
-                if (textNode.length) {
-                    textNode[0].nodeValue = " " + res.likes;
-                } else {
-                    $btn.append(" " + res.likes);
-                }
-                // udpate and create notification for post owner when someone likes their post (but not for unlikes)
+    if (!textNode.length) {
+        $btn.append(" 0");
+        textNode = $btn.contents().filter(function () {
+            return this.nodeType === 3;
+        }).first();
+    }
+
+    var count = parseInt(textNode.text().trim()) || 0;
+
+    // ⚡ 1. Optimistic UI update
+    var newCount = wasLiked ? count - 1 : count + 1;
+
+    $btn.toggleClass("text-warning", !wasLiked);
+    $icon.toggleClass("bi-heart-fill", !wasLiked);
+    $icon.toggleClass("bi-heart", wasLiked);
+
+    textNode[0].nodeValue = " " + newCount;
+
+    $.ajax({
+        url: "/likePost/1", // ✅ dynamic URL
+        method: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({
+            post_id: postId,
+            like: !wasLiked
+        }),
+
+        success: function (res) {
+            // ✅ Sync count only
+            textNode[0].nodeValue = " " + res.likes;
+
+            // 🔔 Only when liking (not unliking)
+            if (!wasLiked) {
+
+                // Normal notification
                 sendNotification({
                     recipientId: res.user_id,
                     title: "New Like!",
@@ -216,106 +224,150 @@
                     message: res.likes > 1
                         ? `${res.current_user_name} and ${res.likes - 1} others liked your post.`
                         : `${res.current_user_name} liked your post.`,
-                    Push: res.likes > 1 ? "false" : "true", // send push only for first like, for subsequent likes just update the notification without sending push
+                    Push: res.likes > 1 ? "false" : "true",
                     state: 3
-                }).done(function (response) {
-                    console.log("Notification sent:", response);
                 }).fail(function (err) {
-                    console.error("Failed to send notification:", err);
+                    console.error("Notification failed:", err);
                 });
-                // check for milstone and send push
-                if (res.likes == 100 || res.likes == 1000 || res.likes == 10000) {
+
+                // 🎉 Milestone notification
+                if ([100, 1000, 10000].includes(res.likes)) {
+                    let label = res.likes >= 1000
+                        ? (res.likes / 1000) + "k"
+                        : res.likes;
+
                     sendNotification({
                         recipientId: res.user_id,
-                        title: (res.likes / 1000) + "k Likes 🎉",
+                        title: label + " Likes 🎉",
                         type: "post_like_milestone",
                         identifier: postId,
-                        message: "Your post has reached " + (res.likes / 1000) + "k likes!",
+                        message: `Your post has reached ${label} likes!`,
                         Push: "true",
                         state: 3
-                    }).done(function (res) {
-                        console.log("Notification sent:", res);
                     }).fail(function (err) {
-                        console.error("Failed to send notification:", err);
+                        console.error("Milestone notification failed:", err);
                     });
                 }
             }
-        });
-    });
+        },
 
+        error: function () {
+            // ❌ Rollback UI
+            alert("An error occurred while processing your like. Please try again.");
+            $btn.toggleClass("text-warning", wasLiked);
+            $icon.toggleClass("bi-heart-fill", wasLiked);
+            $icon.toggleClass("bi-heart", !wasLiked);
+            textNode[0].nodeValue = " " + count;
+        },
+
+        complete: function () {
+            // 🔓 Unlock button
+            $btn.data("loading", false);
+        }
+    });
+});
     $(document).on("click", ".retweet", function (e) {
         e.preventDefault();
 
         var $btn = $(this);
-        var $icon = $btn.find("i");
 
-        var wasreposted = $btn.hasClass("text-warning");
+        // 🔒 Prevent spam clicking
+        if ($btn.data("loading")) return;
+        $btn.data("loading", true);
+
+        var $icon = $btn.find("i");
         var postId = $btn.closest(".post").data("postid");
 
+        var wasReposted = $btn.hasClass("text-warning");
+
+        // Get or create count text node
+        var textNode = $btn.contents().filter(function () {
+            return this.nodeType === 3;
+        }).first();
+
+        if (!textNode.length) {
+            $btn.append(" 0");
+            textNode = $btn.contents().filter(function () {
+                return this.nodeType === 3;
+            }).first();
+        }
+
+        var count = parseInt(textNode.text().trim()) || 0;
+
+        // ⚡ 1. Optimistic UI update
+        var newCount = wasReposted ? count - 1 : count + 1;
+        $btn.toggleClass("text-warning", !wasReposted);
+        textNode[0].nodeValue = " " + newCount;
+
+        // Animation
+        $icon.removeClass("rotate");
+        void $icon[0].offsetWidth;
+        $icon.addClass("rotate");
+
         $.ajax({
-            url: "/likePost/2",
+            url: "/likePost/2", // ✅ fixed dynamic URL
             method: "POST",
             contentType: "application/json",
             data: JSON.stringify({
                 post_id: postId,
-                repost: !wasreposted
+                repost: !wasReposted
             }),
+
             success: function (res) {
-                // Update UI ONLY after backend success
-                if (wasreposted) {
-                    // Was liked, now unliked
-                    $btn.removeClass("text-warning");
-                } else {
-                    // Was unliked, now liked
-                    $btn.addClass("text-warning");
-                }
-                // rotate icon a full cycle
-                $icon.removeClass('rotate');
-                void $icon[0].offsetWidth; // force reflow
-                $icon.addClass('rotate');
-                // Update count safely
-                var textNode = $btn.contents().filter(function () { return this.nodeType === 3; }).first();
-                if (textNode.length) {
-                    textNode[0].nodeValue = " " + res.reposts;
-                } else {
-                    $btn.append(" " + res.reposts);
-                }
-                sendNotification({
-                    recipientId: res.user_id,
-                    title: "New Retweet!",
-                    type: "post_retweet",
-                    identifier: postId,
-                    message: res.reposts > 1
-                        ? `${res.current_user_name} and ${res.reposts - 1} others retweeted your post.`
-                        : `${res.current_user_name} retweeted your post.`,
-                    Push: res.reposts > 1 ? "false" : "true", // only send push for the first retweet to avoid spamming
-                    state: 3
-                }).done(function (response) {
-                    console.log("Notification sent:", response);
-                }).fail(function (err) {
-                    console.error("Failed to send notification:", err);
-                });
-                // check for milstone and send push
-                if (res.reposts == 100 || res.reposts == 1000 || res.reposts == 10000) {
+                // ✅ 2. Sync with backend (no toggle again)
+                textNode[0].nodeValue = " " + res.reposts;
+
+                // 🔔 Send notification ONLY when reposting (not undo)
+                if (!wasReposted) {
+
+                    // Normal notification
                     sendNotification({
                         recipientId: res.user_id,
-                        title: (res.reposts / 1000) + "k Retweets 🎉",
-                        type: "post_retweet_milestone",
+                        title: "New Retweet!",
+                        type: "post_retweet",
                         identifier: postId,
-                        message: "Your post has reached " + (res.reposts / 1000) + "k retweets!",
-                        Push: "true",
+                        message: res.reposts > 1
+                            ? `${res.current_user_name} and ${res.reposts - 1} others retweeted your post.`
+                            : `${res.current_user_name} retweeted your post.`,
+                        Push: res.reposts > 1 ? "false" : "true",
                         state: 3
-                    }).done(function (res) {
-                        console.log("Notification sent:", res);
                     }).fail(function (err) {
-                        console.error("Failed to send notification:", err);
+                        console.error("Notification failed:", err);
                     });
-                }
 
+                    // 🎉 Milestone notification
+                    if ([100, 1000, 10000].includes(res.reposts)) {
+                        let label = res.reposts >= 1000
+                            ? (res.reposts / 1000) + "k"
+                            : res.reposts;
+
+                        sendNotification({
+                            recipientId: res.user_id,
+                            title: label + " Retweets 🎉",
+                            type: "post_retweet_milestone",
+                            identifier: postId,
+                            message: `Your post has reached ${label} retweets!`,
+                            Push: "true",
+                            state: 3
+                        }).fail(function (err) {
+                            console.error("Milestone notification failed:", err);
+                        });
+                    }
+                }
+            },
+
+            error: function () {
+                // ❌ 3. Rollback UI
+                $btn.toggleClass("text-warning", wasReposted);
+                textNode[0].nodeValue = " " + count;
+            },
+
+            complete: function () {
+                // 🔓 Unlock button
+                $btn.data("loading", false);
             }
         });
     });
-
     // share button functionality
     $(".share").click(function (e) {
         e.preventDefault();
@@ -352,27 +404,35 @@
         });
     });
 
-    $(".post-heading small").each(function () {
-        const post_time_str = $(this).data("timestamp"); // READ from data attribute
-        const post_time = new Date(post_time_str);
+    $(".post-time").each(function () {
+        const postTimeStr = $(this).data("timestamp");
+        const postTime = new Date(postTimeStr);
 
-        const current_time = new Date(); // browser current time
-        const diffMs = current_time - post_time;
-        const diffMins = Math.floor(diffMs / 60000);
+        if (Number.isNaN(postTime.getTime())) {
+            return;
+        }
+
+        const currentTime = new Date();
+        const diffMs = currentTime - postTime;
+        const diffMins = Math.max(0, Math.floor(diffMs / 60000));
 
         let display = "";
         if (diffMins < 1) {
             display = "Just now";
         } else if (diffMins < 60) {
-            display = diffMins + " min ago";
+            display = diffMins === 1 ? "1 min ago" : `${diffMins} mins ago`;
         } else if (diffMins < 1440) {
-            display = Math.floor(diffMins / 60) + " hours ago";
-        } else if (diffMins < 10080) { // less than 1 week (7 days)
-            display = Math.floor(diffMins / 1440) + " days ago";
-        } else if (diffMins < 43200) { // less than 1 month (30 days)
-            display = Math.floor(diffMins / 10080) + " week ago";
-        } else { // 1 month or more
-            display = Math.floor(diffMins / 43200) + " month ago";
+            const hours = Math.floor(diffMins / 60);
+            display = hours === 1 ? "1 hour ago" : `${hours} hours ago`;
+        } else if (diffMins < 10080) {
+            const days = Math.floor(diffMins / 1440);
+            display = days === 1 ? "1 day ago" : `${days} days ago`;
+        } else if (diffMins < 43200) {
+            const weeks = Math.floor(diffMins / 10080);
+            display = weeks === 1 ? "1 week ago" : `${weeks} weeks ago`;
+        } else {
+            const months = Math.floor(diffMins / 43200);
+            display = months === 1 ? "1 month ago" : `${months} months ago`;
         }
 
         $(this).text(display);
@@ -384,7 +444,7 @@
     $(".comment").click(showFullPost);
     // Show user profile on clicking user name
     $(".post-heading h5").click(function () {
-        var post_id = $(this).attr("class");
+        var post_id = $(this).data("userid");
         showProfile(post_id);
     });
     user_id = $(".div1").attr("class").split(" ")[1];

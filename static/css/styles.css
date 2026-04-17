@@ -51,6 +51,31 @@ button:hover {
     transition: .5s;
 }
 
+.btn-loader {
+    width: 14px;
+    height: 14px;
+    border: 2px solid #FF3D00;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+    animation: spinBtn 0.6s linear infinite;
+    vertical-align: middle;
+}
+
+@keyframes spinBtn {
+    to {
+        transform: rotate(360deg);
+    }
+}
+.verification-tag {
+    display: block;
+    margin-top: 6px;
+    font-size: 15px;
+    text-decoration: none;
+    color: #8f8674;
+}
+
 .myText:hover {
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     transform: scale(1.01);
@@ -172,5 +197,5 @@ button:hover {
     width: 200px;
     margin-bottom: 20%;
     background-color: #FBF3D1;
-    border-radius: 0 20px 0 20px;    
+    border-radius: 0 20px 0 20px;
 }

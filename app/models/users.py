@@ -9,7 +9,11 @@ from app.extensions import db
 
 DEFAULT_USER_SETTINGS = {
     "profile-info": {"bio": ""},
-    "account-info": {"website": "", "about": ""},
+    "account-info": {
+        "website": "",
+        "about": "",
+        "warnings": 0,  # Track and block account on third warning.
+    },
     "privacy-setting": {
         "private_account": False,
         "show_birthdate": True,
@@ -26,6 +30,68 @@ DEFAULT_USER_SETTINGS = {
     },
     "support": {"theme": "light"},
 }
+_MISSING = object()
+
+
+def _split_path(*parts):
+    path = []
+    for part in parts:
+        if part is None:
+            continue
+        if isinstance(part, str):
+            path.extend(segment for segment in part.split(".") if segment)
+        else:
+            path.append(part)
+    return path
+
+
+def _get_nested(data, path, default=_MISSING):
+    current = data
+    for segment in path:
+        if not isinstance(current, dict) or segment not in current:
+            return default
+        current = current[segment]
+    return current
+
+
+def _set_nested(data, path, value):
+    current = data
+    for segment in path[:-1]:
+        next_value = current.get(segment)
+        if not isinstance(next_value, dict):
+            next_value = {}
+            current[segment] = next_value
+        current = next_value
+    current[path[-1]] = value
+
+
+def _delete_nested(data, path):
+    if not path or not isinstance(data, dict):
+        return False
+
+    current = data
+    parents = []
+
+    for segment in path[:-1]:
+        next_value = current.get(segment)
+        if not isinstance(next_value, dict):
+            return False
+        parents.append((current, segment))
+        current = next_value
+
+    if path[-1] not in current:
+        return False
+
+    del current[path[-1]]
+
+    for parent, segment in reversed(parents):
+        child = parent.get(segment)
+        if isinstance(child, dict) and not child:
+            del parent[segment]
+        else:
+            break
+
+    return True
 
 
 class UserData(UserMixin, db.Model):
@@ -64,32 +130,55 @@ class UserData(UserMixin, db.Model):
     status: Mapped[str] = mapped_column(String, default="UNVERIFIED")
 
     setting: Mapped[dict] = mapped_column(
-        MutableDict.as_mutable(JSON),
-        default=lambda: deepcopy(DEFAULT_USER_SETTINGS),
-        nullable=False,
+        MutableDict.as_mutable(JSON), default=dict, nullable=False
     )
 
     def get_setting(self, section, key, default=None):
-        return self.setting.get(section, {}).get(key, default)
+        path = _split_path(section, key)
+
+        overrides = self.setting if isinstance(self.setting, dict) else {}
+
+        value = _get_nested(overrides, path, _MISSING)
+        if value is not _MISSING:
+            return value
+
+        default_value = _get_nested(DEFAULT_USER_SETTINGS, path, _MISSING)
+        if default_value is not _MISSING:
+            return default_value
+
+        return default
 
     def set_setting(self, section, key, value):
-        settings = dict(self.setting)  # create new dict
+        path = _split_path(section, key)
+        if not path:
+            raise ValueError("section and key must identify a setting path")
 
-        if section not in settings:
-            settings[section] = {}
+        if _get_nested(DEFAULT_USER_SETTINGS, path, _MISSING) is _MISSING:
+            raise KeyError(f"Invalid setting path: {'.'.join(path)}")
 
-        section_data = dict(settings[section])
-        section_data[key] = value
-        settings[section] = section_data
+        settings = deepcopy(self.setting) if isinstance(self.setting, dict) else {}
+        default_value = _get_nested(DEFAULT_USER_SETTINGS, path, _MISSING)
 
-        self.setting = settings  # 🔥 reassign → triggers change
+        if value == default_value:
+            _delete_nested(settings, path)
+        else:
+            _set_nested(settings, path, value)
+
+        self.setting = settings
+        
     # Relationships
     posts = relationship("Post", back_populates="user", cascade="all, delete-orphan")
-    comments = relationship("Comments", back_populates="user", cascade="all, delete-orphan")
-    support = relationship("Support", back_populates="user", cascade="all, delete-orphan")
-    reports = relationship("Report", back_populates="user", cascade="all, delete-orphan")
+    comments = relationship(
+        "Comments", back_populates="user", cascade="all, delete-orphan"
+    )
+    support = relationship(
+        "Support", back_populates="user", cascade="all, delete-orphan"
+    )
+    reports = relationship(
+        "Report", back_populates="user", cascade="all, delete-orphan"
+    )
 
-        # USERS WHO FOLLOW THIS USER
+    # USERS WHO FOLLOW THIS USER
     followers: Mapped[list["Follow"]] = relationship(
         "Follow",
         foreign_keys="Follow.following_id",
