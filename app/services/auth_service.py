@@ -24,14 +24,13 @@ class AuthService:
         ).scalar()
 
     @staticmethod
-    def create_user(name, username, email, phone, birth_date, password):
+    def create_user(name, username, email, birth_date, password):
 
         user = UserData(
             name=name,
             username=username,
             email=email,
             birth_date=birth_date,
-            contact=phone,
             password=generate_password_hash(
                 password, method="pbkdf2:sha256", salt_length=8
             ),

@@ -1,37 +1,106 @@
-// fetch accounts for explore accounts section
-exploreAccounts("/exploreAccounts/0/random");
-function exploreAccounts(url) {
-    $(".explore-accounts").html('<div class="loader-wrapper"><span class="loader"></span></div>');
-    // show explore accounts
-    $.ajax({
-        url: url,
-        method: "GET",
-        success: function (response) {
+// ---------------------------------------------------------------------------
+// Keyed AbortController map — one controller slot per logical action.
+// Calling abortAndRenew(key) cancels any in-flight request for that key and
+// returns a fresh AbortController whose signal can be forwarded to fetch().
+// jQuery $.ajax does NOT natively support AbortSignal, so we adapt via the
+// `xhr` factory option (see ajaxWithAbort helper below).
+// ---------------------------------------------------------------------------
+const controllers = {};
 
-            // Create dummy container to extract HTML + scripts
-            let dummy = $("<div>").html(response);
+/**
+ * Aborts any active request for `key`, then creates and stores a new
+ * AbortController for that key.
+ * @param {string} key - Logical action identifier.
+ * @returns {AbortController}
+ */
+function abortAndRenew(key) {
+    if (controllers[key]) {
+        controllers[key].abort(); // cancel previous in-flight request
+    }
+    controllers[key] = new AbortController();
+    return controllers[key];
+}
 
-            // Extract script tags
-            let scripts = dummy.find("script");
+/**
+ * Thin wrapper around $.ajax that wires an AbortSignal into jQuery's XHR
+ * factory so that calling controller.abort() actually cancels the request.
+ *
+ * @param {string}         key     - Controller map key (matches abortAndRenew).
+ * @param {Object}         options - Standard $.ajax options (url, method, …).
+ * @returns {jqXHR}
+ */
+function ajaxWithAbort(key, options) {
+    const controller = abortAndRenew(key);
+    const signal = controller.signal;
 
-            // Remove scripts from HTML
-            dummy.find("script").remove();
+    // Capture any caller-supplied xhr factory so we can chain it.
+    const callerXhr = options.xhr;
 
-            // Insert cleaned HTML into div3
-            $(".explore-accounts").html(dummy.html());
-
-            // Execute extracted scripts manually
-            scripts.each(function () {
-                let code = $(this).text();
-                if (code.trim() !== "") {
-                    eval(code);
-                }
-            });
+    return $.ajax({
+        ...options,
+        // jQuery lets us supply the raw XHR object; we hook abort() here.
+        xhr: function () {
+            const xhr = callerXhr ? callerXhr() : $.ajaxSettings.xhr();
+            // Mirror AbortController cancellation onto the native XHR.
+            signal.addEventListener("abort", () => xhr.abort());
+            return xhr;
+        },
+        // Wrap error handler to silently swallow aborted requests.
+        error: function (jqXHR, textStatus, errorThrown) {
+            if (textStatus === "abort") {
+                // Request was intentionally cancelled — not a real error.
+                return;
+            }
+            // Delegate to any caller-supplied error handler, otherwise log.
+            if (typeof options.error === "function") {
+                options.error(jqXHR, textStatus, errorThrown);
+            } else {
+                console.error("Ajax error [" + key + "]:", textStatus, errorThrown);
+            }
         }
     });
 }
 
+// ---------------------------------------------------------------------------
+// Reusable helper: inject HTML response (with embedded <script> execution)
+// into a jQuery target element.
+// ---------------------------------------------------------------------------
+function injectHtmlResponse($target, response) {
+    const dummy = $("<div>").html(response);
+    const scripts = dummy.find("script");
+    dummy.find("script").remove();
+    $target.html(dummy.html());
+    scripts.each(function () {
+        const code = $(this).text();
+        if (code.trim() !== "") {
+            eval(code); // eslint-disable-line no-eval
+        }
+    });
+}
+
+// ---------------------------------------------------------------------------
+// fetch accounts for explore accounts section
+// ---------------------------------------------------------------------------
+exploreAccounts("/exploreAccounts/0/random");
+
+function exploreAccounts(url) {
+    $(".explore-accounts").html('<div class="loader-wrapper"><span class="loader"></span></div>');
+
+    // Abort any previous exploreAccounts request before starting a new one.
+    ajaxWithAbort("exploreAccounts", {
+        url: url,
+        method: "GET",
+        success: function (response) {
+            injectHtmlResponse($(".explore-accounts"), response);
+        }
+        // error is handled by ajaxWithAbort (aborts silenced, others logged)
+    });
+}
+
+// ---------------------------------------------------------------------------
 // fetch accounts for search textbox typed input
+// (each keystroke cancels the previous search request)
+// ---------------------------------------------------------------------------
 $(".search input").on("input", function () {
     var query = $(this).val();
     if (query.length > 0) {
@@ -39,8 +108,8 @@ $(".search input").on("input", function () {
     } else {
         exploreAccounts("/exploreAccounts/0/random");
     }
-
 });
+
 // Active sidebar animation
 $(".nav li a").click(function () {
     $(".nav a").removeClass("active link-dark");
@@ -49,36 +118,27 @@ $(".nav li a").click(function () {
     $(this).removeClass("link-dark");
 });
 
+// ---------------------------------------------------------------------------
 // Show posts
+// (rapid tab / filter switches cancel the previous showPosts request)
+// ---------------------------------------------------------------------------
 function showPosts(state, id) {
     $(".div3").html('<div class="page-loader page-loader--posts"><span class="loader1"></span></div>');
-    $.ajax({
+
+    // Abort any pending showPosts request before issuing a new one.
+    ajaxWithAbort("showPosts", {
         url: "/showPosts/" + state + "/" + id,
         method: "GET",
         success: function (response) {
-            // Create dummy container to extract HTML + scripts
-            let dummy = $("<div>").html(response);
-
-            // Extract script tags
-            let scripts = dummy.find("script");
-
-            // Remove scripts from HTML
-            dummy.find("script").remove();
-
-            // Insert cleaned HTML into div3
-            $(".div3").html(dummy.html());
-
-            // Execute extracted scripts manually
-            scripts.each(function () {
-                let code = $(this).text();
-                if (code.trim() !== "") {
-                    eval(code);
-                }
-            });
+            injectHtmlResponse($(".div3"), response);
         }
     });
 }
 
+// ---------------------------------------------------------------------------
+// Email verification button
+// (only one verification request should ever be in-flight at a time)
+// ---------------------------------------------------------------------------
 $(".verification-box button").click(function () {
     userId = $(".div1").attr("class").split(" ")[1];
     const button = $("#verifyBtn");
@@ -87,13 +147,14 @@ $(".verification-box button").click(function () {
             <span class="btn-loader"></span>
             Sending...
         `);
-    $.ajax({
+
+    // Abort any prior verification request (e.g. double-click guard).
+    ajaxWithAbort("emailVerification", {
         url: "/email-verification",
         method: "POST",
         data: JSON.stringify({ user_id: userId }),
         contentType: "application/json",
         success: function (response) {
-
             if (response.status === "success") {
                 button.html(`
                     <span class="btn-loader"></span>
@@ -106,17 +167,18 @@ $(".verification-box button").click(function () {
                 </strong>
             `);
                 }
-
             } else {
-
                 alert("Failed to send verification email. Please try again.");
             }
         }
     });
 });
 
-// Show posts.html
+// ---------------------------------------------------------------------------
+// Show posts.html on initial load
+// ---------------------------------------------------------------------------
 $(".div3").load("/showPosts/0/0");
+
 // Refresh button functionality
 $(".div4 button").click(function (e) {
     $(".ai-bar").hide();
@@ -136,10 +198,14 @@ $(".switch-account-link").click(function () {
     }
 });
 
-// real all notification after page load
+// ---------------------------------------------------------------------------
+// Mark all notifications as read after the tab loads
+// ---------------------------------------------------------------------------
 function markAsRead() {
     userId = $(".notifications").data("userid");
-    $.ajax({
+
+    // Abort any pending markAsRead call (e.g. rapid tab re-opens).
+    ajaxWithAbort("markAsRead", {
         url: `/notifications/mark_read/${userId}`,
         success: function (response) {
             user_id = $(".div1").attr("class").split(" ")[1];
@@ -150,9 +216,12 @@ function markAsRead() {
             console.error("Error marking notifications as read:", err);
         }
     });
-};
+}
 
-// Notification tab functionality
+// ---------------------------------------------------------------------------
+// Notification tab — load + render notifications
+// (re-clicking the bell cancels any unfinished previous load)
+// ---------------------------------------------------------------------------
 $(".notifications-button").click(function () {
     $(".full-post").hide();
     $(".notifications-tab").show();
@@ -160,30 +229,21 @@ $(".notifications-button").click(function () {
     $(".ai-bar").hide();
     $(".notifications-tab").html('<div class="loader-wrapper"><span class="loader"></span></div>');
     $(".notifications-tab").load("/notifications");
-    $.ajax({
+
+    // Abort any in-flight notifications fetch before starting a new one.
+    ajaxWithAbort("loadNotifications", {
         url: "/notifications",
         method: "GET",
         success: function (response) {
-            // Create dummy container to extract HTML + scripts
-            let dummy = $("<div>").html(response);
-            // Extract script tags
-            let scripts = dummy.find("script");
-            // Remove scripts from HTML
-            dummy.find("script").remove();
-            // Insert cleaned HTML into notifications-tab
-            $(".notifications-tab").html(dummy.html());
-            // Execute extracted scripts manually
-            scripts.each(function () {
-                let code = $(this).text();
-                if (code.trim() !== "") {
-                    eval(code);
-                }
-            });
+            injectHtmlResponse($(".notifications-tab"), response);
             markAsRead();
         }
     });
 });
 
+// ---------------------------------------------------------------------------
+// AI button — no fetch here; kept as-is
+// ---------------------------------------------------------------------------
 $(".ai-button").click(function () {
     $(".full-post").hide();
     $(".div2").hide();
@@ -206,12 +266,14 @@ $(".explore-button").click(function () {
     $(".search input").focus();
     $(".notifications-tab").hide();
 });
-// fetching likes posts
+
+// ---------------------------------------------------------------------------
+// Fetching liked posts
+// ---------------------------------------------------------------------------
 $(".likes-button").click(function () {
     var user_id = $(".div1").attr("class").split(" ")[1];
     showPosts(3, user_id);
     exploreAccounts("/exploreAccounts/0/random");
-    // $(".div2").load("/profile/0");
     $(".div2").hide();
     $(".full-post").hide();
     $(".ai-bar").hide();
@@ -219,47 +281,36 @@ $(".likes-button").click(function () {
     $(".notifications-tab").hide();
 });
 
-// show profile on clicking profile link
+// ---------------------------------------------------------------------------
+// Show profile
+// (clicking another profile while one is loading cancels the first request)
+// ---------------------------------------------------------------------------
 function showProfile(user_id) {
     $(".div2").html('<div class="page-loader page-loader--profile"><span class="loader2"></span></div>');
-    $.ajax({
+
+    // Abort any in-flight profile request.
+    ajaxWithAbort("showProfile", {
         url: "/profile/" + user_id,
         method: "GET",
         success: function (response) {
-            // alert("what am I doing here " + user_id);
-            // Create dummy container to extract HTML + scripts
-            let dummy = $("<div>").html(response);
-
-            // Extract script tags
-            let scripts = dummy.find("script");
-
-            // Remove scripts from HTML
-            dummy.find("script").remove();
-
-            // Insert cleaned HTML into div3
-            $(".div2").html(dummy.html());
-
-            // Execute extracted scripts manually
-            scripts.each(function () {
-                let code = $(this).text();
-                if (code.trim() !== "") {
-                    eval(code);
-                }
-            });
+            injectHtmlResponse($(".div2"), response);
             $(".full-post").hide();
             $(".ai-bar").hide();
             $(".explore-tab").show();
             $(".notifications-tab").hide();
             showPosts(1, user_id);
         }
-    })
-};
+    });
+}
+
 $(".profile-link").click(function () {
-    user_id = $(".div1").attr("class").split(" ")[1]
+    user_id = $(".div1").attr("class").split(" ")[1];
     showProfile(user_id);
 });
 
-// show Home on clicking home link & back to home from profile
+// ---------------------------------------------------------------------------
+// Back to home
+// ---------------------------------------------------------------------------
 function Backtohome() {
     $(".div2").load("/profile/0");
     $(".full-post").hide();
@@ -272,13 +323,13 @@ function Backtohome() {
     $(".home-link").removeClass("link-dark");
     $(".div2").show();
     showPosts(0, 0);
-    // requestNotificationPermission();
 }
 $(".home-link").click(Backtohome);
-// show posts based on for you and following tabs
+
+// Show posts based on "For You" / "Following" tabs
 $(document).on("click", ".top-pages h6", function (e) {
-    e.preventDefault();   // STOP navigation
-    e.stopPropagation();  // EXTRA safety
+    e.preventDefault();
+    e.stopPropagation();
 
     $(".top-pages h6").removeClass("active-a");
     $(this).addClass("active-a");
@@ -289,7 +340,9 @@ $(document).on("click", ".top-pages h6", function (e) {
     return false;
 });
 
-// show full post method
+// ---------------------------------------------------------------------------
+// Show full post method
+// ---------------------------------------------------------------------------
 function showFullPost(e) {
     if (e) {
         e.preventDefault();
@@ -315,8 +368,8 @@ function showFullPost(e) {
         $(".ai-bar").hide();
         $(".full-post").show();
         $(".notifications-tab").hide();
-        // reload sepecific part of page without refreshing entire page and implementing on specific div
-        $('.coreXmanzoid').load('/comments/' + post_id);
+        // reload specific part of page without refreshing entire page
+        $(".coreXmanzoid").load("/comments/" + post_id);
     } else {
         $post.removeClass("active-post");
         $(".explore-tab").show();
@@ -324,6 +377,9 @@ function showFullPost(e) {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Send notification helper (fire-and-forget; no abort needed)
+// ---------------------------------------------------------------------------
 function sendNotification({
     recipientId,
     title,
@@ -349,9 +405,11 @@ function sendNotification({
     });
 }
 
+// ---------------------------------------------------------------------------
 // newPost.html script
+// ---------------------------------------------------------------------------
 
-// Control foryou and following active link
+// Control for-you and following active link
 $(".div2 a").click(function () {
     $(".div2 a").removeClass("active-a");
     $(this).addClass("active-a");
@@ -392,19 +450,26 @@ function prependPost(content, userId) {
     $(".div3 .post").first().find(".post-content .content").text(content);
     return tempId;
 }
+
+// ---------------------------------------------------------------------------
+// Submit post
+// (duplicate submissions are blocked by the disabled button, but we also
+// abort any prior in-flight submit request for safety)
+// ---------------------------------------------------------------------------
 $(".submit button").on("click", function () {
     var content = $("textarea[name='post-input']").val();
     var userId = $(this).data("userid");
     var tempPostId;
-    // Optionally, you can clear the textarea and reset the progress circle
+
     $("textarea").val("");
     $(".progress-circle-indicator").css("stroke-dashoffset", 0);
     $(".progress-circle-indicator").attr("stroke", "#3b82f6");
     $(".submit button").prop("disabled", true);
-    // Prepend the new post to the feed without refreshing using jquery after successful post creation
+
     tempPostId = prependPost(content, userId);
 
-    $.ajax({
+    // Abort any previous submitPost request (e.g. rapid double-submit).
+    ajaxWithAbort("submitPost", {
         url: "/managePosts/1",
         method: "POST",
         contentType: "application/json",
@@ -412,7 +477,6 @@ $(".submit button").on("click", function () {
         success: function (response) {
             if (response.status === "success") {
                 var $newPost = $('.div3 .post[data-postid="' + tempPostId + '"]');
-                // Update the prepended post with the response data
                 $newPost.attr("data-postid", response.post_id);
                 $newPost.find(".post-content .hashtag").text(response.hashtags);
                 $newPost.find(".post-content .content").attr("data-mentions", JSON.stringify(response.mentions));
@@ -423,14 +487,14 @@ $(".submit button").on("click", function () {
                     </svg>`
                 );
                 $(".submit button").prop("disabled", true);
-                // showPosts(0, 0);
+
                 sendNotification({
                     title: "New Post",
                     type: "new_post",
                     identifier: response.post_id,
                     senderId: userId,
                     message: response.username + " has just posted a new tweet.",
-                    state: 2, // send the notification to all followers.
+                    state: 2,
                     Push: "true"
                 }).done(function (res) {
                     console.log("Notification saved:", res);
@@ -438,6 +502,7 @@ $(".submit button").on("click", function () {
                     console.error("Failed to send notification:", err);
                 });
 
+                // Mention notifications — fire-and-forget, no abort needed.
                 $.ajax({
                     url: "/send-mention-notifications",
                     method: "POST",
@@ -458,12 +523,14 @@ $(".submit button").on("click", function () {
                 alert("Failed to post. Please try again.");
             }
         },
-        error: function () {
+        error: function (jqXHR, textStatus) {
+            // ajaxWithAbort already silences "abort"; only real errors reach here.
             alert("An error occurred. Please try again.");
         }
     });
 });
-// Control textarea input characters and progress of circle
+
+// Control textarea input characters and progress circle
 $("textarea").on("input", function () {
     var inputLength = $(this).val().length;
     var maxLength = 180;
@@ -487,15 +554,19 @@ $("textarea").on("input", function () {
     }
 });
 
-// see if the user have recieved any notification and show notification tab dot.
+// ---------------------------------------------------------------------------
+// Check for unread notifications on page load (and after marking as read)
+// (rapid successive calls cancel the previous one)
+// ---------------------------------------------------------------------------
 user_id = $(".div1").attr("class").split(" ")[1];
 checkForNotifications(user_id);
+
 function checkForNotifications(id) {
-    $.ajax({
+    // Abort any pending check before issuing a new one.
+    ajaxWithAbort("checkNotifications", {
         url: "/check-notifications/" + id,
         method: "GET",
         success: function (response) {
-
             const $btn = $(".notifications-button");
             const $svg = $btn.find("svg");
 
@@ -507,7 +578,6 @@ function checkForNotifications(id) {
             const $wrapper = $btn.find(".bell-wrapper");
 
             if (response.unread_count > 0) {
-
                 if ($wrapper.find(".notification-dot").length === 0) {
                     $wrapper.append(`
                         <span class="notification-dot 
@@ -516,7 +586,6 @@ function checkForNotifications(id) {
                         </span>
                     `);
                 }
-
             } else {
                 $wrapper.find(".notification-dot").remove();
             }

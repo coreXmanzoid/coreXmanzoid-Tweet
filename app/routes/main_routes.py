@@ -8,6 +8,19 @@ main_bp = Blueprint("main", __name__)
 def home():
     return render_template("index.html")
 
+@main_bp.route("/about")
+def about():
+    return render_template("about.html")
+
+@main_bp.route("/privacy-policy")
+def privacy_policy():
+    return render_template("privacyPolicy.html")
+
+@main_bp.route("/terms-of-service")
+def terms_of_service():
+    return render_template("termsOfService.html")
+
+
 @main_bp.route("/home", methods=["GET", "POST"])
 @login_required
 def homepage():

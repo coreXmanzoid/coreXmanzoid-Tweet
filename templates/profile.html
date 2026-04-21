@@ -6,7 +6,7 @@
         </div>
         <i class="bi bi-three-dots"></i>
     </div>
-    <img class="img-fluid ps-5 w-75 ms-5 " src="../static/assets/logo1.png">
+    <img class="img-fluid ps-5 w-75 ms-5 " src="{{ url_for('static', filename='assets/logo1.png') }}">
     <div class="profile row">
 
         <div class="info col-lg-6 col-md-12" data-user-id="{{user.id}}">

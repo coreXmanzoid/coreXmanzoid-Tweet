@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About Us — ChatFlick</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Exo+2:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/about.css') }}" />
+</head>
+
+<body>
+
+  <!-- ─── NAV ─── -->
+  <nav>
+    <div class="nav-inner">
+      <a class="nav-brand" href="#">
+        <img src="{{ url_for('static', filename='assets/Logo_horizontal.png') }}" width="180" alt="">
+      </a>
+      <div class="nav-links">
+        <a href="#mission">Mission</a>
+        <a href="#features">Features</a>
+        <a href="#stack">Stack</a>
+        <a href="#developer">Developer</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ─── HERO ─── -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="container">
+      <div class="hero-content">
+        <span class="hero-eyebrow fade-up">About ChatFlick</span>
+        <h1 class="fade-up fade-up-1">
+          Built from passion,<br><em>one commit at a time.</em>
+        </h1>
+        <p class="hero-sub fade-up fade-up-2">
+          ChatFlick is a full-stack social microblogging platform crafted as a
+          year-long academic and personal project — combining modern web
+          development, Python backend engineering, and a genuine love for
+          building things that work.
+        </p>
+        <div class="hero-line fade-up fade-up-3"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── MISSION ─── -->
+  <section id="mission">
+    <div class="container">
+      <div class="mission-grid">
+        <div>
+          <p class="section-label">Our Mission</p>
+          <h2 class="section-title">A space to share, connect, and express.</h2>
+          <p class="section-body">
+            ChatFlick was built with one goal in mind: to create a clean,
+            functional platform where people can share short thoughts, follow
+            others, and engage with content — without the noise.
+          </p>
+          <p class="section-body">
+            This project is an honest demonstration of what a developer can
+            build from scratch — authentication, real-time notifications, an AI
+            assistant, and a polished UI — all woven together through months of
+            focused work.
+          </p>
+        </div>
+        <div class="mission-visual">
+          <div class="mission-card-accent"><img src="{{ url_for('static', filename='assets/Logo_icon.png') }}" width="65"></div>
+          <div class="mission-card">
+            <p class="mission-card-quote">
+              “Behind every line of code is a story. This application is dedicated to the person who became my
+              inspiration — the reason this idea turned into something real. Even the name ‘coreXmanzoid’ traces back to
+              that connection.”
+            </p>
+            <span class="mission-card-author">— M. Hammad Ashraf, Developer</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FEATURES ─── -->
+  <section id="features">
+    <div class="container">
+      <p class="section-label">What's Inside</p>
+      <h2 class="section-title">Core Features</h2>
+      <p class="section-body">
+        ChatFlick covers the full social platform experience — from account
+        management to real-time notifications — implemented end-to-end by a
+        single developer.
+      </p>
+      <div class="features-grid">
+
+        <div class="feature-card">
+          <div class="feature-icon">🔐</div>
+          <h4>Authentication</h4>
+          <p>Email & password login, Google OAuth, CAPTCHA protection, email
+            verification, and secure password reset via tokenized links.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📝</div>
+          <h4>Posts & Feed</h4>
+          <p>Create, edit, and delete posts with hashtag extraction and
+            @mention parsing. Browse a personalized "Following" feed or discover
+            random content.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">❤️</div>
+          <h4>Engagement</h4>
+          <p>Like, repost, share, and comment on posts. Milestone notifications
+            fire at 100, 1K, and 10K likes or reposts to celebrate your reach.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🔔</div>
+          <h4>Notifications</h4>
+          <p>In-app and Firebase push notifications for new followers, likes,
+            comments, reposts, mentions, and milestone events — with deduplication built in.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🤖</div>
+          <h4>Manzoid-AI Assistant</h4>
+          <p>An integrated Groq-powered AI chat assistant to help you draft
+            posts, generate hashtags, summarize content, or just answer
+            questions — contextually aware per session.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">⚙️</div>
+          <h4>Settings & Privacy</h4>
+          <p>Full profile and account management: password change, privacy
+            toggles, notification preferences, theme switching, and an admin
+            dashboard for moderation.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── TECH STACK ─── -->
+  <section id="stack">
+    <div class="container">
+      <p class="section-label">Under the Hood</p>
+      <h2 class="section-title">Technology Stack</h2>
+      <p class="section-body">
+        Every layer of ChatFlick was chosen deliberately — a cohesive stack
+        that balances developer productivity with production capability.
+      </p>
+      <div class="stack-grid">
+
+        <div class="stack-item">
+          <div class="stack-dot"></div>
+          <div>
+            <div class="stack-name">Flask (Python)</div>
+            <div class="stack-desc">Core backend framework — routing, blueprints, session management, and template
+              rendering.</div>
+          </div>
+        </div>
+
+        <div class="stack-item">
+          <div class="stack-dot"></div>
+          <div>
+            <div class="stack-name">SQLAlchemy + PostgreSQL</div>
+            <div class="stack-desc">ORM-backed relational database for users, posts, follows, comments, and
+              notifications.</div>
+          </div>
+        </div>
+
+        <div class="stack-item">
+          <div class="stack-dot"></div>
+          <div>
+            <div class="stack-name">Flask-Login & Authlib</div>
+            <div class="stack-desc">Session-based authentication and Google OAuth 2.0 integration.</div>
+          </div>
+        </div>
+
+        <div class="stack-item">
+          <div class="stack-dot"></div>
+          <div>
+            <div class="stack-name">Firebase Cloud Messaging</div>
+            <div class="stack-desc">Push notification delivery for real-time follower and engagement alerts.</div>
+          </div>
+        </div>
+
+        <div class="stack-item">
+          <div class="stack-dot"></div>
+          <div>
+            <div class="stack-name">Cloudinary</div>
+            <div class="stack-desc">Profile picture storage and transformation with automatic resizing and format
+              optimization.</div>
+          </div>
+        </div>
+
+        <div class="stack-item">
+          <div class="stack-dot"></div>
+          <div>
+            <div class="stack-name">Groq (Llama 3.1)</div>
+            <div class="stack-desc">Fast LLM inference powering the Manzoid-AI assistant with per-session conversation
+              history.</div>
+          </div>
+        </div>
+
+        <div class="stack-item">
+          <div class="stack-dot"></div>
+          <div>
+            <div class="stack-name">Jinja2 + Bootstrap 5</div>
+            <div class="stack-desc">Server-side templating with a responsive, component-driven front-end baseline.</div>
+          </div>
+        </div>
+
+        <div class="stack-item">
+          <div class="stack-dot"></div>
+          <div>
+            <div class="stack-name">jQuery + Vanilla JS</div>
+            <div class="stack-desc">Dynamic UI interactions, AJAX-driven feeds, optimistic updates, and real-time
+              comment loading.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── DEVELOPER ─── -->
+  <section id="developer">
+    <div class="container">
+      <p class="section-label">The Person Behind It</p>
+      <h2 class="section-title">About the Developer</h2>
+      <div class="dev-grid" style="margin-top: 40px;">
+        <div>
+          <div class="dev-avatar"><img src="{{ url_for('static', filename='assets/HammadAshraf.jpeg') }}"></div>
+        </div>
+        <div>
+          <h3 class="dev-name">Muhammad Hammad Ashraf</h3>
+          <p class="dev-role">Full-Stack Developer · Python Engineer</p>
+          <p class="dev-bio">
+            I'm a computer science student at <strong>The Islamia University of
+              Bahawalpur</strong> with a focus on Python backend development and
+            modern web engineering. ChatFlick started as a final project for my
+            Web Development and Python Backend courses and grew into something
+            I'm genuinely proud of — roughly a year of weekends, late nights,
+            and stubborn debugging sessions.
+          </p>
+          <p class="dev-bio">
+            I care about writing clean, maintainable code and building
+            interfaces that feel considered. This project is my most complete
+            demonstration of that — a full product, designed and shipped solo. <br>
+          </p>
+          <div class="dev-tags">
+            <span class="dev-tag">Python</span>
+            <span class="dev-tag">Flask</span>
+            <span class="dev-tag">SQLAlchemy</span>
+            <span class="dev-tag">REST APIs</span>
+            <span class="dev-tag">Firebase</span>
+            <span class="dev-tag">JavaScript</span>
+            <span class="dev-tag">Cloudinary</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── TIMELINE / STATUS ─── -->
+  <section id="status">
+    <div class="container">
+      <p class="section-label">Development Journey</p>
+      <h2 class="section-title">How ChatFlick Grew</h2>
+      <p class="section-body">
+        At the end of each day, She is the only that listens what I have done today. In those simple conversations,
+        the tiredness of the day slowly faded away. This project slowly took shape, one day at a time.
+      </p>
+      <div class="timeline">
+
+        <div class="tl-item">
+          <div class="tl-left">
+            <div class="tl-dot"></div>
+            <div class="tl-line"></div>
+          </div>
+          <div>
+            <p class="tl-date">Phase 1 — Foundation</p>
+            <p class="tl-text">Authentication & User System</p>
+            <p class="tl-sub">Email/password signup, login, CAPTCHA validation, and the core user model with
+              verification flows.</p>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-left">
+            <div class="tl-dot"></div>
+            <div class="tl-line"></div>
+          </div>
+          <div>
+            <p class="tl-date">Phase 2 — Social Layer</p>
+            <p class="tl-text">Posts, Feeds & Engagement</p>
+            <p class="tl-sub">Post creation with hashtag extraction, follow relationships, likes, reposts, sharing, and
+              comment threads.</p>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-left">
+            <div class="tl-dot"></div>
+            <div class="tl-line"></div>
+          </div>
+          <div>
+            <p class="tl-date">Phase 3 — Intelligence & Polish</p>
+            <p class="tl-text">AI Assistant, Notifications & Settings</p>
+            <p class="tl-sub">Groq-powered AI chat, Firebase push notifications with deduplication, full settings
+              management, and admin dashboard.</p>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-left">
+            <div class="tl-dot"></div>
+          </div>
+          <div>
+            <p class="tl-date">Ongoing</p>
+            <p class="tl-text">Refinement & Future Features</p>
+            <p class="tl-sub">Bug fixes, performance improvements, and new capabilities actively in development.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── VISION ─── -->
+  <div class="container">
+    <div class="vision-band">
+      <p class="section-label">What's Next</p>
+      <h2 class="section-title">Future Vision</h2>
+      <p class="section-body">
+        ChatFlick is an evolving project. The foundation is solid — the next
+        chapter is about deepening the experience, hardening the platform, and
+        exploring what comes naturally when you keep building with intent.
+      </p>
+      <div class="vision-items">
+        <div class="vision-item">
+          <div class="vision-check">📱</div>
+          <p><strong style="color:#FBF3D1">Native Mobile App</strong> — A dedicated iOS and Android experience built on
+            top of the existing API.</p>
+        </div>
+        <div class="vision-item">
+          <div class="vision-check">🌐</div>
+          <p><strong style="color:#FBF3D1">Open Platform</strong> — Exploring community deployments and potentially
+            open-sourcing core modules.</p>
+        </div>
+        <div class="vision-item">
+          <div class="vision-check">🤖</div>
+          <p><strong style="color:#FBF3D1">Smarter AI</strong> — Expanding Manzoid-AI with longer context memory, post
+            analysis, and writing tools.</p>
+        </div>
+        <div class="vision-item">
+          <div class="vision-check">✨</div>
+          <p><strong style="color:#FBF3D1">Pro Tier</strong> — A premium subscription model with verified badges,
+            advanced analytics, and priority AI access.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── CONTACT ─── -->
+  <section id="contact" style="padding-top: 80px;">
+    <div class="container">
+      <p class="section-label">Get In Touch</p>
+      <h2 class="section-title">Contact & Feedback</h2>
+      <p class="section-body">
+        Have a suggestion, found a bug, or just want to say hello? Reach out
+        directly — all messages are read personally.
+      </p>
+      <div class="contact-grid">
+
+        <div class="contact-card">
+          <div class="contact-icon">📧</div>
+          <div>
+            <p class="contact-label">Email</p>
+            <a href="mailto:coreXmanzoid@gmail.com" class="contact-value">coreXmanzoid@gmail.com</a>
+          </div>
+        </div>
+
+        <div class="contact-card">
+          <div class="contact-icon">📞</div>
+          <div>
+            <p class="contact-label">Phone / WhatsApp</p>
+            <a href="tel:+923136382001" class="contact-value">+92 313 638 2001</a>
+          </div>
+        </div>
+
+        <div class="contact-card">
+          <div class="contact-icon">🎓</div>
+          <div>
+            <p class="contact-label">Institution</p>
+            <span class="contact-value">The Islamia University of Bahawalpur</span>
+          </div>
+        </div>
+
+        <div class="contact-card">
+          <div class="contact-icon">🚀</div>
+          <div>
+            <p class="contact-label">Project</p>
+            <span class="contact-value">ChatFlick by coreXmanzoid</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ─── -->
+  <footer>
+    <p>© 2026 <strong>ChatFlick</strong> — Built by M. Hammad Ashraf &nbsp;·&nbsp; <a
+        href="mailto:coreXmanzoid@gmail.com"
+        style="color:var(--accent); text-decoration:none;">coreXmanzoid@gmail.com</a></p>
+  </footer>
+
+</body>
+
+</html>

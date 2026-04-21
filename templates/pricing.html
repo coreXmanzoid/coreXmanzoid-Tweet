@@ -1,0 +1,378 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>coreXmanzoid</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='assets/logo.png')}}" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles01.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles01.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/setting.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pro.css') }}">
+</head>
+
+<body>
+
+
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/"><img class="img-fluid" id="navImg"
+                    src="{{ url_for('static', filename='assets/Logo_horizontal.png') }}" alt=""></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+                aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="ps-2 navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.about') }}">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#pricing-section">Pricing Plan</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Help & Supports</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#faqs">FAQs</a>
+                    </li>
+                </ul>
+                {% if user is none %}
+                <div class="d-flex ms-auto">
+                        <a href="{{ url_for('auth.login') }}" class="me-2"><button class="py-3 px-4">Login</button></a>
+                        <a href="{{ url_for('auth.signup') }}" ><button class="p-3">Sign Up</button></a>
+                    </div>
+                {% else %}
+                <div class="d-flex ms-auto">
+                    <div class="nav-item dropdown m-3">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            {{ user.name }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" id="first" href="#">@{{ user.username }}</a></li>
+                            <li><a class="dropdown-item" href="#">My Profile</a></li>
+                            <li><a class="dropdown-item" href="#">Switch Account</a></li>
+                        </ul>
+                    </div>
+                    <img src="{{ user.profile_image_url if user.profile_image_url else '../static/assets/default-profile.jpg' }}" id="navprofile" class="img-fluid">
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-tag">Simple Pricing</div>
+        <h1>Choose your<br><em>ChatFlick</em> plan</h1>
+        <p>Start free. Upgrade when you need more reach, analytics, and power.</p>
+
+        <!-- TOGGLE -->
+        <div class="toggle-wrap">
+            <button class="toggle-btn active" id="btn-monthly" onclick="setToggle('monthly')">Monthly</button>
+            <button class="toggle-btn" id="btn-yearly" onclick="setToggle('yearly')">
+                Yearly
+                <span class="badge-save">-20%</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- CARDS -->
+    <section class="pricing-section">
+        <div class="cards-row">
+
+            <!-- FREE -->
+            <div class="plan-card">
+                <div class="plan-icon free-icon"><i class="bi bi-feather"></i></div>
+                <div class="plan-name">Free</div>
+                <div class="plan-price">
+                    <sup>$</sup><span class="price-val" id="price-free">0</span>
+                </div>
+                <div class="plan-muted" id="period-free">Forever free</div>
+                <hr class="divider" />
+                <div class="features-label">What's included</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Up to 50 flicks per month</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Maximum 180 characters per flick</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Basic profile customization</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Web access only</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Limited access to AI features</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Single-device login</div>
+                <div class="feature-item disabled"><i class="bi bi-x-circle"></i> Edit flicks after posting</div>
+                <div class="feature-item disabled"><i class="bi bi-x-circle"></i> Verified Badge</div>
+                <div class="feature-item disabled"><i class="bi bi-x-circle"></i> Ad-free experience</div>
+                <button class="btn-plan btn-free mt-3">Get started free</button>
+            </div>
+
+            <!-- PRO (featured) -->
+            <div class="plan-card featured">
+                <span class="popular-badge">Most Popular</span>
+                <div class="plan-icon pro-icon"><i class="bi bi-lightning-fill"></i></div>
+                <div class="plan-name">Pro</div>
+                <div class="plan-price">
+                    <sup>$</sup><span class="price-val" id="price-pro">12</span>&nbsp;<small><s>$15</s></small>
+                </div>
+                <div class="plan-muted" id="period-pro">per month, billed monthly</div>
+                <hr class="divider" />
+                <div class="features-label">Everything in Free, plus</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Unlimited flicks</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Verified Red badge</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Maximum 230 characters per flick</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Multi Devices Access</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Access to Manzoid-AI</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Access to Manzoid-AI</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Web & Mobile Access</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Edit flicks after posting</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Priority in search results</div>
+                <div class="feature-item disabled"><i class="bi bi-x-circle"></i> Maintain history of AI Chats</div>
+                <button class="btn-plan btn-pro mt-3">Start Pro <i class="bi bi-arrow-right"></i></button>
+            </div>
+
+            <!-- ENTERPRISE -->
+            <div class="plan-card">
+                <div class="plan-icon enterprise-icon"><i class="bi bi-buildings-fill"></i></div>
+                <div class="plan-name">Enterprise</div>
+                <div class="plan-price">
+                    <sup>$</sup><span class="price-val" id="price-ent">49</span>&nbsp;<small><s>$60</s></small>
+                </div>
+                <div class="plan-muted" id="period-ent">per month, billed monthly</div>
+                <hr class="divider" />
+                <div class="features-label">Everything in Pro, plus</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Up to 25 team seats</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Dedicated account manager</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> No Limit on flick length</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Advanced brand analytics</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> API access & integrations</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Maintain history of AI Chats</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Custom onboarding & SSO</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> SLA & priority support</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> White-label options</div>
+                <button class="btn-plan btn-enterprise mt-3">Contact sales</button>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="faqs">
+        <div class="app-item faq-item">
+            <div class="faq-header">
+                <div>
+                    <strong>FAQs</strong>
+                    <span class="muted">Everything you need to know before choosing a plan.</span>
+                </div>
+                <span class="faq-badge" style="cursor: pointer; text-align: center;">Help Center</span>
+            </div>
+
+            <div class="faq-intro">
+                <h3>Pricing & Plans FAQ</h3>
+                <p>Everything you need to know about Free, Pro, and Enterprise plans—features, limits, and upgrades.</p>
+            </div>
+
+            <div class="faq-container">
+
+                <div class="faq active">
+                    <div class="faq-question">
+                        What is included in the Free plan?
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        The Free plan gives you access to core features like limited monthly flicks, basic profile
+                        customization,
+                        and access to Manzoid-AI with restrictions. It’s perfect for exploring the platform before
+                        upgrading.
+                    </div>
+                </div>
+
+                <div class="faq">
+                    <div class="faq-question">
+                        What extra benefits do I get with the Pro plan?
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        The Pro plan unlocks higher limits, advanced content tools, full access to Manzoid-AI, and a
+                        verified badge.
+                        You’ll also enjoy an ad-free experience and better overall performance.
+                    </div>
+                </div>
+
+                <div class="faq">
+                    <div class="faq-question">
+                        Who should choose the Enterprise plan?
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        The Enterprise plan is designed for power users, teams, and businesses. It offers maximum
+                        limits, priority
+                        support, advanced analytics, multi-device access, and exclusive premium features.
+                    </div>
+                </div>
+
+                <div class="faq">
+                    <div class="faq-question">
+                        Can I upgrade or downgrade my plan anytime?
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        Yes, you can switch between Free, Pro, and Enterprise plans at any time. Changes take effect
+                        immediately or
+                        at the next billing cycle, depending on your subscription.
+                    </div>
+                </div>
+
+                <div class="faq">
+                    <div class="faq-question">
+                        Will I lose my data if I change my plan?
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        No, your data is always safe. However, some features may become limited if you downgrade to a
+                        lower plan.
+                    </div>
+                </div>
+
+                <div class="faq">
+                    <div class="faq-question">
+                        Is there a free trial for Pro or Enterprise?
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        Depending on current offers, we may provide free trials for Pro or Enterprise plans. Check the
+                        pricing page
+                        for the latest availability.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <footer class="text-light pt-5 pb-3 mt-5">
+        <div class="container">
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4 mb-4">
+
+                <div class="col">
+                    <h6 class="text-uppercase fw-bold text-white mb-3">Plans</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#" class="text-secondary text-decoration-none">Free</a></li>
+                        <li class="mb-2"><a href="#" class="text-secondary text-decoration-none">Pro</a></li>
+                        <li class="mb-2"><a href="#" class="text-secondary text-decoration-none">Business</a></li>
+                        <li class="mb-2"><a href="#" class="text-secondary text-decoration-none">Enterprise</a></li>
+                    </ul>
+                </div>
+
+                <div class="col">
+                    <h6 class="text-uppercase fw-bold text-white mb-3">Compare Plans</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#" class="text-secondary text-decoration-none">Feature
+                                Comparison</a></li>
+                        <li class="mb-2"><a href="#" class="text-secondary text-decoration-none">FAQ</a></li>
+                        <li class="mb-2"><a href="#" class="text-secondary text-decoration-none">What's Included</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col">
+                    <h6 class="text-uppercase fw-bold text-white mb-3">Billing</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#" class="text-secondary text-decoration-none">Monthly</a></li>
+                        <li class="mb-2">
+                            <a href="#" class="text-secondary text-decoration-none">
+                                Annual
+                                <span class="badge ms-1" style="background-color: #f94818;">Save 20%</span>
+                            </a>
+                        </li>
+                        <li class="mb-2"><a href="#" class="text-secondary text-decoration-none">Manage
+                                Subscription</a></li>
+                        <li class="mb-2"><a href="#" class="text-secondary text-decoration-none">Cancel Plan</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col">
+                    <h6 class="text-uppercase fw-bold text-white mb-3">Support</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#" class="text-secondary text-decoration-none">Contact Sales</a>
+                        </li>
+                        <li class="mb-2"><a href="#" class="text-secondary text-decoration-none">Help Center</a>
+                        </li>
+                        <li class="mb-2"><a href="#" class="text-secondary text-decoration-none">Refund Policy</a>
+                        </li>
+                    </ul>
+                    <a href="#" class="btn btn-outline-light btn-sm mt-2 text-dark">Talk to Us</a>
+                </div>
+
+            </div>
+
+            <hr class="border-secondary">
+
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                <p class="mb-0 text-secondary small">&copy; 2026 coreXmanzoid, Inc. All rights reserved.</p>
+                <nav class="d-flex gap-3">
+                    <a href="{{ url_for('main.privacy_policy') }}" class="text-secondary text-decoration-none small">Privacy Policy</a>
+                    <a href="{{ url_for('main.terms_of_service') }}" class="text-secondary text-decoration-none small">Terms of Service</a>
+                    <a href="#" class="text-secondary text-decoration-none small">Cookie Policy</a>
+                </nav>
+            </div>
+        </div>
+    </footer>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script>
+        document.querySelectorAll(".faq-question").forEach((item) => {
+            item.addEventListener("click", function () {
+                const parent = item.parentElement;
+                document.querySelectorAll(".faq").forEach((faq) => {
+                    if (faq !== parent) {
+                        faq.classList.remove("active");
+                    }
+                });
+                parent.classList.toggle("active");
+            });
+        });
+
+        const prices = {
+            monthly: { pro: 12, ent: 49, proPeriod: 'per month, billed monthly', entPeriod: 'per month, billed monthly' },
+            yearly: { pro: 10, ent: 39, proPeriod: 'per month, billed annually', entPeriod: 'per month, billed annually' }
+        };
+
+        let current = 'monthly';
+
+        function setToggle(mode) {
+            if (mode === current) return;
+            current = mode;
+
+            $('#btn-monthly, #btn-yearly').removeClass('active');
+            $(`#btn-${mode}`).addClass('active');
+
+            const vals = prices[mode];
+
+            // Animate price change
+            $('.price-val').addClass('fade-out');
+            setTimeout(() => {
+                $('#price-pro').text(vals.pro);
+                $('#price-ent').text(vals.ent);
+                $('#period-pro').text(vals.proPeriod);
+                $('#period-ent').text(vals.entPeriod);
+
+                if (mode === 'yearly') {
+                    $('#period-free').text('Forever free · save 20% on paid');
+                } else {
+                    $('#period-free').text('Forever free');
+                }
+
+                $('.price-val').removeClass('fade-out');
+            }, 220);
+        }
+    </script>
+</body>
+
+</html>

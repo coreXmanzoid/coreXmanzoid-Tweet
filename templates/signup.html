@@ -13,7 +13,7 @@
     <section id="signup">
         <div class="signup-page">
             <div class="signup-text d-none d-sm-block" style="padding: 0px 50px;">
-                <img src="../static/assets/Logo_horizontal.png" class="logoimg img-fluid">
+                <img src="{{ url_for('static', filename='/assets/Logo_horizontal.png') }}" class="logoimg img-fluid">
                 <h1>Welcome! We’re glad you’re here.</h1>
                 <ul>
                     <li>Create your account to get started, share your thoughts, and connect with people in real life.
@@ -21,8 +21,9 @@
                     <li>Your security matters — we’ve built a platform designed to keep your account safe.</li>
                     <li>Get high quality refining, generating, and visualizing a post through Manzoid-AI.</li>
                 </ul>
-                <h6>By signing up, you agree to our <a href="" style="color: #FBF3D1">Terms of Service</a> and <a
-                        href="" style="color: #FBF3D1;">Privacy</a>
+                <h6>By signing up, you agree to our <a href="{{ url_for('main.terms_of_service') }}"
+                        style="color: #FBF3D1">Terms of Service</a> and <a href="{{ url_for('main.privacy_policy') }}"
+                        style="color: #FBF3D1;">Privacy</a>
             </div>
             <center>
                 <form action="{{ url_for('auth.signup', st=0) }}" method="post">
@@ -39,7 +40,6 @@
                         {% endwith %}
                         <input type="text" name="name" placeholder="Your Full Name*" required>
                         <input type="text" name="username" placeholder="Username*" required>
-                        <input type="number" name="phone" placeholder="Phone Number">
                         <input type="email" name="email" placeholder="Email*" required>
                         <input type="text" name="birthDate" placeholder="Enter your birthdate"
                             onfocus="this.type='date'" required>
@@ -47,7 +47,7 @@
                         <br><small id="passwordStrength" style="color: red;"></small>
                         <div class="cf-turnstile" data-sitekey="0x4AAAAAACmwFzmV2GwylvEi">
                         </div>
-                        <a href=""><button type="submit" class="submitbutton" disabled>Signup</button></a>
+                        <a href=""><button type="submit" id="signup-button" class="submitbutton" disabled>Signup</button></a>
                     </div>
                 </form>
                 <h6 class="my-3">Already have account?<a href="{{ url_for('auth.login') }}">Login</a></h6>
@@ -59,22 +59,35 @@
 
     <footer class="py-3 my-4">
         <ul class="nav justify-content-center border-bottom pb-3 mb-3">
-            <li class="nav-item"><a href="#" class="nav-link px-2 text-body-secondary">Home</a></li>
+            <li class="nav-item"><a href="{{ url_for('main.home') }}" class="nav-link px-2 text-body-secondary">Home</a>
+            </li>
             <li class="nav-item"><a href="#" class="nav-link px-2 text-body-secondary">Features</a></li>
-            <li class="nav-item"><a href="#" class="nav-link px-2 text-body-secondary">Pricing</a></li>
+            <li class="nav-item"><a href="{{ url_for('pricing.pricing') }}"
+                    class="nav-link px-2 text-body-secondary">Pricing</a></li>
             <li class="nav-item"><a href="#" class="nav-link px-2 text-body-secondary">FAQs</a></li>
-            <li class="nav-item"><a href="#" class="nav-link px-2 text-body-secondary">About</a></li>
+            <li class="nav-item"><a href="{{ url_for('main.about') }}"
+                    class="nav-link px-2 text-body-secondary">About</a></li>
         </ul>
-        <p class="text-center text-body-secondary">© 2026 Company, Inc</p>
+        <p class="text-center text-body-secondary">© 2026 coreXmanzoid, Inc</p>
+        <p class="text-center text-body-secondary">Built with <i class="bi bi-heart-fill" style="color: red;"></i> by
+            coreXmanzoid</p>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script>
-        const data = {{ data | default({"emailAlreadyExist": "false"}) | tojson }};
+        const data = {{ data | default ({ "emailAlreadyExist": "false" }) | tojson }};
         const birthDateInput = document.querySelector("input[name='birthDate']");
         if (birthDateInput) {
             birthDateInput.max = new Date().toISOString().split("T")[0];
         }
+        $('#signup-button').click(function () {
+            let button = $(this);
+            button.prop("disabled", true);
+            button.html(`
+        <span class="btn-loader"></span>
+        signing up...
+    `);
+        });
     </script>
     <script src="{{ url_for('static', filename='js/signup.js') }}"></script>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>

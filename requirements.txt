@@ -1,0 +1,8 @@
+Flask
+Flask-Login
+SQLAlchemy
+python-dotenv
+firebase-admin
+cloudinary
+Werkzeug
+psycopg2-binary

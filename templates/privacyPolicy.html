@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy — ChatFlick by coreXmanzoid</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,300;0,500;0,700;0,900;1,300&family=DM+Serif+Display:ital@0;1&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/privacy&terms.css">
+</head>
+
+<body>
+
+    <!-- ── HEADER ─────────────────────────────────────────────── -->
+    <header class="site-header">
+        <a class="logo-wrap" href="/">
+            <img src="{{ url_for('static', filename='assets/Logo_horizontal.png') }}" width="180">
+        </a>
+        <div class="header-right">
+            <span class="header-chip">Privacy Policy</span>
+            <a class="privacy-link" href="{{ url_for('main.terms_of_service') }}">Terms of Service →</a>
+            <a class="privacy-link" href="{{ url_for('main.about') }}">About Us →</a>
+        </div>
+    </header>
+
+    <!-- ── HERO ───────────────────────────────────────────────── -->
+    <section class="hero">
+        <div class="hero-eyebrow">Legal Document</div>
+        <h1>Your Privacy,<br><em>Our Commitment.</em></h1>
+        <div class="hero-meta">
+            <div class="hero-meta-pill">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm4.24 16L12 15.45 7.77 18l1.12-4.81-3.73-3.23 4.92-.42L12 5l1.92 4.53 4.92.42-3.73 3.23L16.23 18z" />
+                </svg>
+                Last updated: April 19, 2026
+            </div>
+            <div class="hero-meta-pill">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
+                </svg>
+                Applies to ChatFlick by coreXmanzoid
+            </div>
+        </div>
+    </section>
+
+    <!-- ── MAIN LAYOUT ─────────────────────────────────────────── -->
+    <div class="layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <p class="sidebar-label">On this page</p>
+            <ul class="toc">
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#data-collected">Data We Collect</a></li>
+                <li><a href="#how-we-use">How We Use It</a></li>
+                <li><a href="#authentication">Authentication</a></li>
+                <li><a href="#posts-content">Posts &amp; Content</a></li>
+                <li><a href="#notifications">Notifications</a></li>
+                <li><a href="#ai-assistant">Manzoid‑AI</a></li>
+                <li><a href="#third-parties">Third Parties</a></li>
+                <li><a href="#pricing">Pricing Policy</a></li>
+                <li><a href="#your-rights">Your Rights</a></li>
+                <li><a href="#data-security">Data Security</a></li>
+                <li><a href="#children">Children</a></li>
+                <li><a href="#changes">Policy Changes</a></li>
+                <li><a href="#contact">Contact Us</a></li>
+            </ul>
+        </aside>
+
+        <!-- Content -->
+        <main class="content">
+
+            <!-- OVERVIEW -->
+            <section class="section-block" id="overview">
+                <div class="section-tag"><span class="dot"></span>Introduction</div>
+                <h2>Overview</h2>
+                <p>ChatFlick ("we", "us", or "our") is a social microblogging platform built by
+                    <strong>coreXmanzoid</strong>. This <a href="{{ url_for('main.privacy_policy') }}"
+                        style="color:var(--fire);font-weight:700;">Privacy Policy</a> explains what personal information
+                    we collect,
+                    why we collect it, and how you can exercise control over it.
+                </p>
+                <p>By creating an account or using any part of ChatFlick, you agree to the practices described in this
+                    document. If you disagree with any part of this policy, please do not use the platform.</p>
+                <div class="highlight-card">
+                    <div class="icon">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" />
+                        </svg>
+                    </div>
+                    <p>ChatFlick does not sell your personal data to advertisers or third-party marketers. Our platform
+                        is entirely ad-free within our own products.</p>
+                </div>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- DATA COLLECTED -->
+            <section class="section-block" id="data-collected">
+                <div class="section-tag"><span class="dot"></span>Data Collection</div>
+                <h2>Data We Collect</h2>
+                <p>We collect information you provide directly and information generated automatically when you use the
+                    platform.</p>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>What we collect</th>
+                            <th>When</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Account info</strong></td>
+                            <td>Full name, username, email address, phone number, date of birth, hashed password,
+                                account status</td>
+                            <td>Sign-up</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Profile data</strong></td>
+                            <td>Profile photo URL (stored on Cloudinary), bio, website, about section</td>
+                            <td>Profile setup &amp; settings</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Content</strong></td>
+                            <td>Posts, comments, hashtags, @mentions, edit history (3-minute window)</td>
+                            <td>Posting &amp; commenting</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Social graph</strong></td>
+                            <td>Follower and following relationships</td>
+                            <td>Follow actions</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Engagement</strong></td>
+                            <td>Liked post IDs, reposted post IDs, share counts, comment likes</td>
+                            <td>Engagement actions</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Notifications</strong></td>
+                            <td>Firebase Cloud Messaging (FCM) token, notification read/unread state</td>
+                            <td>Push setup &amp; browsing</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Support &amp; reports</strong></td>
+                            <td>Support request messages and category, problem reports, admin replies</td>
+                            <td>Help Center usage</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Settings</strong></td>
+                            <td>Privacy preferences, notification preferences, theme choice</td>
+                            <td>Settings page</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Google OAuth</strong></td>
+                            <td>Name, email, Google-provided profile info</td>
+                            <td>Google sign-in only</td>
+                        </tr>
+                        <tr>
+                            <td><strong>AI chat history</strong></td>
+                            <td>Last 2 message exchanges (in-process memory only; resets on server restart)</td>
+                            <td>Manzoid-AI usage</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p>We do <strong>not</strong> collect payment card information, precise geolocation, or biometric data.
+                </p>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- HOW WE USE -->
+            <section class="section-block" id="how-we-use">
+                <div class="section-tag"><span class="dot"></span>Usage</div>
+                <h2>How We Use Your Data</h2>
+                <p>Your data is used exclusively to operate, improve, and secure ChatFlick. Specific uses include:</p>
+                <div class="pill-list">
+                    <span class="pill">🔐 Account authentication</span>
+                    <span class="pill">📰 Personalising your feed</span>
+                    <span class="pill">🔔 Sending in-app &amp; push notifications</span>
+                    <span class="pill">🤖 Powering Manzoid-AI context</span>
+                    <span class="pill">👥 Building social graph suggestions</span>
+                    <span class="pill">🛡️ Admin moderation &amp; safety</span>
+                    <span class="pill">📧 Email verification &amp; password reset</span>
+                    <span class="pill">📦 Account data export</span>
+                    <span class="pill">🎨 Applying your theme preference</span>
+                    <span class="pill">📊 Follower milestone alerts</span>
+                </div>
+                <p>We do not use your data to build advertising profiles, train third-party machine learning models, or
+                    share it with data brokers.</p>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- AUTHENTICATION -->
+            <section class="section-block" id="authentication">
+                <div class="section-tag"><span class="dot"></span>Sign-in</div>
+                <h2>Authentication &amp; Account Security</h2>
+                <p>Passwords are hashed using PBKDF2-SHA256 before storage. We never store or transmit plaintext
+                    passwords.</p>
+                <p>We support two sign-in methods:</p>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>Data handling</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Email + Password</strong></td>
+                            <td>Credentials verified locally. A signed time-limited token (20-minute expiry) is used for
+                                email verification and password reset flows. Reset requests return the same response
+                                whether an email exists or not, to prevent user enumeration.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Google OAuth</strong></td>
+                            <td>We receive your name and email from Google's OpenID Connect endpoint. No Google access
+                                tokens are stored after authentication. Accounts created via Google are automatically
+                                marked as Verified.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>All authentication flows require Cloudflare Turnstile CAPTCHA validation to prevent automated abuse.
+                </p>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- POSTS -->
+            <section class="section-block" id="posts-content">
+                <div class="section-tag"><span class="dot"></span>Content</div>
+                <h2>Posts &amp; User Content</h2>
+                <p>Content you post — including text, hashtags, and @mentions — is stored in our database and displayed
+                    to other users according to your privacy settings. Hashtags are extracted and stored separately to
+                    enable discovery features.</p>
+                <div class="highlight-card">
+                    <div class="icon">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                        </svg>
+                    </div>
+                    <p>Posts can be edited or deleted only within a 3-minute window after creation. Deleting a post
+                        cascades — all associated comments and likes are removed from our database.</p>
+                </div>
+                <p>@Mentions create structured references stored as JSON alongside the post. Mentioned users may receive
+                    in-app notifications. Engagement data (likes, reposts, shares, comment counts) is stored as running
+                    counters and per-user tracking arrays to ensure uniqueness.</p>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- NOTIFICATIONS -->
+            <section class="section-block" id="notifications">
+                <div class="section-tag"><span class="dot"></span>Alerts</div>
+                <h2>Notifications &amp; Push Tokens</h2>
+                <p>If you grant notification permission, your browser provides a Firebase Cloud Messaging (FCM) token.
+                    This token is stored securely in your user record and used solely to deliver push notifications
+                    about activity on ChatFlick.</p>
+                <p>You can disable push notifications at any time in <strong>Settings → Notifications</strong>. Revoking
+                    browser notification permission will prevent push delivery. You control which event types trigger
+                    notifications (likes, comments, follows, reposts, mentions).</p>
+                <p>Self-notifications are suppressed — you will not receive a notification for your own actions. Push
+                    delivery silently fails if Firebase is not configured or if your device token has expired; we do not
+                    retry or log failed attempts against your profile.</p>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- AI ASSISTANT -->
+            <section class="section-block" id="ai-assistant">
+                <div class="section-tag"><span class="dot"></span>AI Features</div>
+                <h2>Manzoid-AI Assistant</h2>
+                <p>ChatFlick includes an AI chat assistant powered by the <strong>Groq API</strong> (Llama
+                    3.1-8b-instant model). When you send a message to Manzoid-AI:</p>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>What happens</th>
+                            <th>Detail</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Message limit</strong></td>
+                            <td>Authenticated chat is limited to 130 characters per message. The public endpoint is
+                                limited to 100 characters.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Short-term memory</strong></td>
+                            <td>The last 2 exchanges are held in server process memory to provide context. This data is
+                                never written to our database.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Session resets</strong></td>
+                            <td>Chat history is lost when the server restarts. There is no persistent conversation
+                                storage.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Third-party processing</strong></td>
+                            <td>Your messages are sent to Groq's API for inference. Groq's own privacy policy applies to
+                                their processing.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Availability</strong></td>
+                            <td>The AI feature depends on external API connectivity. Unavailability is surfaced as an
+                                error and does not affect your account data.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- THIRD PARTIES -->
+            <section class="section-block" id="third-parties">
+                <div class="section-tag"><span class="dot"></span>External Services</div>
+                <h2>Third-Party Services</h2>
+                <p>ChatFlick relies on a small set of trusted third-party providers. Each receives only the data
+                    necessary to perform its function:</p>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Service</th>
+                            <th>Purpose</th>
+                            <th>Data shared</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Neon (PostgreSQL Database Service)</strong></td>
+                            <td>Stores and manages application data (users, posts, comments, notifications, settings).
+                            </td>
+                            <td>User info (username, email, hashed password), content data (posts, comments), activity
+                                data.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cloudinary</strong></td>
+                            <td>Profile image hosting &amp; transformation</td>
+                            <td>Uploaded image file only. Images are stored under a per-user ID, overwritten on each
+                                update.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Firebase (Google)</strong></td>
+                            <td>Push notification delivery</td>
+                            <td>FCM device token and notification payload (title, body, type, identifier).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Groq</strong></td>
+                            <td>Manzoid-AI language model inference</td>
+                            <td>Your chat message and a short context window of prior exchanges.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Google OAuth</strong></td>
+                            <td>Sign-in with Google</td>
+                            <td>Name and email received from Google's OpenID Connect endpoint at sign-in only.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cloudflare Turnstile</strong></td>
+                            <td>Bot protection on auth flows</td>
+                            <td>CAPTCHA challenge token and your IP address (not stored by us).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SMTP (Gmail)</strong></td>
+                            <td>Transactional email (verification, password reset)</td>
+                            <td>Your email address and the one-time signed link.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>We do not integrate any advertising networks, analytics trackers (e.g. Google Analytics), or social
+                    login kits beyond Google OAuth.</p>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- PRICING POLICY -->
+            <section class="section-block" id="pricing">
+                <div class="section-tag"><span class="dot"></span>Pricing</div>
+                <h2>Pricing Policy</h2>
+                <p>ChatFlick offers a free base tier for all registered users and two paid upgrade tiers —
+                    <strong>Pro</strong> and <strong>Enterprise</strong> — that unlock additional capabilities. This
+                    section describes what each plan costs, what it includes, and how billing, refunds, and
+                    cancellations are handled.</p>
+
+                <div class="highlight-card">
+                    <div class="icon">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm4.24 16L12 15.45 7.77 18l1.12-4.81-3.73-3.23 4.92-.42L12 5l1.92 4.53 4.92.42-3.73 3.23L16.23 18z" />
+                        </svg>
+                    </div>
+                    <p><strong>Current status:</strong> Pro status is currently granted manually by an administrator at
+                        no charge during ChatFlick's early-access period. The pricing below represents our planned
+                        commercial tiers. Existing manually-granted Pro accounts will be grandfathered at no cost until
+                        a transition date communicated via in-app notice at least 30 days in advance.</p>
+                </div>
+
+                <!-- Plan comparison table -->
+                <table class="data-table" style="margin-top:28px;">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Free</th>
+                            <th>Pro — $12 / mo</th>
+                            <th>Enterprise — $49 / mo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>All core social features</strong></td>
+                            <td>✓</td>
+                            <td>✓</td>
+                            <td>✓</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Verified badge on profile</strong></td>
+                            <td>Email only</td>
+                            <td>✓ Pro badge</td>
+                            <td>✓ Enterprise badge</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Manzoid-AI message limit</strong></td>
+                            <td>100 chars (public endpoint)</td>
+                            <td>130 chars + priority queue</td>
+                            <td>Unlimited + dedicated context</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Manzoid-AI conversation memory</strong></td>
+                            <td>Last 2 exchanges</td>
+                            <td>Last 8 exchanges</td>
+                            <td>Persistent session history</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Post character limit</strong></td>
+                            <td>180 characters</td>
+                            <td>230 characters</td>
+                            <td>unlimited characters</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Post edit window</strong></td>
+                            <td>no edit</td>
+                            <td>3 minutes</td>
+                            <td>10 minutes</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Profile image quality</strong></td>
+                            <td>256 × 256 px</td>
+                            <td>512 × 512 px</td>
+                            <td>1 024 × 1 024 px</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Following feed limit</strong></td>
+                            <td>10 posts</td>
+                            <td>50 posts</td>
+                            <td>Unlimited</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Push notification delivery</strong></td>
+                            <td>Standard</td>
+                            <td>Priority</td>
+                            <td>Priority + custom payloads</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Admin dashboard access</strong></td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>Read-only analytics view</td>
+                        </tr>
+                        <tr>
+                            <td><strong>API access</strong></td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>REST API key (rate-limited)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Support SLA</strong></td>
+                            <td>5 business days</td>
+                            <td>2 business days</td>
+                            <td>Next business day + dedicated channel</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Data export</strong></td>
+                            <td>Manual (zip download)</td>
+                            <td>Manual (zip download)</td>
+                            <td>Scheduled automated exports</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Billing sub-section -->
+                <div style="margin-top:32px;">
+                    <div class="section-tag" style="margin-bottom:10px;"><span class="dot"></span>Billing</div>
+                    <p
+                        style="font-family:'DM Serif Display',serif;font-size:1.35rem;color:var(--ink);margin-bottom:14px;font-weight:400;">
+                        Billing Terms</p>
+                    <p>Paid plans are billed on a <strong>monthly recurring</strong> basis from the date you first
+                        subscribe. Annual billing is available at a <strong>20% discount</strong> (Pro: $144 / yr ·
+                        Enterprise: $468.40 / yr) and is invoiced up-front as a single payment.</p>
+
+                    <div class="pill-list" style="margin:18px 0;">
+                        <span class="pill">💳 Visa, Mastercard, Amex accepted</span>
+                        <span class="pill">🏦 SEPA / ACH bank transfer (Enterprise)</span>
+                        <span class="pill">🔄 Auto-renews each billing period</span>
+                        <span class="pill">📧 Invoice emailed on each charge</span>
+                        <span class="pill">💱 Prices in USD; local taxes may apply</span>
+                    </div>
+
+                    <p>All prices are listed in US Dollars (USD) and are exclusive of any applicable taxes (VAT, GST,
+                        sales tax). Tax is calculated at checkout based on your billing address and applied as a
+                        separate line item. coreXmanzoid is not responsible for any currency conversion fees charged by
+                        your card issuer.</p>
+                </div>
+
+                <!-- Refund sub-section -->
+                <div style="margin-top:28px;">
+                    <div class="section-tag" style="margin-bottom:10px;"><span class="dot"></span>Refunds</div>
+                    <p
+                        style="font-family:'DM Serif Display',serif;font-size:1.35rem;color:var(--ink);margin-bottom:14px;font-weight:400;">
+                        Refund Policy</p>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Scenario</th>
+                                <th>Outcome</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Cancellation within 48 hours of first charge</strong></td>
+                                <td>Full refund issued automatically to the original payment method within 5–10 business
+                                    days.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Cancellation after 48 hours (monthly plan)</strong></td>
+                                <td>No refund for the current billing period. Access continues until the period end
+                                    date.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Cancellation of annual plan within 14 days</strong></td>
+                                <td>Pro-rated refund for unused complete months, minus a 5% processing fee.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Account terminated for policy violation</strong></td>
+                                <td>No refund. Subscription is cancelled immediately with no remaining access period.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Service outage ≥ 24 consecutive hours</strong></td>
+                                <td>Pro-rated credit applied to next billing cycle equal to the downtime proportion of
+                                    your monthly fee.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Duplicate or erroneous charge</strong></td>
+                                <td>Full refund of the duplicate amount issued within 3 business days upon verification.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <p>To request a refund, submit a support ticket via <strong>Settings → Support → Help
+                            Center</strong> with your account email and the charge date. Refunds are processed to the
+                        original payment method and cannot be redirected to a different card or bank account.</p>
+                </div>
+
+                <!-- Cancellation & upgrade sub-section -->
+                <div style="margin-top:28px;">
+                    <div class="section-tag" style="margin-bottom:10px;"><span class="dot"></span>Changes</div>
+                    <p
+                        style="font-family:'DM Serif Display',serif;font-size:1.35rem;color:var(--ink);margin-bottom:14px;font-weight:400;">
+                        Upgrades, Downgrades &amp; Cancellation</p>
+
+                    <div class="pill-list">
+                        <span class="pill">⬆️ Upgrade takes effect immediately; billed pro-rated for the remainder of
+                            the current period</span>
+                        <span class="pill">⬇️ Downgrade takes effect at the next renewal; current plan benefits continue
+                            until then</span>
+                        <span class="pill">❌ Cancel any time; no cancellation fee</span>
+                        <span class="pill">🔒 Data retained for 30 days after downgrade before reverting to Free
+                            limits</span>
+                    </div>
+
+                    <p>When you cancel a paid plan your account reverts to the <strong>Free (Verified)</strong> tier at
+                        the end of the billing period. Your posts, followers, and data are not deleted. Reverting to
+                        Free means any Pro-only content length (characters beyond 180) or AI context history (beyond
+                        last 2 exchanges) will no longer be accessible or editable, but will remain stored and visible
+                        as posted.</p>
+                </div>
+
+                <!-- Enterprise custom section -->
+                <div style="margin-top:28px;">
+                    <div class="section-tag" style="margin-bottom:10px;"><span class="dot"></span>Enterprise</div>
+                    <p
+                        style="font-family:'DM Serif Display',serif;font-size:1.35rem;color:var(--ink);margin-bottom:14px;font-weight:400;">
+                        Enterprise Custom Arrangements</p>
+
+                    <p>Organisations requiring more than 10 seats, custom data-retention agreements, on-premise
+                        deployment, dedicated infrastructure, or bespoke SLA commitments should contact us for a custom
+                        quote. Enterprise contracts are governed by a separate Master Service Agreement (MSA) that
+                        supersedes the standard pricing terms above where they conflict.</p>
+
+                    <div class="highlight-card">
+                        <div class="icon">
+                            <svg viewBox="0 0 24 24">
+                                <path
+                                    d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                            </svg>
+                        </div>
+                        <p>For Enterprise enquiries, email <a href="mailto:corexmanzoid@gmail.com"
+                                style="color:var(--fire);font-weight:700;">enterprise@corexmanzoid.com</a> with your
+                            organisation name, estimated seat count, and any specific compliance requirements (GDPR, SOC
+                            2, HIPAA). We will respond within 2 business days with a tailored proposal.</p>
+                    </div>
+                </div>
+
+                <!-- Price change notice -->
+                <div style="margin-top:28px;">
+                    <p><strong>Price changes:</strong> We reserve the right to adjust subscription pricing. Any price
+                        increase will be communicated by in-app notification and email at least <strong>30 days
+                            before</strong> it applies to your renewal. You may cancel before the new price takes effect
+                        without penalty. Price decreases apply immediately at your next renewal.</p>
+                </div>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- YOUR RIGHTS -->
+            <section class="section-block" id="your-rights">
+                <div class="section-tag"><span class="dot"></span>Control</div>
+                <h2>Your Rights &amp; Controls</h2>
+                <p>You have meaningful control over your data through the ChatFlick interface:</p>
+                <div class="pill-list">
+                    <span class="pill">✏️ Edit your profile info</span>
+                    <span class="pill">🔒 Switch to a private account</span>
+                    <span class="pill">🙈 Hide birthdate &amp; bio</span>
+                    <span class="pill">🔔 Granular notification controls</span>
+                    <span class="pill">📦 Download your account data</span>
+                    <span class="pill">😴 Deactivate your account</span>
+                    <span class="pill">🗑️ Permanently delete your account</span>
+                </div>
+                <p><strong>Account deletion</strong> is permanent and irreversible. All profile data, posts, comments,
+                    follows, likes, reposts, notifications, and settings are removed from our database. We recommend
+                    using <em>Settings → Support → Download account data</em> before deleting.</p>
+                <p><strong>Account deactivation</strong> is temporary. Your data is preserved and your account can be
+                    restored by logging back in.</p>
+                <p>Depending on your jurisdiction you may also have rights to data portability, restriction of
+                    processing, and to lodge complaints with a supervisory authority. Contact us (details below) to
+                    exercise any of these rights.</p>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- DATA SECURITY -->
+            <section class="section-block" id="data-security">
+                <div class="section-tag"><span class="dot"></span>Security</div>
+                <h2>Data Security</h2>
+                <p>We implement the following protective measures:</p>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Measure</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Data Management</strong></td>
+                            <td>SSL/TLS encryption, hashed passwords, restricted access, role-based permissions,
+                                automated backups.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Password hashing</strong></td>
+                            <td>PBKDF2-SHA256 with a random salt of length 8 applied to every password before storage.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Signed tokens</strong></td>
+                            <td>Email verification and password-reset links use itsdangerous URLSafeTimedSerializer with
+                                a 20-minute expiry.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Session management</strong></td>
+                            <td>Authenticated sessions are managed server-side via Flask-Login. Session cookies are
+                                bound to the application's secret key.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Authorization checks</strong></td>
+                            <td>Sensitive operations (profile upload, notification marking, post modification) verify
+                                that the requesting user matches the resource owner before proceeding.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>CAPTCHA</strong></td>
+                            <td>Cloudflare Turnstile is required on sign-up, login, and password-reset request flows.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cloudinary images</strong></td>
+                            <td>Profile images are served over HTTPS and transformed/resized server-side before storage.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>No system is perfectly secure. In the event of a data breach affecting your personal information we
+                    will notify affected users as required by applicable law.</p>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- CHILDREN -->
+            <section class="section-block" id="children">
+                <div class="section-tag"><span class="dot"></span>Age Policy</div>
+                <h2>Children's Privacy</h2>
+                <p>ChatFlick is not directed at children under 13 years of age. We do not knowingly collect personal
+                    information from anyone under 13. If you believe a child under 13 has created an account, please
+                    contact us immediately and we will delete the account and associated data.</p>
+                <p>During sign-up, we collect a date of birth to help enforce this restriction. Birth date visibility on
+                    your public profile is controlled by your privacy settings.</p>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- CHANGES -->
+            <section class="section-block" id="changes">
+                <div class="section-tag"><span class="dot"></span>Updates</div>
+                <h2>Policy Changes</h2>
+                <p>We may update this Privacy Policy from time to time. When we do, the "Last updated" date at the top
+                    of this page will change. For material changes, we will provide in-app notification to active users.
+                </p>
+                <p>Continued use of ChatFlick after a policy update constitutes acceptance of the revised terms. If you
+                    do not agree with an update, you may deactivate or delete your account before the change takes
+                    effect.</p>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- CONTACT -->
+            <section class="section-block" id="contact">
+                <div class="section-tag"><span class="dot"></span>Get in touch</div>
+                <h2>Contact Us</h2>
+                <div class="contact-block">
+                    <h3>Questions about your privacy?</h3>
+                    <p>If you have any questions, requests, or concerns about this policy or how we handle your data,
+                        reach out through one of the channels below. We aim to respond within 5 business days.</p>
+                    <div class="contact-row">
+                        <a class="contact-btn primary" href="mailto:coreXmanzoid@gmail.com">
+                            <svg viewBox="0 0 24 24">
+                                <path
+                                    d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                            </svg>
+                            Email Us
+                        </a>
+                        <a class="contact-btn secondary" href="#">
+                            <svg viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z" />
+                            </svg>
+                            Help Center
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ── FOOTER ──────────────────────────────────────────────── -->
+    <footer class="site-footer">
+        <p>© 2026 coreXmanzoid — ChatFlick. All rights reserved.</p>
+        <nav class="footer-links">
+            <a href="/">Home</a>
+            <a href="#">Help Center</a>
+            <a href="{{ url_for('main.terms_of_service') }}">Terms of Service</a>
+            <a href="{{ url_for('main.privacy_policy') }}">Privacy Policy</a>
+        </nav>
+    </footer>
+
+    <script>
+        // Highlight active TOC item on scroll
+        const sections = document.querySelectorAll('.section-block');
+        const links = document.querySelectorAll('.toc a');
+
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    links.forEach(l => l.style.color = '');
+                    const active = document.querySelector(`.toc a[href="#${entry.target.id}"]`);
+                    if (active) {
+                        active.style.color = 'var(--fire)';
+                        active.style.background = 'var(--fire-soft)';
+                        active.style.borderLeftColor = 'var(--fire)';
+                    }
+                }
+            });
+        }, { rootMargin: '-20% 0px -70% 0px' });
+
+        sections.forEach(s => observer.observe(s));
+    </script>
+</body>
+
+</html>

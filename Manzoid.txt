@@ -8,3 +8,30 @@ Spawn a subagent to exSpawn a subagent to explore this repo.
 
 
 make the setting.user unique
+
+
+
+
+
+update the latest commit
+git add .
+git commit --amend --no-edit
+git push --force
+
+
+
+
+flask db init        # only first time
+flask db migrate -m "update contact column"
+flask db upgrade
+
+
+
+
+
+/privacy-policy ----------------done
+/terms-and-conditions ----------------done
+/refund-policy
+/shipping-policy
+/contact
+/about

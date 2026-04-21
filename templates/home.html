@@ -107,7 +107,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="nav-link link-dark">
+                            <a href="{{ url_for('main.about') }}" class="nav-link link-dark">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor"
                                     class="bi bi-file-earmark-person-fill me-2" viewBox="0 0 16 16">
                                     <path
@@ -129,7 +129,7 @@
                             <strong data-username="{{ current_user.username }}">{{ current_user.name }}</strong>
                         </a>
                         <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
-                            <li><a class="dropdown-item LActive" href="#">Help</a></li>
+                            <li><a class="dropdown-item LActive" href="{{ url_for('setting.setting', section='support') }}">Help</a></li>
                             <li><a class="dropdown-item LActive" href="{{ url_for('setting.setting_index')}}">Settings</a></li>
                             <li><a class="dropdown-item LActive profile-link" href="#">Profile</a></li>
                             <li>

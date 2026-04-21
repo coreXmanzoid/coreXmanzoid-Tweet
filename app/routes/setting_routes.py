@@ -76,7 +76,7 @@ def profile_setting():
                     SettingService.change_username(user, new_username)
                     flash("Username Updated Successfully", "success")
 
-            if current_user.contact != int(new_contact):
+            if current_user.contact != new_contact:
                 SettingService.change_contact(user, new_contact)
                 flash("Contact Number updated Successfully", "success")
 

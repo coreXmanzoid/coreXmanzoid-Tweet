@@ -16,7 +16,7 @@ DEFAULT_USER_SETTINGS = {
     },
     "privacy-setting": {
         "private_account": False,
-        "show_birthdate": True,
+        "show_birthdate": False,
         "show_bio": True,
         "show_status": True,
     },
@@ -109,7 +109,7 @@ class UserData(UserMixin, db.Model):
 
     email: Mapped[str] = mapped_column(String, nullable=False, unique=True)
 
-    contact: Mapped[int] = mapped_column(Integer, nullable=False)
+    contact: Mapped[int] = mapped_column(String, nullable=True)
 
     password: Mapped[str] = mapped_column(String, nullable=False)
 

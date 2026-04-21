@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, app
 
 from app.extensions import db, login_manager, oauth as oauth_client
 
@@ -14,6 +14,8 @@ from app.routes.comment_routes import comment_bp
 from app.routes.account_routes import account_bp
 from app.routes.setting_routes import setting_bp
 from app.routes.admin_routes import admin_bp
+from app.routes.pricing_routes import pricing_bp
+from flask_migrate import Migrate
 
 def create_app():
 
@@ -30,6 +32,7 @@ def create_app():
 
     db.init_app(app)
     login_manager.init_app(app)
+    # migrate = Migrate(app, db)
     oauth_client.init_app(app)
     init_firebase()
 
@@ -43,7 +46,8 @@ def create_app():
     app.register_blueprint(account_bp)
     app.register_blueprint(setting_bp)
     app.register_blueprint(admin_bp)
-
+    app.register_blueprint(pricing_bp)
+    
     with app.app_context():
         from app import models
         from app import auth

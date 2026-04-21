@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service — ChatFlick by coreXmanzoid</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,300;0,500;0,700;0,900;1,300&family=DM+Serif+Display:ital@0;1&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/privacy&terms.css') }}">
+</head>
+
+<body>
+
+    <!-- ── HEADER ─────────────────────────────────────────────── -->
+    <header class="site-header">
+        <a class="logo-wrap" href="/">
+            <img src="{{ url_for('static', filename='assets/Logo_horizontal.png') }}" width="180">
+        </a>
+        <div class="header-right">
+            <span class="header-chip">Terms of Service</span>
+            <a class="privacy-link" href="{{ url_for('main.privacy_policy') }}">Privacy Policy →</a>
+            <a class="privacy-link" href="{{ url_for('main.about') }}">About Us →</a>
+
+        </div>
+    </header>
+
+    <!-- ── HERO ───────────────────────────────────────────────── */ -->
+    <section class="hero">
+        <div class="hero-eyebrow">Legal Agreement</div>
+        <h1>The Rules of<br><em>ChatFlick.</em></h1>
+        <p class="hero-summary">These Terms govern your use of ChatFlick, a social microblogging platform built by
+            <strong>coreXmanzoid</strong>. Please read them carefully — by creating an account or using the platform you
+            agree to be bound by them.
+        </p>
+        <div class="hero-meta">
+            <div class="hero-meta-pill">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm4.24 16L12 15.45 7.77 18l1.12-4.81-3.73-3.23 4.92-.42L12 5l1.92 4.53 4.92.42-3.73 3.23L16.23 18z" />
+                </svg>
+                Last updated: April 19, 2026
+            </div>
+            <div class="hero-meta-pill">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
+                </svg>
+                Effective immediately upon account creation
+            </div>
+        </div>
+    </section>
+
+    <!-- ── LAYOUT ──────────────────────────────────────────────── -->
+    <div class="layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <p class="sidebar-label">Sections</p>
+            <ul class="toc">
+                <li><a href="#acceptance"><span class="num">01</span> Acceptance</a></li>
+                <li><a href="#eligibility"><span class="num">02</span> Eligibility</a></li>
+                <li><a href="#accounts"><span class="num">03</span> Your Account</a></li>
+                <li><a href="#content"><span class="num">04</span> Content Rules</a></li>
+                <li><a href="#conduct"><span class="num">05</span> Prohibited Conduct</a></li>
+                <li><a href="#engagement"><span class="num">06</span> Engagement Features</a></li>
+                <li><a href="#ai"><span class="num">07</span> Manzoid-AI</a></li>
+                <li><a href="#notifications"><span class="num">08</span> Notifications</a></li>
+                <li><a href="#moderation"><span class="num">09</span> Moderation</a></li>
+                <li><a href="#membership"><span class="num">10</span> Membership Tiers</a></li>
+                <li><a href="#intellectual-property"><span class="num">11</span> Intellectual Property</a></li>
+                <li><a href="#third-parties"><span class="num">12</span> Third-Party Services</a></li>
+                <li><a href="#termination"><span class="num">13</span> Termination</a></li>
+                <li><a href="#disclaimers"><span class="num">14</span> Disclaimers</a></li>
+                <li><a href="#liability"><span class="num">15</span> Limitation of Liability</a></li>
+                <li><a href="#changes"><span class="num">16</span> Changes to Terms</a></li>
+                <li><a href="#contact"><span class="num">17</span> Contact</a></li>
+            </ul>
+        </aside>
+
+        <!-- Content -->
+        <main class="content">
+
+            <!-- 01 ACCEPTANCE -->
+            <section class="section-block" id="acceptance">
+                <div class="section-tag"><span class="dot"></span>Section 01</div>
+                <h2>Acceptance of Terms</h2>
+                <p>By registering for a ChatFlick account — whether via email, password, or Google OAuth — or by
+                    accessing any part of the platform as a guest, you enter into a legally binding agreement with
+                    <strong>coreXmanzoid</strong> ("we", "us", "our") and confirm that you have read, understood, and
+                    agree to these <a href="{{ url_for('main.terms_of_service') }}" style="color:var(--fire);font-weight:700;">Terms of
+                        Service</a> ("Terms") and our <a href="{{ url_for('main.privacy_policy') }}"
+                        style="color:var(--fire);font-weight:700;">Privacy Policy</a>.
+                </p>
+                <p>If you do not agree with any part of these Terms, you must not use ChatFlick. Your continued use
+                    after any update to these Terms constitutes acceptance of the revised version.</p>
+                <div class="callout callout-fire">
+                    <div class="callout-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
+                        </svg>
+                    </div>
+                    <p>These Terms apply to all users regardless of verification status — from unverified new members
+                        through to Pro account holders and administrators.</p>
+                </div>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- 02 ELIGIBILITY -->
+            <section class="section-block" id="eligibility">
+                <div class="section-tag"><span class="dot"></span>Section 02</div>
+                <h2>Eligibility</h2>
+                <p>You must meet all of the following conditions to use ChatFlick:</p>
+                <ul class="rule-list">
+                    <li>
+                        <div class="bullet bullet-ok"><svg viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                            </svg></div>
+                        <span>You are at least <strong>13 years of age</strong>. Users under 18 require parental or
+                            guardian consent.</span>
+                    </li>
+                    <li>
+                        <div class="bullet bullet-ok"><svg viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                            </svg></div>
+                        <span>You have the legal capacity to enter into a binding contract in your jurisdiction.</span>
+                    </li>
+                    <li>
+                        <div class="bullet bullet-ok"><svg viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                            </svg></div>
+                        <span>You are not located in a country or territory subject to a trade embargo that would
+                            prohibit use of the platform.</span>
+                    </li>
+                    <li>
+                        <div class="bullet bullet-ban"><svg viewBox="0 0 24 24">
+                                <path
+                                    d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+                            </svg></div>
+                        <span>Your account has not been previously suspended or permanently banned by
+                            coreXmanzoid.</span>
+                    </li>
+                </ul>
+                <p>We collect your date of birth at sign-up solely to verify this age requirement. You may control
+                    whether your birth date is visible on your public profile via <strong>Settings → Privacy</strong>.
+                </p>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- 03 ACCOUNTS -->
+            <section class="section-block" id="accounts">
+                <div class="section-tag"><span class="dot"></span>Section 03</div>
+                <h2>Your Account</h2>
+                <p>You are responsible for maintaining the security of your account and for all activity that occurs
+                    under it.</p>
+
+                <div class="sub-section">
+                    <h3><svg viewBox="0 0 24 24">
+                            <path
+                                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                        </svg> Account Registration</h3>
+                    <p>You must provide accurate, current, and complete information during sign-up. Usernames must be
+                        unique — duplicates are rejected at registration. You may not impersonate another person or use
+                        a username that is misleading or offensive. Your email address serves as your primary account
+                        identifier and must be verifiable.</p>
+                </div>
+
+                <div class="sub-section">
+                    <h3><svg viewBox="0 0 24 24">
+                            <path
+                                d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
+                        </svg> Password & Security</h3>
+                    <p>Passwords are stored as PBKDF2-SHA256 hashes. You are responsible for keeping your password
+                        confidential. Notify us immediately if you suspect unauthorised access. We will never ask for
+                        your password via email or chat. Password reset links expire after 20 minutes and are
+                        single-use.</p>
+                </div>
+
+                <div class="sub-section">
+                    <h3><svg viewBox="0 0 24 24">
+                            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+                        </svg> Account Status</h3>
+                    <p>Accounts begin as <strong>UNVERIFIED</strong> until you confirm your email address. Certain
+                        features — including following others, commenting, uploading a profile photo, and receiving
+                        mention notifications — require verified status. Accounts may also hold <strong>PRO</strong>
+                        status, granted by an administrator, which unlocks additional privileges.</p>
+                </div>
+
+                <div class="sub-section">
+                    <h3><svg viewBox="0 0 24 24">
+                            <path d="M21 7L9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7z" />
+                        </svg> Google Sign-In</h3>
+                    <p>If you choose to sign in with Google, you authorise us to receive your name and email address
+                        from Google's OpenID Connect endpoint. A ChatFlick account is created or linked automatically.
+                        Google-created accounts are marked Verified upon creation.</p>
+                </div>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- 04 CONTENT RULES -->
+            <section class="section-block" id="content">
+                <div class="section-tag"><span class="dot"></span>Section 04</div>
+                <h2>Content Rules</h2>
+                <p>ChatFlick is a text-based microblogging platform. Posts are limited to <strong>180
+                        characters</strong> on the frontend. Comments are limited to <strong>130 characters</strong>.
+                    You may include hashtags (prefixed with <code>#</code>) and mention other users (prefixed with
+                    <code>@</code>).
+                </p>
+
+                <div class="compare-grid">
+                    <div class="compare-card allowed">
+                        <h4>✓ Permitted</h4>
+                        <ul class="rule-list">
+                            <li>
+                                <div class="bullet bullet-ok"><svg viewBox="0 0 24 24">
+                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                                    </svg></div><span>Original opinions, commentary, and personal updates</span>
+                            </li>
+                            <li>
+                                <div class="bullet bullet-ok"><svg viewBox="0 0 24 24">
+                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                                    </svg></div><span>Hashtags, @mentions, and links to external content</span>
+                            </li>
+                            <li>
+                                <div class="bullet bullet-ok"><svg viewBox="0 0 24 24">
+                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                                    </svg></div><span>Reposting and liking content from other users</span>
+                            </li>
+                            <li>
+                                <div class="bullet bullet-ok"><svg viewBox="0 0 24 24">
+                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                                    </svg></div><span>Editing or deleting your own posts within 3 minutes of
+                                    creation</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="compare-card forbidden">
+                        <h4>✗ Prohibited</h4>
+                        <ul class="rule-list">
+                            <li>
+                                <div class="bullet bullet-ban"><svg viewBox="0 0 24 24">
+                                        <path
+                                            d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+                                    </svg></div><span>Hate speech, harassment, or targeted abuse</span>
+                            </li>
+                            <li>
+                                <div class="bullet bullet-ban"><svg viewBox="0 0 24 24">
+                                        <path
+                                            d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+                                    </svg></div><span>Spam, unsolicited advertising, or repetitive content</span>
+                            </li>
+                            <li>
+                                <div class="bullet bullet-ban"><svg viewBox="0 0 24 24">
+                                        <path
+                                            d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+                                    </svg></div><span>Impersonating other users, public figures, or coreXmanzoid</span>
+                            </li>
+                            <li>
+                                <div class="bullet bullet-ban"><svg viewBox="0 0 24 24">
+                                        <path
+                                            d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+                                    </svg></div><span>Posting explicit, violent, or illegal content</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <p>Hashtags are extracted from post content and stored separately for discovery purposes. Editing a post
+                    does not re-parse hashtags or mentions — the original extracted values are retained.</p>
+                <p><strong>Ownership:</strong> You retain ownership of the content you create. By posting on ChatFlick
+                    you grant us a non-exclusive, royalty-free, worldwide licence to display, distribute, and store that
+                    content solely for the purpose of operating the platform.</p>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- 05 CONDUCT -->
+            <section class="section-block" id="conduct">
+                <div class="section-tag"><span class="dot"></span>Section 05</div>
+                <h2>Prohibited Conduct</h2>
+                <p>The following behaviours are strictly prohibited on ChatFlick and may result in warnings, suspension,
+                    or permanent account deletion:</p>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Violation</th>
+                            <th>Examples</th>
+                            <th>Consequence</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Harassment &amp; abuse</strong></td>
+                            <td>Targeted threats, coordinated pile-ons, repeated unwanted mentions</td>
+                            <td>Warning → Block → Deletion</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Impersonation</strong></td>
+                            <td>Fake profiles designed to mislead others about your identity</td>
+                            <td>Immediate suspension</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Spam &amp; automation</strong></td>
+                            <td>Bot-driven posting, mass following/unfollowing, artificially inflating metrics</td>
+                            <td>Warning → Block</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Illegal content</strong></td>
+                            <td>Doxxing, CSAM, incitement to violence, intellectual property infringement</td>
+                            <td>Immediate deletion &amp; report to authorities</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Platform manipulation</strong></td>
+                            <td>Exploiting bugs, reverse-engineering APIs, bypassing CAPTCHA</td>
+                            <td>Immediate ban</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Misinformation</strong></td>
+                            <td>Deliberately false health, safety, or electoral content</td>
+                            <td>Warning → Removal</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="callout callout-warn">
+                    <div class="callout-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
+                        </svg>
+                    </div>
+                    <p>Accounts accumulate warnings. Three warnings trigger an automatic block. Blocked accounts cannot
+                        post, comment, follow, or use Manzoid-AI until restored by an administrator.</p>
+                </div>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- 06 ENGAGEMENT -->
+            <section class="section-block" id="engagement">
+                <div class="section-tag"><span class="dot"></span>Section 06</div>
+                <h2>Engagement Features</h2>
+                <p>ChatFlick provides likes, reposts, shares, and comment likes to enable social interaction. By using
+                    these features you agree to the following:</p>
+                <ul class="rule-list">
+                    <li>
+                        <div class="bullet bullet-ok"><svg viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                            </svg></div><span><strong>Post likes and reposts</strong> are tracked per user — you can
+                            only like or repost a given post once. Counters are floored at zero.</span>
+                    </li>
+                    <li>
+                        <div class="bullet bullet-warn"><svg viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                            </svg></div><span><strong>Share counts</strong> are incremented per action and are not
+                            uniquely tracked per user — the same user can increment the share counter multiple
+                            times.</span>
+                    </li>
+                    <li>
+                        <div class="bullet bullet-warn"><svg viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                            </svg></div><span><strong>Comment likes</strong> are not uniquely enforced per user at the
+                            backend. You agree not to exploit this to artificially inflate comment counts.</span>
+                    </li>
+                    <li>
+                        <div class="bullet bullet-ok"><svg viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                            </svg></div><span>Engagement actions on your own content (self-like, self-repost,
+                            self-share) are technically possible but do not affect milestone notifications sent to
+                            yourself.</span>
+                    </li>
+                </ul>
+                <p>Milestone notifications (at 100, 1,000, and 10,000 likes, reposts, and comments) are triggered
+                    automatically by the platform. You cannot opt out of milestone notifications for your own content.
+                </p>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- 07 AI -->
+            <section class="section-block" id="ai">
+                <div class="section-tag"><span class="dot"></span>Section 07</div>
+                <h2>Manzoid-AI Assistant</h2>
+                <p>ChatFlick includes an AI chat assistant ("Manzoid-AI") powered by a third-party language model
+                    provider (Groq). Your use of Manzoid-AI is subject to the following additional terms:</p>
+
+                <div class="sub-section">
+                    <h3><svg viewBox="0 0 24 24">
+                            <path
+                                d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9z" />
+                        </svg> Message Limits</h3>
+                    <p>Authenticated messages are capped at <strong>130 characters</strong>. The public
+                        (unauthenticated) API endpoint is capped at <strong>100 characters</strong>. Exceeding these
+                        limits will return an error and your message will not be processed.</p>
+                </div>
+
+                <div class="sub-section">
+                    <h3><svg viewBox="0 0 24 24">
+                            <path
+                                d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z" />
+                        </svg> No Persistent Memory</h3>
+                    <p>Manzoid-AI retains a short context window of your last 2 message exchanges in server process
+                        memory only. This context is <strong>not stored in our database</strong> and is lost when the
+                        server restarts. Do not share sensitive personal information in AI chats.</p>
+                </div>
+
+                <div class="sub-section">
+                    <h3><svg viewBox="0 0 24 24">
+                            <path
+                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                        </svg> Acceptable Use of AI</h3>
+                    <p>You must not use Manzoid-AI to generate content that violates these Terms, including but not
+                        limited to hate speech, harassment, illegal instructions, or deceptive material. coreXmanzoid
+                        reserves the right to terminate AI access for abuse without notice.</p>
+                </div>
+
+                <div class="callout callout-warn">
+                    <div class="callout-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
+                        </svg>
+                    </div>
+                    <p>AI-generated content is not reviewed or endorsed by coreXmanzoid. You are solely responsible for
+                        any AI output you post to the platform. Manzoid-AI may produce inaccurate or inappropriate
+                        responses; always verify important information from authoritative sources.</p>
+                </div>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- 08 NOTIFICATIONS -->
+            <section class="section-block" id="notifications">
+                <div class="section-tag"><span class="dot"></span>Section 08</div>
+                <h2>Notifications</h2>
+                <p>ChatFlick sends in-app and push notifications about account activity. By granting browser
+                    notification permission you authorise us to store your Firebase Cloud Messaging (FCM) token and send
+                    push notifications to your device.</p>
+                <ul class="rule-list">
+                    <li>
+                        <div class="bullet bullet-ok"><svg viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                            </svg></div><span>You can granularly control which event types trigger notifications in
+                            <strong>Settings → Notifications</strong>.</span>
+                    </li>
+                    <li>
+                        <div class="bullet bullet-ok"><svg viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                            </svg></div><span>Revoking browser notification permission stops push delivery
+                            immediately.</span>
+                    </li>
+                    <li>
+                        <div class="bullet bullet-ok"><svg viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                            </svg></div><span>You will never receive notifications for your own actions —
+                            self-notifications are suppressed by the platform.</span>
+                    </li>
+                </ul>
+                <p>We use notifications solely to inform you of genuine account activity. We will not send promotional
+                    push notifications without your explicit consent.</p>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- 09 MODERATION -->
+            <section class="section-block" id="moderation">
+                <div class="section-tag"><span class="dot"></span>Section 09</div>
+                <h2>Moderation &amp; Enforcement</h2>
+                <p>ChatFlick is administered by a single administrator account (coreXmanzoid) with access to a dedicated
+                    admin dashboard. The following enforcement actions may be taken against accounts that violate these
+                    Terms:</p>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Action</th>
+                            <th>Effect</th>
+                            <th>Reversible?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Warning</strong></td>
+                            <td>A formal caution logged against your account. Three warnings trigger an automatic block.
+                            </td>
+                            <td>Warnings are permanent on record but do not restrict access until the third is issued.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Block</strong></td>
+                            <td>Account access is restricted. You cannot post, comment, follow, or use AI features.</td>
+                            <td>Yes — an administrator may unblock and restore your previous status.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Deactivation</strong></td>
+                            <td>Your status is set to DEACTIVATED. Data is retained but access is suspended.</td>
+                            <td>Yes — log back in to reactivate.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Deletion</strong></td>
+                            <td>All account data, posts, comments, follows, likes, and settings are permanently removed.
+                            </td>
+                            <td>No — this action is irreversible.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>You may submit a report or support request through <strong>Settings → Support → Help Center</strong>.
+                    We aim to review all reports and respond to support requests within 5 business days. Moderation
+                    decisions are at the sole discretion of coreXmanzoid.</p>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- 10 MEMBERSHIP -->
+            <section class="section-block" id="membership">
+                <div class="section-tag"><span class="dot"></span>Section 10</div>
+                <h2>Membership Tiers</h2>
+                <p>ChatFlick operates a multi-tier account system. Each tier unlocks different platform capabilities:
+                </p>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>How obtained</th>
+                            <th>Key capabilities</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>UNVERIFIED</strong></td>
+                            <td>Default on registration</td>
+                            <td>Browse feed; cannot follow, comment, upload photos, or receive mention notifications
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>VERIFIED</strong></td>
+                            <td>Confirm email address</td>
+                            <td>Full platform access including all social features</td>
+                        </tr>
+                        <tr>
+                            <td><strong>PRO</strong></td>
+                            <td>Administrator approval</td>
+                            <td>All verified features plus Pro badge; treated as verified across the platform</td>
+                        </tr>
+                        <tr>
+                            <td><strong>BLOCKED</strong></td>
+                            <td>Policy violation</td>
+                            <td>Restricted access; most features disabled pending review</td>
+                        </tr>
+                        <tr>
+                            <td><strong>DEACTIVATED</strong></td>
+                            <td>User self-action or admin</td>
+                            <td>Account suspended; data preserved; reactivate by logging in</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="callout callout-fire">
+                    <div class="callout-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm4.24 16L12 15.45 7.77 18l1.12-4.81-3.73-3.23 4.92-.42L12 5l1.92 4.53 4.92.42-3.73 3.23L16.23 18z" />
+                        </svg>
+                    </div>
+                    <p><strong>Note:</strong> At present, Pro status is granted manually by an administrator. There is
+                        no automated billing or subscription system. Any future premium billing features will be subject
+                        to a separate Subscription Agreement published before they take effect.</p>
+                </div>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- 11 INTELLECTUAL PROPERTY -->
+            <section class="section-block" id="intellectual-property">
+                <div class="section-tag"><span class="dot"></span>Section 11</div>
+                <h2>Intellectual Property</h2>
+                <p><strong>Platform IP:</strong> All code, design, branding, logos, and trade dress of ChatFlick are the
+                    exclusive property of coreXmanzoid. You may not reproduce, distribute, or create derivative works
+                    from any part of the platform without prior written permission.</p>
+                <p><strong>Your content:</strong> You retain all intellectual property rights in content you create. By
+                    submitting content to ChatFlick you grant us a worldwide, non-exclusive, royalty-free licence to
+                    host, display, store, and transmit that content for the sole purpose of operating and improving the
+                    platform. This licence terminates when you delete the content or close your account.</p>
+                <p><strong>Third-party content:</strong> Do not post content that infringes the intellectual property
+                    rights of others. If you believe content on ChatFlick infringes your copyright, submit a report via
+                    the Help Center with details of the infringement and we will investigate promptly.</p>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- 12 THIRD PARTIES -->
+            <section class="section-block" id="third-parties">
+                <div class="section-tag"><span class="dot"></span>Section 12</div>
+                <h2>Third-Party Services</h2>
+                <p>ChatFlick integrates with external services to deliver certain features. Your use of these
+                    integrations is also governed by the respective third-party terms:</p>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Service</th>
+                            <th>Purpose</th>
+                            <th>Their terms</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Google OAuth</strong></td>
+                            <td>Optional sign-in method</td>
+                            <td>Google Terms of Service &amp; Privacy Policy</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Neon</strong></td>
+                            <td>Data Storage</td>
+                            <td>Neon Terms of Service</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cloudinary</strong></td>
+                            <td>Profile image hosting</td>
+                            <td>Cloudinary Terms of Service</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Firebase (Google)</strong></td>
+                            <td>Push notification delivery</td>
+                            <td>Google / Firebase Terms of Service</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Groq</strong></td>
+                            <td>Manzoid-AI language model</td>
+                            <td>Groq Terms of Service &amp; Usage Policy</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cloudflare Turnstile</strong></td>
+                            <td>CAPTCHA / bot protection</td>
+                            <td>Cloudflare Terms of Service</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>coreXmanzoid is not responsible for the practices or content of any third-party services. We do not
+                    serve advertisements or allow third-party tracking scripts within ChatFlick's own products.</p>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- 13 TERMINATION -->
+            <section class="section-block" id="termination">
+                <div class="section-tag"><span class="dot"></span>Section 13</div>
+                <h2>Termination</h2>
+
+                <div class="sub-section">
+                    <h3><svg viewBox="0 0 24 24">
+                            <path
+                                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                        </svg> Termination by You</h3>
+                    <p>You may deactivate your account (reversible) or permanently delete your account at any time via
+                        <strong>Settings → Delete Account</strong>. Deletion permanently removes all your data, posts,
+                        comments, follows, likes, reposts, notifications, and settings. We recommend downloading your
+                        account data first via <strong>Settings → Support → Download account data</strong>.
+                    </p>
+                </div>
+
+                <div class="sub-section">
+                    <h3><svg viewBox="0 0 24 24">
+                            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
+                        </svg> Termination by Us</h3>
+                    <p>We reserve the right to suspend, block, or permanently delete any account that violates these
+                        Terms, at our sole discretion and without prior notice where circumstances require immediate
+                        action. Where possible, we will issue a warning first. We are not liable for any loss resulting
+                        from account termination due to a policy violation.</p>
+                </div>
+
+                <div class="sub-section">
+                    <h3><svg viewBox="0 0 24 24">
+                            <path
+                                d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9z" />
+                        </svg> Effect of Termination</h3>
+                    <p>Upon termination all licences granted to you under these Terms cease immediately. Sections on
+                        intellectual property, disclaimers, limitation of liability, and any accrued obligations survive
+                        termination.</p>
+                </div>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- 14 DISCLAIMERS -->
+            <section class="section-block" id="disclaimers">
+                <div class="section-tag"><span class="dot"></span>Section 14</div>
+                <h2>Disclaimers</h2>
+                <p>ChatFlick is provided <strong>"as is"</strong> and <strong>"as available"</strong> without warranties
+                    of any kind, express or implied, including but not limited to warranties of merchantability, fitness
+                    for a particular purpose, or non-infringement.</p>
+                <ul class="rule-list">
+                    <li>
+                        <div class="bullet bullet-warn"><svg viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                            </svg></div><span>We do not guarantee uninterrupted, error-free, or secure platform
+                            operation at all times.</span>
+                    </li>
+                    <li>
+                        <div class="bullet bullet-warn"><svg viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                            </svg></div><span>We are not responsible for user-generated content, including accuracy,
+                            legality, or appropriateness.</span>
+                    </li>
+                    <li>
+                        <div class="bullet bullet-warn"><svg viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                            </svg></div><span>Manzoid-AI responses are generated by a third-party language model and may
+                            be inaccurate, incomplete, or inappropriate. Always verify important information
+                            independently.</span>
+                    </li>
+                    <li>
+                        <div class="bullet bullet-warn"><svg viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                            </svg></div><span>Push notification delivery depends on Firebase availability and your
+                            device state. We cannot guarantee timely or reliable delivery.</span>
+                    </li>
+                </ul>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- 15 LIABILITY -->
+            <section class="section-block" id="liability">
+                <div class="section-tag"><span class="dot"></span>Section 15</div>
+                <h2>Limitation of Liability</h2>
+                <p>To the fullest extent permitted by applicable law, coreXmanzoid and its affiliates, officers, and
+                    contributors shall not be liable for any indirect, incidental, special, consequential, or punitive
+                    damages, including but not limited to:</p>
+                <ul class="rule-list">
+                    <li>
+                        <div class="bullet bullet-ban"><svg viewBox="0 0 24 24">
+                                <path
+                                    d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+                            </svg></div><span>Loss of data, posts, followers, or engagement metrics</span>
+                    </li>
+                    <li>
+                        <div class="bullet bullet-ban"><svg viewBox="0 0 24 24">
+                                <path
+                                    d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+                            </svg></div><span>Loss of revenue or business opportunity arising from account
+                            suspension</span>
+                    </li>
+                    <li>
+                        <div class="bullet bullet-ban"><svg viewBox="0 0 24 24">
+                                <path
+                                    d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+                            </svg></div><span>Harm caused by content posted by other users</span>
+                    </li>
+                    <li>
+                        <div class="bullet bullet-ban"><svg viewBox="0 0 24 24">
+                                <path
+                                    d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+                            </svg></div><span>Damages arising from AI-generated content or third-party service
+                            failures</span>
+                    </li>
+                </ul>
+                <p>Where liability cannot be excluded under applicable law, our total cumulative liability to you shall
+                    not exceed the greater of (a) the amount you paid to us in the 12 months prior to the claim, or (b)
+                    USD $50.</p>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- 16 CHANGES -->
+            <section class="section-block" id="changes">
+                <div class="section-tag"><span class="dot"></span>Section 16</div>
+                <h2>Changes to These Terms</h2>
+                <p>We may modify these Terms at any time. When we make material changes we will update the "Last
+                    updated" date at the top of this page and provide in-app notification to active users at least 7
+                    days before the changes take effect, except where immediate changes are required by law or to
+                    address an urgent safety issue.</p>
+                <div class="callout callout-ok">
+                    <div class="callout-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                        </svg>
+                    </div>
+                    <p>Continued use of ChatFlick after the effective date of any revision constitutes your acceptance
+                        of the updated Terms. If you disagree, you may delete your account before the changes take
+                        effect.</p>
+                </div>
+            </section>
+
+            <div class="divider"></div>
+
+            <!-- 17 CONTACT -->
+            <section class="section-block" id="contact">
+                <div class="section-tag"><span class="dot"></span>Section 17</div>
+                <h2>Contact Us</h2>
+                <div class="contact-block">
+                    <h3>Questions about these Terms?</h3>
+                    <p>If you have questions about these Terms or wish to report a violation, reach us through the
+                        channels below. We aim to acknowledge all enquiries within 2 business days.</p>
+                    <div class="contact-row">
+                        <a class="contact-btn primary" href="mailto:coreXmanzoid@gmail.com">
+                            <svg viewBox="0 0 24 24">
+                                <path
+                                    d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                            </svg>
+                            legal@corexmanzoid.com
+                        </a>
+                        <a class="contact-btn secondary" href="#">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
+                            </svg>
+                            Help Center
+                        </a>
+                        <a class="contact-btn secondary" href="{{ url_for('main.privacy_policy') }}">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
+                            </svg>
+                            Privacy Policy
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ── FOOTER ──────────────────────────────────────────────── -->
+    <footer class="site-footer">
+        <p>© 2026 coreXmanzoid — ChatFlick. All rights reserved.</p>
+        <nav class="footer-links">
+            <a href="/">Home</a>
+            <a href="/setting/support">Help Center</a>
+            <a href="{{ url_for('main.privacy_policy') }}">Privacy Policy</a>
+            <a href="{{ url_for('main.terms_of_service') }}">Terms of Service</a>
+        </nav>
+    </footer>
+
+    <script>
+        // Highlight active TOC item on scroll
+        const sections = document.querySelectorAll('.section-block');
+        const links = document.querySelectorAll('.toc a');
+
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    links.forEach(l => l.style.color = '');
+                    const active = document.querySelector(`.toc a[href="#${entry.target.id}"]`);
+                    if (active) {
+                        active.style.color = 'var(--fire)';
+                        active.style.background = 'var(--fire-soft)';
+                        active.style.borderLeftColor = 'var(--fire)';
+                    }
+                }
+            });
+        }, { rootMargin: '-20% 0px -70% 0px' });
+
+        sections.forEach(s => observer.observe(s));
+    </script>
+</body>
+
+</html>

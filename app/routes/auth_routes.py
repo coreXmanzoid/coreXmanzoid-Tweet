@@ -100,7 +100,6 @@ def signup(st):
 
         name = request.form.get("name")
         username = request.form.get("username")
-        phone = request.form.get("phone")
         email = request.form.get("email")
         password = request.form.get("pin")
 
@@ -120,7 +119,7 @@ def signup(st):
             flash("Username already taken.")
             return redirect(url_for("auth.signup", st=0))
 
-        AuthService.create_user(name, username, email, phone, birth_date, password)
+        AuthService.create_user(name, username, email, birth_date, password)
 
         flash("Account created successfully. Please verify your email.")
 
