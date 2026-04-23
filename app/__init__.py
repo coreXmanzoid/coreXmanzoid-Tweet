@@ -1,5 +1,6 @@
 import os
 from flask import Flask, app
+from dotenv import load_dotenv
 
 from app.extensions import db, login_manager, oauth as oauth_client
 
@@ -15,19 +16,19 @@ from app.routes.account_routes import account_bp
 from app.routes.setting_routes import setting_bp
 from app.routes.admin_routes import admin_bp
 from app.routes.pricing_routes import pricing_bp
-from flask_migrate import Migrate
 
 def create_app():
-
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    load_dotenv(os.path.join(base_dir, ".env"))
+
     app = Flask(
         __name__,
         template_folder=os.path.join(base_dir, "templates"),
         static_folder=os.path.join(base_dir, "static"),
     )
     app.config["SECRET_KEY"] = "8BYkEfBA6O6donzWlSihBXox7C0sKR6b"
-    # app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///coreXmanzoidTweet.db"
-    app.config["SQLALCHEMY_DATABASE_URI"] = str(os.environ.get("SQLALCHEMY_DATABASE_URI"))
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///ChatFlick.db"
+    # app.config["SQLALCHEMY_DATABASE_URI"] = str(os.environ.get("SQLALCHEMY_DATABASE_URI"))
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     db.init_app(app)
@@ -52,6 +53,8 @@ def create_app():
         from app import models
         from app import auth
         from app.oauth import google_oauth
-        db.create_all()
-
+        try:
+            db.create_all()
+        except Exception as e:
+            print("DB init skipped:", e)
     return app

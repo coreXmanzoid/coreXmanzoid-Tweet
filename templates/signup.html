@@ -80,14 +80,14 @@
         if (birthDateInput) {
             birthDateInput.max = new Date().toISOString().split("T")[0];
         }
-        $('#signup-button').click(function () {
-            let button = $(this);
-            button.prop("disabled", true);
-            button.html(`
-        <span class="btn-loader"></span>
-        signing up...
-    `);
-        });
+    //     $('#signup-button').click(function () {
+    //         let button = $(this);
+    //         button.prop("disabled", true);
+    //         button.html(`
+    //     <span class="btn-loader"></span>
+    //     signing up...
+    // `);
+    //     });
     </script>
     <script src="{{ url_for('static', filename='js/signup.js') }}"></script>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>

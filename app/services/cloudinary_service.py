@@ -1,3 +1,4 @@
+from app.cloudinary.cloudinary_config import configure_cloudinary
 import cloudinary.uploader
 
 
@@ -5,6 +6,7 @@ class CloudinaryService:
 
     @staticmethod
     def upload_profile_picture(file, user_id):
+        configure_cloudinary()
 
         result = cloudinary.uploader.upload(
             file,

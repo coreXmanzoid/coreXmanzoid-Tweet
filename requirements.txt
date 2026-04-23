@@ -1,8 +1,13 @@
 Flask
 Flask-Login
 SQLAlchemy
+Flask-SQLAlchemy
 python-dotenv
 firebase-admin
 cloudinary
 Werkzeug
 psycopg2-binary
+authlib
+groq
+Flask-Migrate
+Authlib
