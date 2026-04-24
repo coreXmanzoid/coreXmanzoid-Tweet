@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import Blueprint, jsonify, redirect, render_template, request, url_for, flash
+from flask import Blueprint, current_app, jsonify, redirect, render_template, request, url_for, flash
 from flask_login import login_required, current_user, login_user
 
 from app.extensions import db, oauth
@@ -25,7 +25,15 @@ def email_verification():
     if not user:
         return jsonify({"status": "error", "message": "User not found"}), 404
 
-    AuthService.send_email_verification(user)
+    email_sent = AuthService.send_email_verification(user)
+
+    if not email_sent:
+        current_app.logger.error(
+            "Email verification message could not be sent to user_id=%s email=%s",
+            user.id,
+            user.email,
+        )
+        return jsonify({"status": "error", "message": "Email could not be sent"}), 500
 
     return jsonify({"status": "success"})
 
@@ -176,7 +184,14 @@ def reset_password():
                 _external=True,
             )
 
-            EmailService.send_link_email(email, reset_link, st=2)
+            email_sent = EmailService.send_link_email(email, reset_link, st=2)
+
+            if not email_sent:
+                current_app.logger.error(
+                    "Password reset email could not be sent to user_id=%s email=%s",
+                    user.id,
+                    email,
+                )
 
         return jsonify(
             {
