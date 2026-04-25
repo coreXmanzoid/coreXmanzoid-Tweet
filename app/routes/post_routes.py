@@ -112,7 +112,7 @@ def show_posts(state, id):
         reposts=reposts,
     )
 
-@post_bp.route("/likePost/<int:state>", methods=["POST"])
+@post_bp.route("/PostAction/<int:state>", methods=["POST"])
 @login_required
 def post_action(state):
 
@@ -134,7 +134,13 @@ def post_action(state):
         })
 
     elif state == 4:
-        post = PostActionService.share_post(post_id, data.get("wasshare"))
+        post = PostActionService.share_post(post_id)
+
+        if not post:
+            return jsonify({
+                "status": "error",
+                "message": "Post not found"
+            }), 404
 
         return jsonify({
             "status": "success",

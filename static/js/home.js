@@ -1,216 +1,378 @@
-// ---------------------------------------------------------------------------
-// Keyed AbortController map — one controller slot per logical action.
-// Calling abortAndRenew(key) cancels any in-flight request for that key and
-// returns a fresh AbortController whose signal can be forwarded to fetch().
-// jQuery $.ajax does NOT natively support AbortSignal, so we adapt via the
-// `xhr` factory option (see ajaxWithAbort helper below).
-// ---------------------------------------------------------------------------
 const controllers = {};
 
-/**
- * Aborts any active request for `key`, then creates and stores a new
- * AbortController for that key.
- * @param {string} key - Logical action identifier.
- * @returns {AbortController}
- */
 function abortAndRenew(key) {
     if (controllers[key]) {
-        controllers[key].abort(); // cancel previous in-flight request
+        controllers[key].abort();
     }
+
     controllers[key] = new AbortController();
     return controllers[key];
 }
 
-/**
- * Thin wrapper around $.ajax that wires an AbortSignal into jQuery's XHR
- * factory so that calling controller.abort() actually cancels the request.
- *
- * @param {string}         key     - Controller map key (matches abortAndRenew).
- * @param {Object}         options - Standard $.ajax options (url, method, …).
- * @returns {jqXHR}
- */
 function ajaxWithAbort(key, options) {
     const controller = abortAndRenew(key);
     const signal = controller.signal;
-
-    // Capture any caller-supplied xhr factory so we can chain it.
     const callerXhr = options.xhr;
 
-    return $.ajax({
-        ...options,
-        // jQuery lets us supply the raw XHR object; we hook abort() here.
+    return $.ajax($.extend({}, options, {
         xhr: function () {
             const xhr = callerXhr ? callerXhr() : $.ajaxSettings.xhr();
-            // Mirror AbortController cancellation onto the native XHR.
-            signal.addEventListener("abort", () => xhr.abort());
+            signal.addEventListener("abort", function () {
+                xhr.abort();
+            });
             return xhr;
         },
-        // Wrap error handler to silently swallow aborted requests.
         error: function (jqXHR, textStatus, errorThrown) {
             if (textStatus === "abort") {
-                // Request was intentionally cancelled — not a real error.
                 return;
             }
-            // Delegate to any caller-supplied error handler, otherwise log.
+
             if (typeof options.error === "function") {
                 options.error(jqXHR, textStatus, errorThrown);
-            } else {
-                console.error("Ajax error [" + key + "]:", textStatus, errorThrown);
+                return;
             }
+
+            console.error("Ajax error [" + key + "]:", textStatus, errorThrown);
+        }
+    }));
+}
+
+function getCurrentUserId() {
+    const className = $(".div1").attr("class") || "";
+    return parseInt(className.split(" ")[1], 10);
+}
+
+function getTextNode($element) {
+    let textNode = $element.contents().filter(function () {
+        return this.nodeType === 3;
+    }).first();
+
+    if (!textNode.length) {
+        $element.append(" 0");
+        textNode = $element.contents().filter(function () {
+            return this.nodeType === 3;
+        }).first();
+    }
+
+    return textNode;
+}
+
+function setActionCount($element, count) {
+    const $count = $element.find("span").first();
+
+    if ($count.length) {
+        $count.text(count);
+        return;
+    }
+
+    const textNode = getTextNode($element);
+    textNode[0].nodeValue = " " + count;
+}
+
+function getShareContext($btn) {
+    const $container = $btn.closest(".post, .post-detail");
+    const rawPostId = $container.data("postid");
+    const postId = typeof rawPostId === "string" ? rawPostId.trim() : rawPostId;
+    const text = $container.find(".post-content .content").first().text().trim();
+
+    return {
+        $container: $container,
+        postId: postId,
+        text: text
+    };
+}
+
+async function sharePostContent(shareData) {
+    if (navigator.share) {
+        await navigator.share(shareData);
+        return {
+            shared: true,
+            mode: "native"
+        };
+    }
+
+    if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText((shareData.text || "").trim() + "\n" + shareData.url);
+        return {
+            shared: true,
+            mode: "clipboard"
+        };
+    }
+
+    const fallbackInput = document.createElement("textarea");
+    fallbackInput.value = ((shareData.text || "").trim() + "\n" + shareData.url).trim();
+    fallbackInput.setAttribute("readonly", "");
+    fallbackInput.style.position = "fixed";
+    fallbackInput.style.opacity = "0";
+    document.body.appendChild(fallbackInput);
+    fallbackInput.focus();
+    fallbackInput.select();
+
+    try {
+        const copied = document.execCommand("copy");
+        if (!copied) {
+            throw new Error("Copy command failed");
+        }
+
+        return {
+            shared: true,
+            mode: "clipboard"
+        };
+    } finally {
+        document.body.removeChild(fallbackInput);
+    }
+}
+
+function formatRelativeTime(timestamp) {
+    const date = new Date(timestamp);
+    if (Number.isNaN(date.getTime())) {
+        return "";
+    }
+
+    const diffMs = new Date() - date;
+    const diffMins = Math.max(0, Math.floor(diffMs / 60000));
+
+    if (diffMins < 1) {
+        return "Just now";
+    }
+    if (diffMins < 60) {
+        return diffMins === 1 ? "1 min ago" : diffMins + " mins ago";
+    }
+    if (diffMins < 1440) {
+        const hours = Math.floor(diffMins / 60);
+        return hours === 1 ? "1 hour ago" : hours + " hours ago";
+    }
+    if (diffMins < 10080) {
+        const days = Math.floor(diffMins / 1440);
+        return days === 1 ? "1 day ago" : days + " days ago";
+    }
+    if (diffMins < 43200) {
+        const weeks = Math.floor(diffMins / 10080);
+        return weeks === 1 ? "1 week ago" : weeks + " weeks ago";
+    }
+
+    const months = Math.floor(diffMins / 43200);
+    return months === 1 ? "1 month ago" : months + " months ago";
+}
+
+function formatCompactRelativeTime(timestamp) {
+    const date = new Date(timestamp);
+    if (Number.isNaN(date.getTime())) {
+        return "";
+    }
+
+    const diffMs = new Date() - date;
+    const diffMins = Math.max(0, Math.floor(diffMs / 60000));
+
+    if (diffMins < 1) {
+        return "0s";
+    }
+    if (diffMins < 60) {
+        return diffMins + "m";
+    }
+    if (diffMins < 1440) {
+        return Math.floor(diffMins / 60) + "h";
+    }
+    if (diffMins < 10080) {
+        return Math.floor(diffMins / 1440) + "d";
+    }
+    if (diffMins < 43200) {
+        return Math.floor(diffMins / 10080) + "w";
+    }
+
+    return Math.floor(diffMins / 43200) + "mo";
+}
+
+function parseMentions(value) {
+    if (!value) {
+        return [];
+    }
+
+    try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function renderMentions(selector) {
+    document.querySelectorAll(selector).forEach(function (el) {
+        const mentions = parseMentions(el.dataset.mentions);
+        let text = el.innerText;
+
+        mentions.forEach(function (mention) {
+            const username = mention.username.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            const regex = new RegExp("@" + username + "\\b", "g");
+            text = text.replace(regex, '<span class="mention">@' + mention.username + "</span>");
+        });
+
+        el.innerHTML = text;
+    });
+}
+
+function initializeComposerFragment($root) {
+    const $textareas = $root.find("textarea[name='post-input']");
+    if (!$textareas.length) {
+        return;
+    }
+
+    $textareas.each(function () {
+        updateComposerState($(this));
+    });
+}
+
+function initializeProfileFragment($root) {
+    if (!$root.find(".profile").length) {
+        return;
+    }
+
+    const $birthDate = $root.find("#birthDate");
+    const rawDate = $.trim($birthDate.text());
+    if (rawDate) {
+        const dateObj = new Date(rawDate);
+        if (!Number.isNaN(dateObj.getTime())) {
+            const formatted = String(dateObj.getDate()).padStart(2, "0") + " " +
+                dateObj.toLocaleString("en-GB", { month: "short" }) + ", " +
+                dateObj.getFullYear();
+            $birthDate.text(formatted);
+        }
+    }
+
+    $root.find(".ProfileOptions h6").removeClass("active-a").first().addClass("active-a");
+}
+
+function initializePostsFragment($root) {
+    if (!$root.find(".post").length) {
+        return;
+    }
+
+    renderMentions(".post-content .content");
+
+    $root.find(".post-time").each(function () {
+        const display = formatRelativeTime($(this).data("timestamp"));
+        if (display) {
+            $(this).text(display);
         }
     });
 }
 
-// ---------------------------------------------------------------------------
-// Reusable helper: inject HTML response (with embedded <script> execution)
-// into a jQuery target element.
-// ---------------------------------------------------------------------------
+function initializeCommentsFragment($root) {
+    if (!$root.find(".all-comments, .post-detail").length) {
+        return;
+    }
+
+    renderMentions(".comment-content .content");
+}
+
+function initializeNotificationsFragment($root) {
+    if (!$root.find(".notifications, #notifications-permission").length) {
+        return;
+    }
+
+    const permissionWarning = document.getElementById("notifications-permission");
+    if (permissionWarning) {
+        if (!("Notification" in window) || Notification.permission !== "granted") {
+            $(".notifications").hide();
+        } else {
+            $("#notifications-permission").remove();
+            $(".notifications").show();
+        }
+    }
+
+    $root.find(".notification-message span").each(function () {
+        const display = formatCompactRelativeTime($(this).data("timestamp"));
+        if (display) {
+            $(this).text(display);
+        }
+    });
+}
+
+function initializeDynamicContent($root) {
+    initializeComposerFragment($root);
+    initializeProfileFragment($root);
+    initializePostsFragment($root);
+    initializeCommentsFragment($root);
+    initializeNotificationsFragment($root);
+}
+
 function injectHtmlResponse($target, response) {
     const dummy = $("<div>").html(response);
     const scripts = dummy.find("script");
     dummy.find("script").remove();
     $target.html(dummy.html());
+
     scripts.each(function () {
         const code = $(this).text();
         if (code.trim() !== "") {
             eval(code); // eslint-disable-line no-eval
         }
     });
+
+    initializeDynamicContent($target);
 }
 
-// ---------------------------------------------------------------------------
-// fetch accounts for explore accounts section
-// ---------------------------------------------------------------------------
-exploreAccounts("/exploreAccounts/0/random");
+function loadFragment(key, $target, url, loaderHtml) {
+    $target.html(loaderHtml);
+
+    return ajaxWithAbort(key, {
+        url: url,
+        method: "GET",
+        success: function (response) {
+            injectHtmlResponse($target, response);
+        }
+    });
+}
+
+function updateComposerState($textarea) {
+    const inputLength = $textarea.val().length;
+    const maxLength = 180;
+    const progress = (inputLength / maxLength) * 100;
+    const circumference = 2 * Math.PI * 22;
+    const offset = (progress / 100) * circumference;
+    const $container = $textarea.closest(".div2, .container, body");
+
+    $container.find(".progress-circle-indicator").css("stroke-dashoffset", offset);
+
+    if (progress >= 100) {
+        $container.find(".progress-circle-indicator").attr("stroke", "red");
+    } else if (progress >= 80) {
+        $container.find(".progress-circle-indicator").attr("stroke", "orange");
+    } else {
+        $container.find(".progress-circle-indicator").attr("stroke", "#3b82f6");
+    }
+
+    $container.find(".submit button").prop("disabled", !(inputLength > 0 && inputLength <= maxLength));
+}
 
 function exploreAccounts(url) {
     $(".explore-accounts").html('<div class="loader-wrapper"><span class="loader"></span></div>');
 
-    // Abort any previous exploreAccounts request before starting a new one.
     ajaxWithAbort("exploreAccounts", {
         url: url,
         method: "GET",
         success: function (response) {
             injectHtmlResponse($(".explore-accounts"), response);
         }
-        // error is handled by ajaxWithAbort (aborts silenced, others logged)
     });
 }
 
-// ---------------------------------------------------------------------------
-// fetch accounts for search textbox typed input
-// (each keystroke cancels the previous search request)
-// ---------------------------------------------------------------------------
-$(".search input").on("input", function () {
-    var query = $(this).val();
-    if (query.length > 0) {
-        exploreAccounts("/exploreAccounts/0/" + query);
-    } else {
-        exploreAccounts("/exploreAccounts/0/random");
-    }
-});
-
-// Active sidebar animation
-$(".nav li a").click(function () {
-    $(".nav a").removeClass("active link-dark");
-    $(".nav a").addClass("link-dark");
-    $(this).addClass("active");
-    $(this).removeClass("link-dark");
-});
-
-// ---------------------------------------------------------------------------
-// Show posts
-// (rapid tab / filter switches cancel the previous showPosts request)
-// ---------------------------------------------------------------------------
 function showPosts(state, id) {
-    $(".div3").html('<div class="page-loader page-loader--posts"><span class="loader1"></span></div>');
-
-    // Abort any pending showPosts request before issuing a new one.
-    ajaxWithAbort("showPosts", {
-        url: "/showPosts/" + state + "/" + id,
-        method: "GET",
-        success: function (response) {
-            injectHtmlResponse($(".div3"), response);
-        }
-    });
+    loadFragment(
+        "showPosts",
+        $(".div3"),
+        "/showPosts/" + state + "/" + id,
+        '<div class="page-loader page-loader--posts"><span class="loader1"></span></div>'
+    );
 }
 
-// ---------------------------------------------------------------------------
-// Email verification button
-// (only one verification request should ever be in-flight at a time)
-// ---------------------------------------------------------------------------
-$(".verification-box button").click(function () {
-    userId = $(".div1").attr("class").split(" ")[1];
-    const button = $("#verifyBtn");
-    button.prop("disabled", true);
-    button.html(`
-            <span class="btn-loader"></span>
-            Sending...
-        `);
-
-    // Abort any prior verification request (e.g. double-click guard).
-    ajaxWithAbort("emailVerification", {
-        url: "/email-verification",
-        method: "POST",
-        data: JSON.stringify({ user_id: userId }),
-        contentType: "application/json",
-        success: function (response) {
-            if (response.status === "success") {
-                button.html(`
-                    <span class="btn-loader"></span>
-                    Verification in progress...
-                `);
-                if ($("#verification-status").length === 0) {
-                    button.after(`
-                <strong id="verification-status" class="verification-tag">
-                    Verification email sent! Please check your inbox.
-                </strong>
-            `);
-                }
-            } else {
-                alert("Failed to send verification email. Please try again.");
-            }
-        }
-    });
-});
-
-// ---------------------------------------------------------------------------
-// Show posts.html on initial load
-// ---------------------------------------------------------------------------
-$(".div3").load("/showPosts/0/0");
-
-// Refresh button functionality
-$(".div4 button").click(function (e) {
-    $(".ai-bar").hide();
-    $(".notifications-tab").hide();
-    $(".full-post").hide();
-    $(".explore-tab").show();
-    $(".div3").load("/showPosts/0/0");
-});
-
-// switch account functionality
-$(".switch-account-link").click(function () {
-    confirmSwitch = confirm("Are you sure you want to switch accounts? Unsaved changes will be lost.");
-    if (confirmSwitch) {
-        window.location.href = "/logout/2";
-    } else {
-        Backtohome();
-    }
-});
-
-// ---------------------------------------------------------------------------
-// Mark all notifications as read after the tab loads
-// ---------------------------------------------------------------------------
 function markAsRead() {
-    userId = $(".notifications").data("userid");
+    const userId = $(".notifications").data("userid");
 
-    // Abort any pending markAsRead call (e.g. rapid tab re-opens).
     ajaxWithAbort("markAsRead", {
-        url: `/notifications/mark_read/${userId}`,
-        success: function (response) {
-            user_id = $(".div1").attr("class").split(" ")[1];
-            checkForNotifications(user_id);
-            console.log("Notifications marked as read:", response);
+        url: "/notifications/mark_read/" + userId,
+        success: function () {
+            checkForNotifications(getCurrentUserId());
         },
         error: function (err) {
             console.error("Error marking notifications as read:", err);
@@ -218,158 +380,72 @@ function markAsRead() {
     });
 }
 
-// ---------------------------------------------------------------------------
-// Notification tab — load + render notifications
-// (re-clicking the bell cancels any unfinished previous load)
-// ---------------------------------------------------------------------------
-$(".notifications-button").click(function () {
-    $(".full-post").hide();
-    $(".notifications-tab").show();
-    $(".explore-tab").hide();
-    $(".ai-bar").hide();
-    $(".notifications-tab").html('<div class="loader-wrapper"><span class="loader"></span></div>');
-    $(".notifications-tab").load("/notifications");
+function showProfile(userId) {
+    loadFragment(
+        "showProfile",
+        $(".div2"),
+        "/profile/" + userId,
+        '<div class="page-loader page-loader--profile"><span class="loader2"></span></div>'
+    );
 
-    // Abort any in-flight notifications fetch before starting a new one.
-    ajaxWithAbort("loadNotifications", {
-        url: "/notifications",
-        method: "GET",
-        success: function (response) {
-            injectHtmlResponse($(".notifications-tab"), response);
-            markAsRead();
-        }
-    });
-});
-
-// ---------------------------------------------------------------------------
-// AI button — no fetch here; kept as-is
-// ---------------------------------------------------------------------------
-$(".ai-button").click(function () {
-    $(".full-post").hide();
-    $(".div2").hide();
-    $(".div3").html('<div class="loader-wrapper"><span class="loader"></span></div>');
-    $(".div3").load("/Manzoid-AI");
-    $(".explore-tab").hide();
-    $(".ai-bar").show();
-    $(".notifications-tab").hide();
-});
-
-$(".post-button").click(function () {
-    Backtohome();
-    $("textarea").focus();
-});
-
-$(".explore-button").click(function () {
-    $(".full-post").hide();
-    $(".ai-bar").hide();
-    $(".explore-tab").show();
-    $(".search input").focus();
-    $(".notifications-tab").hide();
-});
-
-// ---------------------------------------------------------------------------
-// Fetching liked posts
-// ---------------------------------------------------------------------------
-$(".likes-button").click(function () {
-    var user_id = $(".div1").attr("class").split(" ")[1];
-    showPosts(3, user_id);
-    exploreAccounts("/exploreAccounts/0/random");
-    $(".div2").hide();
     $(".full-post").hide();
     $(".ai-bar").hide();
     $(".explore-tab").show();
     $(".notifications-tab").hide();
-});
-
-// ---------------------------------------------------------------------------
-// Show profile
-// (clicking another profile while one is loading cancels the first request)
-// ---------------------------------------------------------------------------
-function showProfile(user_id) {
-    $(".div2").html('<div class="page-loader page-loader--profile"><span class="loader2"></span></div>');
-
-    // Abort any in-flight profile request.
-    ajaxWithAbort("showProfile", {
-        url: "/profile/" + user_id,
-        method: "GET",
-        success: function (response) {
-            injectHtmlResponse($(".div2"), response);
-            $(".full-post").hide();
-            $(".ai-bar").hide();
-            $(".explore-tab").show();
-            $(".notifications-tab").hide();
-            showPosts(1, user_id);
-        }
-    });
+    showPosts(1, userId);
 }
 
-$(".profile-link").click(function () {
-    user_id = $(".div1").attr("class").split(" ")[1];
-    showProfile(user_id);
-});
-
-// ---------------------------------------------------------------------------
-// Back to home
-// ---------------------------------------------------------------------------
 function Backtohome() {
-    $(".div2").load("/profile/0");
+    loadFragment(
+        "backHomeProfile",
+        $(".div2"),
+        "/profile/0",
+        '<div class="page-loader page-loader--profile"><span class="loader2"></span></div>'
+    );
     $(".full-post").hide();
     $(".ai-bar").hide();
     $(".notifications-tab").hide();
     $(".explore-tab").show();
-    $(".nav a").removeClass("active link-dark");
-    $(".nav a").addClass("link-dark");
-    $(".home-link").addClass("active");
-    $(".home-link").removeClass("link-dark");
+    $(".nav a").removeClass("active link-dark").addClass("link-dark");
+    $(".home-link").addClass("active").removeClass("link-dark");
     $(".div2").show();
     showPosts(0, 0);
 }
-$(".home-link").click(Backtohome);
 
-// Show posts based on "For You" / "Following" tabs
-$(document).on("click", ".top-pages h6", function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-
-    $(".top-pages h6").removeClass("active-a");
-    $(this).addClass("active-a");
-
-    var state = parseInt($(this).data("state"));
-    var user_id = $(this).data("userid");
-    showPosts(state, user_id);
-    return false;
-});
-
-// ---------------------------------------------------------------------------
-// Show full post method
-// ---------------------------------------------------------------------------
 function showFullPost(e) {
     if (e) {
         e.preventDefault();
     }
-    var $post = $(this).closest(".post");
+
+    let $post = $(this).closest(".post");
     if ($post.length === 0) {
         $post = $(".post.active-post").first();
     }
+
     if ($post.length === 0) {
         $(".explore-tab").show();
         $(".full-post").hide();
         $(".notifications-tab").hide();
         return;
     }
-    var post_id = $post.data("postid");
-    var active_post = $post.hasClass("active-post");
+
+    const postId = $post.data("postid");
+    const activePost = $post.hasClass("active-post");
 
     $(".post").removeClass("active-post");
 
-    if (!active_post) {
+    if (!activePost) {
         $post.addClass("active-post");
         $(".explore-tab").hide();
         $(".ai-bar").hide();
         $(".full-post").show();
         $(".notifications-tab").hide();
-        // reload specific part of page without refreshing entire page
-        $(".coreXmanzoid").load("/comments/" + post_id);
+        loadFragment(
+            "showComments",
+            $(".coreXmanzoid"),
+            "/comments/" + postId,
+            '<div class="loader-wrapper"><span class="loader"></span></div>'
+        );
     } else {
         $post.removeClass("active-post");
         $(".explore-tab").show();
@@ -377,9 +453,6 @@ function showFullPost(e) {
     }
 }
 
-// ---------------------------------------------------------------------------
-// Send notification helper (fire-and-forget; no abort needed)
-// ---------------------------------------------------------------------------
 function sendNotification({
     recipientId,
     title,
@@ -405,164 +478,188 @@ function sendNotification({
     });
 }
 
-// ---------------------------------------------------------------------------
-// newPost.html script
-// ---------------------------------------------------------------------------
-
-// Control for-you and following active link
-$(".div2 a").click(function () {
-    $(".div2 a").removeClass("active-a");
-    $(this).addClass("active-a");
-});
-
 function prependPost(content, userId) {
-    let profileImg = $("#dropdownUser2 img").attr("src");
-    let username = $("#dropdownUser2 strong").data("username");
-    let name = $("#dropdownUser2 strong").text().trim();
-    let tempId = "temp-" + Date.now();
-    let timestamp = new Date().toISOString();
-    let postHTML = `
-    <div class="post info p-1" data-postid="${tempId}">
-        <div class="post-heading">
-            <img src="${profileImg}" alt="" width="40" height="40" class="rounded-circle me-2">
-            <h5 class="${userId}">${name}<br /><span>@${username}</span></h5>
-            <small class="post-time" data-timestamp="${timestamp}">Just now</small>
-            <div class="edit-post ms-auto me-2" title="Edit Post">
-                Posting...
+    const profileImg = $("#dropdownUser2 img").attr("src");
+    const username = $("#dropdownUser2 strong").data("username");
+    const name = $("#dropdownUser2 strong").text().trim();
+    const tempId = "temp-" + Date.now();
+    const timestamp = new Date().toISOString();
+    const postHtml = `
+        <div class="post info p-1" data-postid="${tempId}">
+            <div class="post-heading">
+                <img src="${profileImg}" alt="" width="40" height="40" class="rounded-circle me-2">
+                <h5 class="${userId}">${name}<br><span>@${username}</span></h5>
+                <small class="post-time" data-timestamp="${timestamp}">Just now</small>
+                <div class="edit-post ms-auto me-2" title="Edit Post">
+                    Posting...
+                </div>
             </div>
+            <div class="post-content">
+                <p class="content" data-mentions='[]'></p>
+                <p class="hashtag"></p>
+            </div>
+            <div class="post-actions">
+                <a class="comment"><i class="bi bi-chat-heart"></i> 0</a>
+                <a class="retweet"><i class="bi bi-repeat"></i> 0</a>
+                <a class="like"><i class="bi bi-heart"></i> 0</a>
+                <a class="share"><i class="bi bi-share"></i> 0</a>
+            </div>
+            <hr>
         </div>
-        <div class="post-content">
-            <p class="content" data-mentions='[]'></p>
-            <p class="hashtag"></p>
-        </div>
-
-        <div class="post-actions">
-            <a class="comment"><i class="bi bi-chat-heart"></i> 0</a>
-            <a class="retweet"><i class="bi bi-repeat"></i> 0</a>
-            <a class="like"><i class="bi bi-heart"></i> 0</a>
-            <a class="share"><i class="bi bi-share"></i> 0</a>
-        </div>
-        <hr>
-    </div>
     `;
 
-    $(".div3").prepend(postHTML);
+    $(".div3").prepend(postHtml);
     $(".div3 .post").first().find(".post-content .content").text(content);
+    initializePostsFragment($(".div3"));
     return tempId;
 }
 
-// ---------------------------------------------------------------------------
-// Submit post
-// (duplicate submissions are blocked by the disabled button, but we also
-// abort any prior in-flight submit request for safety)
-// ---------------------------------------------------------------------------
-$(".submit button").on("click", function () {
-    var content = $("textarea[name='post-input']").val();
-    var userId = $(this).data("userid");
-    var tempPostId;
+function uploadProfileImage(input, url) {
+    const file = input.files[0];
+    if (!file) {
+        return;
+    }
 
-    $("textarea").val("");
-    $(".progress-circle-indicator").css("stroke-dashoffset", 0);
-    $(".progress-circle-indicator").attr("stroke", "#3b82f6");
-    $(".submit button").prop("disabled", true);
+    const formData = new FormData();
+    formData.append("profile", file);
 
-    tempPostId = prependPost(content, userId);
-
-    // Abort any previous submitPost request (e.g. rapid double-submit).
-    ajaxWithAbort("submitPost", {
-        url: "/managePosts/1",
-        method: "POST",
-        contentType: "application/json",
-        data: JSON.stringify({ content: content, user_id: userId }),
-        success: function (response) {
-            if (response.status === "success") {
-                var $newPost = $('.div3 .post[data-postid="' + tempPostId + '"]');
-                $newPost.attr("data-postid", response.post_id);
-                $newPost.find(".post-content .hashtag").text(response.hashtags);
-                $newPost.find(".post-content .content").attr("data-mentions", JSON.stringify(response.mentions));
-                $newPost.find(".post-time").attr("data-timestamp", response.timestamp).text("Just now");
-                $newPost.find(".edit-post").attr("title", "Edit Post").html(`<svg style="width: 22px; cursor:pointer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
-                    <path
-                        d="M505 122.9L517.1 135C526.5 144.4 526.5 159.6 517.1 168.9L488 198.1L441.9 152L471 122.9C480.4 113.5 495.6 113.5 504.9 122.9zM273.8 320.2L408 185.9L454.1 232L319.8 366.2C316.9 369.1 313.3 371.2 309.4 372.3L250.9 389L267.6 330.5C268.7 326.6 270.8 323 273.7 320.1zM437.1 89L239.8 286.2C231.1 294.9 224.8 305.6 221.5 317.3L192.9 417.3C190.5 425.7 192.8 434.7 199 440.9C205.2 447.1 214.2 449.4 222.6 447L322.6 418.4C334.4 415 345.1 408.7 353.7 400.1L551 202.9C579.1 174.8 579.1 129.2 551 101.1L538.9 89C510.8 60.9 465.2 60.9 437.1 89zM152 128C103.4 128 64 167.4 64 216L64 488C64 536.6 103.4 576 152 576L424 576C472.6 576 512 536.6 512 488L512 376C512 362.7 501.3 352 488 352C474.7 352 464 362.7 464 376L464 488C464 510.1 446.1 528 424 528L152 528C129.9 528 112 510.1 112 488L112 216C112 193.9 129.9 176 152 176L264 176C277.3 176 288 165.3 288 152C288 138.7 277.3 128 264 128L152 128z" />
-                    </svg>`
-                );
-                $(".submit button").prop("disabled", true);
-
-                sendNotification({
-                    title: "New Post",
-                    type: "new_post",
-                    identifier: response.post_id,
-                    senderId: userId,
-                    message: response.username + " has just posted a new tweet.",
-                    state: 2,
-                    Push: "true"
-                }).done(function (res) {
-                    console.log("Notification saved:", res);
-                }).fail(function (err) {
-                    console.error("Failed to send notification:", err);
-                });
-
-                // Mention notifications — fire-and-forget, no abort needed.
-                $.ajax({
-                    url: "/send-mention-notifications",
-                    method: "POST",
-                    data: JSON.stringify({
-                        post_id: response.post_id,
-                        state: "post"
-                    }),
-                    headers: { "Content-Type": "application/json" },
-                    success: function (res) {
-                        console.log("Mention notifications sent:", res);
-                    },
-                    error: function (err) {
-                        console.error("Failed to send mention notifications:", err);
-                    }
-                });
-
-            } else {
-                alert("Failed to post. Please try again.");
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (res) {
+            if (res.image_url) {
+                $(input).closest(".profile-pic-wrapper").find(".profile-pic").attr("src", res.image_url);
+                $("#dropdownUser2 img").attr("src", res.image_url);
             }
         },
-        error: function (jqXHR, textStatus) {
-            // ajaxWithAbort already silences "abort"; only real errors reach here.
-            alert("An error occurred. Please try again.");
+        error: function (err) {
+            console.error(err.responseJSON || err);
         }
     });
-});
+}
 
-// Control textarea input characters and progress circle
-$("textarea").on("input", function () {
-    var inputLength = $(this).val().length;
-    var maxLength = 180;
-    var progress = (inputLength / maxLength) * 100;
+function appendNewComment(name, username, content, profileImageUrl, userId) {
+    const commentId = "new-" + Date.now();
+    const commentHtml = `
+        <div class="post-top">
+            <div class="post-heading">
+                <img src="${profileImageUrl}" alt="" width="30" height="30" class="rounded-circle me-2">
+                <h5 data-userid="${userId}">${name} <br><span>@${username}</span></h5>
+            </div>
+            <div class="post-actions comment-actions" data-commentId="${commentId}">
+                <a class="like-comment"><i class="bi bi-heart"></i> 0 </a>
+            </div>
+        </div>
+        <div class="post-content comment-content">
+            <p class="content" data-mentions='[]'>${content}</p>
+        </div>
+        <hr>
+    `;
 
-    var circumference = 2 * Math.PI * 22;
-    var offset = (progress / 100) * circumference;
-    if (progress >= 100) {
-        $(".progress-circle-indicator").attr("stroke", "red");
-    } else if (progress >= 80) {
-        $(".progress-circle-indicator").attr("stroke", "orange");
-    } else {
-        $(".progress-circle-indicator").attr("stroke", "#3b82f6");
+    $(".all-comments .no-data").remove();
+    $("#SMN").remove();
+    $(".all-comments").prepend(commentHtml);
+    return $(".all-comments .post-top").first();
+}
+
+function submitComment() {
+    const postId = $(".active-post").data("postid");
+    const postUserId = $(".post-detail .post-heading h5").data("userid");
+    const postContent = $(".my-comment input").val().trim();
+    const currentUserName = $("#submitComment").data("current_user_name");
+    const currentUserUsername = $("#submitComment").data("current_user_username");
+    const currentUserProfileImage = $(".my-comment img").attr("src");
+    const currentUserId = getCurrentUserId();
+    let comments = (parseInt($(".comments span").text(), 10) || 0) + 1;
+
+    if (!postContent) {
+        return;
     }
-    $(".progress-circle-indicator").css("stroke-dashoffset", offset);
 
-    if (inputLength > 0 && inputLength <= maxLength) {
-        $(".submit button").prop("disabled", false);
-    } else {
-        $(".submit button").prop("disabled", true);
-    }
-});
+    $(".my-comment input").val("");
+    $("#submitComment").prop("disabled", true);
 
-// ---------------------------------------------------------------------------
-// Check for unread notifications on page load (and after marking as read)
-// (rapid successive calls cancel the previous one)
-// ---------------------------------------------------------------------------
-user_id = $(".div1").attr("class").split(" ")[1];
-checkForNotifications(user_id);
+    const $newComment = appendNewComment(
+        currentUserName,
+        currentUserUsername,
+        postContent,
+        currentUserProfileImage,
+        currentUserId
+    );
+
+    $.ajax({
+        url: "/comments/" + postId,
+        method: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({
+            content: postContent,
+            state: 1
+        }),
+        headers: { "Content-Type": "application/json" },
+        success: function (response) {
+            comments = response.comments_count || comments;
+            $(".comments span").text(comments);
+            $newComment.next(".comment-content").find(".content").attr("data-mentions", JSON.stringify(response.mentions || []));
+            initializeCommentsFragment($(".full-post"));
+
+            sendNotification({
+                recipientId: postUserId,
+                title: "New Comment",
+                type: "new_comment",
+                identifier: postId,
+                message: comments > 1
+                    ? currentUserName + " and " + comments + " others commented on your post."
+                    : currentUserName + " commented on your post.",
+                Push: comments > 0 ? "false" : "true",
+                state: 3
+            });
+
+            if ([100, 1000, 10000].includes(comments)) {
+                const milestoneLabel = comments >= 1000 ? (comments / 1000) + "k" : String(comments);
+                sendNotification({
+                    recipientId: postUserId,
+                    title: milestoneLabel + " Comments",
+                    type: "post_comment_milestone",
+                    identifier: postId,
+                    message: "Your post has reached " + milestoneLabel + " comments!",
+                    Push: "true",
+                    state: 3
+                });
+            }
+
+            $.ajax({
+                url: "/send-mention-notifications",
+                method: "POST",
+                data: JSON.stringify({
+                    post_id: response.comment_id,
+                    state: "comment"
+                }),
+                headers: { "Content-Type": "application/json" }
+            });
+        },
+        error: function (err) {
+            console.error("Failed to submit comment:", err);
+            $newComment.next(".comment-content").next("hr").remove();
+            $newComment.next(".comment-content").remove();
+            $newComment.remove();
+            $(".comments span").text(Math.max(comments - 1, 0));
+
+            if ($(".all-comments .post-top").length === 0) {
+                $(".all-comments").html('<div class="no-data text-center py-3">No comments yet.</div>');
+            }
+
+            alert("Failed to submit comment. Please try again.");
+        },
+        complete: function () {
+            $("#submitComment").prop("disabled", false);
+        }
+    });
+}
 
 function checkForNotifications(id) {
-    // Abort any pending check before issuing a new one.
     ajaxWithAbort("checkNotifications", {
         url: "/check-notifications/" + id,
         method: "GET",
@@ -570,21 +667,14 @@ function checkForNotifications(id) {
             const $btn = $(".notifications-button");
             const $svg = $btn.find("svg");
 
-            // Wrap SVG only once
             if (!$svg.parent().hasClass("bell-wrapper")) {
                 $svg.wrap('<span class="bell-wrapper position-relative d-inline-block"></span>');
             }
 
             const $wrapper = $btn.find(".bell-wrapper");
-
             if (response.unread_count > 0) {
                 if ($wrapper.find(".notification-dot").length === 0) {
-                    $wrapper.append(`
-                        <span class="notification-dot 
-                                     translate-middle 
-                                     badge rounded-circle p-1">
-                        </span>
-                    `);
+                    $wrapper.append('<span class="notification-dot translate-middle badge rounded-circle p-1"></span>');
                 }
             } else {
                 $wrapper.find(".notification-dot").remove();
@@ -595,3 +685,627 @@ function checkForNotifications(id) {
         }
     });
 }
+
+exploreAccounts("/exploreAccounts/0/random");
+loadFragment("initialPosts", $(".div3"), "/showPosts/0/0", '<div class="page-loader page-loader--posts"><span class="loader1"></span></div>');
+initializeDynamicContent($(document.body));
+
+$(".search input").on("input", function () {
+    const query = $(this).val();
+    if (query.length > 0) {
+        exploreAccounts("/exploreAccounts/0/" + query);
+    } else {
+        exploreAccounts("/exploreAccounts/0/random");
+    }
+});
+
+$(".nav li a").on("click", function () {
+    $(".nav a").removeClass("active link-dark").addClass("link-dark");
+    $(this).addClass("active").removeClass("link-dark");
+});
+
+$(".verification-box button").on("click", function () {
+    const userId = getCurrentUserId();
+    const button = $("#verifyBtn");
+
+    button.prop("disabled", true);
+    button.html('<span class="btn-loader"></span>Sending...');
+
+    ajaxWithAbort("emailVerification", {
+        url: "/email-verification",
+        method: "POST",
+        data: JSON.stringify({ user_id: userId }),
+        contentType: "application/json",
+        success: function (response) {
+            if (response.status === "success") {
+                button.html('<span class="btn-loader"></span>Verification in progress...');
+                if ($("#verification-status").length === 0) {
+                    button.after('<strong id="verification-status" class="verification-tag">Verification email sent! Please check your inbox.</strong>');
+                }
+            } else {
+                alert("Failed to send verification email. Please try again.");
+            }
+        }
+    });
+});
+
+$(".div4 button").on("click", function () {
+    $(".ai-bar").hide();
+    $(".notifications-tab").hide();
+    $(".full-post").hide();
+    $(".explore-tab").show();
+    showPosts(0, 0);
+});
+
+$(".switch-account-link").on("click", function () {
+    const confirmSwitch = confirm("Are you sure you want to switch accounts? Unsaved changes will be lost.");
+
+    if (confirmSwitch) {
+        window.location.href = "/logout/2";
+    } else {
+        Backtohome();
+    }
+});
+
+$(".notifications-button").on("click", function () {
+    $(".full-post").hide();
+    $(".notifications-tab").show().html('<div class="loader-wrapper"><span class="loader"></span></div>');
+    $(".explore-tab").hide();
+    $(".ai-bar").hide();
+
+    ajaxWithAbort("loadNotifications", {
+        url: "/notifications",
+        method: "GET",
+        success: function (response) {
+            injectHtmlResponse($(".notifications-tab"), response);
+            markAsRead();
+        }
+    });
+});
+
+$(".ai-button").on("click", function () {
+    $(".full-post").hide();
+    $(".div2").hide();
+    $(".div3").html('<div class="loader-wrapper"><span class="loader"></span></div>');
+    $(".div3").load("/Manzoid-AI");
+    $(".explore-tab").hide();
+    $(".ai-bar").show();
+    $(".notifications-tab").hide();
+});
+
+$(".post-button").on("click", function () {
+    Backtohome();
+    setTimeout(function () {
+        $("textarea[name='post-input']").trigger("focus");
+    }, 150);
+});
+
+$(".explore-button").on("click", function () {
+    $(".full-post").hide();
+    $(".ai-bar").hide();
+    $(".explore-tab").show();
+    $(".search input").trigger("focus");
+    $(".notifications-tab").hide();
+});
+
+$(".likes-button").on("click", function () {
+    const userId = getCurrentUserId();
+    showPosts(3, userId);
+    exploreAccounts("/exploreAccounts/0/random");
+    $(".div2").hide();
+    $(".full-post").hide();
+    $(".ai-bar").hide();
+    $(".explore-tab").show();
+    $(".notifications-tab").hide();
+});
+
+$(".profile-link").on("click", function () {
+    showProfile(getCurrentUserId());
+});
+
+$(".home-link").on("click", Backtohome);
+
+$(document).off("click.topPages", ".top-pages h6").on("click.topPages", ".top-pages h6", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    $(".top-pages h6").removeClass("active-a");
+    $(this).addClass("active-a");
+
+    const state = parseInt($(this).data("state"), 10);
+    const userId = $(this).data("userid");
+    showPosts(state, userId);
+});
+
+$(document).off("click.submitPost", ".submit button").on("click.submitPost", ".submit button", function () {
+    const $button = $(this);
+    const content = $("textarea[name='post-input']").val().trim();
+    const userId = $button.data("userid");
+
+    if (!content) {
+        updateComposerState($("textarea[name='post-input']"));
+        return;
+    }
+
+    $("textarea[name='post-input']").val("");
+    updateComposerState($("textarea[name='post-input']"));
+    $button.prop("disabled", true);
+
+    const tempPostId = prependPost(content, userId);
+
+    ajaxWithAbort("submitPost", {
+        url: "/managePosts/1",
+        method: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({ content: content, user_id: userId }),
+        success: function (response) {
+            if (response.status !== "success") {
+                $('.div3 .post[data-postid="' + tempPostId + '"]').remove();
+                alert("Failed to post. Please try again.");
+                return;
+            }
+
+            const $newPost = $('.div3 .post[data-postid="' + tempPostId + '"]');
+            $newPost.attr("data-postid", response.post_id);
+            $newPost.find(".post-content .hashtag").text(response.hashtags);
+            $newPost.find(".post-content .content").attr("data-mentions", JSON.stringify(response.mentions || []));
+            $newPost.find(".post-time").attr("data-timestamp", response.timestamp).text("Just now");
+            $newPost.find(".edit-post").attr("title", "Edit Post").html(
+                '<svg style="width: 22px; cursor:pointer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M505 122.9L517.1 135C526.5 144.4 526.5 159.6 517.1 168.9L488 198.1L441.9 152L471 122.9C480.4 113.5 495.6 113.5 504.9 122.9zM273.8 320.2L408 185.9L454.1 232L319.8 366.2C316.9 369.1 313.3 371.2 309.4 372.3L250.9 389L267.6 330.5C268.7 326.6 270.8 323 273.7 320.1zM437.1 89L239.8 286.2C231.1 294.9 224.8 305.6 221.5 317.3L192.9 417.3C190.5 425.7 192.8 434.7 199 440.9C205.2 447.1 214.2 449.4 222.6 447L322.6 418.4C334.4 415 345.1 408.7 353.7 400.1L551 202.9C579.1 174.8 579.1 129.2 551 101.1L538.9 89C510.8 60.9 465.2 60.9 437.1 89zM152 128C103.4 128 64 167.4 64 216L64 488C64 536.6 103.4 576 152 576L424 576C472.6 576 512 536.6 512 488L512 376C512 362.7 501.3 352 488 352C474.7 352 464 362.7 464 376L464 488C464 510.1 446.1 528 424 528L152 528C129.9 528 112 510.1 112 488L112 216C112 193.9 129.9 176 152 176L264 176C277.3 176 288 165.3 288 152C288 138.7 277.3 128 264 128L152 128z" /></svg>'
+            );
+            initializePostsFragment($newPost.parent());
+
+            sendNotification({
+                title: "New Post",
+                type: "new_post",
+                identifier: response.post_id,
+                senderId: userId,
+                message: response.username + " has just posted a new tweet.",
+                state: 2,
+                Push: "true"
+            });
+
+            $.ajax({
+                url: "/send-mention-notifications",
+                method: "POST",
+                data: JSON.stringify({
+                    post_id: response.post_id,
+                    state: "post"
+                }),
+                headers: { "Content-Type": "application/json" }
+            });
+        },
+        error: function () {
+            $('.div3 .post[data-postid="' + tempPostId + '"]').remove();
+            alert("An error occurred. Please try again.");
+        }
+    });
+});
+
+$(document).off("input.postComposer", "textarea[name='post-input']").on("input.postComposer", "textarea[name='post-input']", function () {
+    updateComposerState($(this));
+});
+
+$(document).off("click.profileBack", ".backtohome").on("click.profileBack", ".backtohome", Backtohome);
+
+$(document).off("click.profilePicture", ".profile-pic-wrapper").on("click.profilePicture", ".profile-pic-wrapper", function () {
+    const $input = $(this).find("#profileInput");
+    if ($input.length) {
+        $input.trigger("click");
+    }
+});
+
+$(document).off("change.profileInput", "#profileInput").on("change.profileInput", "#profileInput", function () {
+    const userId = $(this).closest(".info").data("user-id");
+    const userChoice = confirm("Are you sure you want to update your profile picture?");
+
+    if (!userChoice) {
+        this.value = "";
+        return;
+    }
+
+    uploadProfileImage(this, "/update-profile/" + userId);
+    sendNotification({
+        recipientId: null,
+        title: "Profile Updated",
+        type: "profile_update",
+        identifier: userId,
+        message: "Has updated his profile picture.",
+        state: 2
+    });
+});
+
+$(document).off("click.profileAudience", ".audience small").on("click.profileAudience", ".audience small", function () {
+    const $btn = $(this);
+    const primaryClass = ($btn.attr("class") || "").split(" ")[0];
+    const accountId = $btn.closest(".audience").attr("class").split(" ")[1];
+
+    if (primaryClass === "Follow") {
+        $.ajax({
+            url: "/follows/" + accountId + "/1",
+            type: "POST",
+            success: function () {
+                $btn.text("Following");
+                $btn.attr("class", "Following ps-3");
+            }
+        });
+        return;
+    }
+
+    if (primaryClass === "Following") {
+        $.ajax({
+            url: "/follows/" + accountId + "/2",
+            type: "POST",
+            success: function () {
+                $btn.text("Follow");
+                $btn.attr("class", "Follow ps-4");
+            }
+        });
+        return;
+    }
+
+    window.location.href = "/setting";
+});
+
+$(document).off("click.profileFollowers", ".followers").on("click.profileFollowers", ".followers", function () {
+    exploreAccounts("/exploreAccounts/" + $(this).attr("class").split(" ")[1] + "/followers");
+});
+
+$(document).off("click.profileFollowing", ".following").on("click.profileFollowing", ".following", function () {
+    exploreAccounts("/exploreAccounts/" + $(this).attr("class").split(" ")[1] + "/following");
+});
+
+$(document).off("click.profileOptions", ".ProfileOptions h6").on("click.profileOptions", ".ProfileOptions h6", function () {
+    $(".ProfileOptions h6").removeClass("active-a");
+    $(this).addClass("active-a");
+
+    const option = $(this).text().trim();
+    const userId = $(".ProfileOptions").attr("class").split(" ")[1];
+
+    if (option === "Posts") {
+        showPosts(1, userId);
+    } else if (option === "Likes") {
+        showPosts(3, userId);
+    } else if (option === "Reposts") {
+        showPosts(4, userId);
+    }
+});
+
+$(document).off("dblclick.showFullPost", ".post").on("dblclick.showFullPost", ".post", showFullPost);
+$(document).off("click.showFullPost", ".comment").on("click.showFullPost", ".comment", showFullPost);
+
+$(document).off("click.postProfile", ".post-heading h5").on("click.postProfile", ".post-heading h5", function () {
+    const profileId = $(this).data("userid");
+    if (profileId) {
+        showProfile(profileId);
+    }
+});
+
+$(document).off("click.editPost", ".edit-post").on("click.editPost", ".edit-post", function () {
+    const editLink = $(this);
+    const postDiv = editLink.closest(".post");
+    const postId = postDiv.data("postid");
+    const contentP = postDiv.find(".post-content .content");
+    const originalContent = contentP.text().trim();
+    const textarea = $('<textarea class="form-control" maxlength="180" rows="3"></textarea>').val(originalContent);
+    const deleteBtn = $('<small class="edit-action delete"><u>Delete</u></small>');
+    const saveBtn = $('<small class="edit-action save"><u>Save</u></small>');
+    const cancelBtn = $('<small class="edit-action cancel"><u>Cancel</u></small>');
+    const btnContainer = $('<div class="edit-btn-container m-1" style="display:flex; justify-content:space-between;"></div>');
+
+    contentP.replaceWith(textarea);
+    textarea.trigger("focus");
+    btnContainer.append(deleteBtn, cancelBtn, saveBtn);
+    postDiv.find(".post-content").after(btnContainer);
+    editLink.hide();
+
+    saveBtn.on("click", function () {
+        const confirmChange = confirm("Do you want to update you post. This action cannot be undone.");
+        if (!confirmChange) {
+            return;
+        }
+
+        $.ajax({
+            url: "/managePosts/2",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                post_id: postId,
+                content: textarea.val().trim()
+            }),
+            success: function (res) {
+                textarea.replaceWith($('<p class="content"></p>').text(res.content || ""));
+                btnContainer.remove();
+                editLink.show();
+            }
+        });
+    });
+
+    cancelBtn.on("click", function () {
+        textarea.replaceWith($('<p class="content"></p>').text(originalContent));
+        btnContainer.remove();
+        editLink.show();
+    });
+
+    deleteBtn.on("click", function () {
+        const confirmChange = confirm("Are you sure you want to delete this post? This action cannot be undone.");
+        if (!confirmChange) {
+            return;
+        }
+
+        $.ajax({
+            url: "/managePosts/3",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ post_id: postId }),
+            success: function () {
+                postDiv.remove();
+            }
+        });
+    });
+});
+
+$(document).off("click.likePost", ".like").on("click.likePost", ".like", function (e) {
+    e.preventDefault();
+
+    const $btn = $(this);
+    if ($btn.data("loading")) {
+        return;
+    }
+
+    $btn.data("loading", true);
+
+    const $icon = $btn.find("i");
+    const postId = $btn.closest(".post").data("postid");
+    const wasLiked = $btn.hasClass("text-warning") || $icon.hasClass("bi-heart-fill");
+    const textNode = getTextNode($btn);
+    const count = parseInt(textNode.text().trim(), 10) || 0;
+    const newCount = wasLiked ? count - 1 : count + 1;
+
+    $btn.toggleClass("text-warning", !wasLiked);
+    $icon.toggleClass("bi-heart-fill", !wasLiked);
+    $icon.toggleClass("bi-heart", wasLiked);
+    textNode[0].nodeValue = " " + newCount;
+
+    $.ajax({
+        url: "/PostAction/1",
+        method: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({
+            post_id: postId,
+            like: !wasLiked
+        }),
+        success: function (res) {
+            textNode[0].nodeValue = " " + res.likes;
+
+            if (!wasLiked) {
+                sendNotification({
+                    recipientId: res.user_id,
+                    title: "New Like!",
+                    type: "post_like",
+                    identifier: postId,
+                    message: res.likes > 1
+                        ? res.current_user_name + " and " + (res.likes - 1) + " others liked your post."
+                        : res.current_user_name + " liked your post.",
+                    Push: res.likes > 1 ? "false" : "true",
+                    state: 3
+                });
+
+                if ([100, 1000, 10000].includes(res.likes)) {
+                    const label = res.likes >= 1000 ? (res.likes / 1000) + "k" : String(res.likes);
+                    sendNotification({
+                        recipientId: res.user_id,
+                        title: label + " Likes",
+                        type: "post_like_milestone",
+                        identifier: postId,
+                        message: "Your post has reached " + label + " likes!",
+                        Push: "true",
+                        state: 3
+                    });
+                }
+            }
+        },
+        error: function () {
+            alert("An error occurred while processing your like. Please try again.");
+            $btn.toggleClass("text-warning", wasLiked);
+            $icon.toggleClass("bi-heart-fill", wasLiked);
+            $icon.toggleClass("bi-heart", !wasLiked);
+            textNode[0].nodeValue = " " + count;
+        },
+        complete: function () {
+            $btn.data("loading", false);
+        }
+    });
+});
+
+$(document).off("click.retweetPost", ".retweet").on("click.retweetPost", ".retweet", function (e) {
+    e.preventDefault();
+
+    const $btn = $(this);
+    if ($btn.data("loading")) {
+        return;
+    }
+
+    $btn.data("loading", true);
+
+    const $icon = $btn.find("i");
+    const postId = $btn.closest(".post").data("postid");
+    const wasReposted = $btn.hasClass("text-warning");
+    const textNode = getTextNode($btn);
+    const count = parseInt(textNode.text().trim(), 10) || 0;
+    const newCount = wasReposted ? count - 1 : count + 1;
+
+    $btn.toggleClass("text-warning", !wasReposted);
+    textNode[0].nodeValue = " " + newCount;
+    $icon.removeClass("rotate");
+    void $icon[0].offsetWidth;
+    $icon.addClass("rotate");
+
+    $.ajax({
+        url: "/PostAction/2",
+        method: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({
+            post_id: postId,
+            repost: !wasReposted
+        }),
+        success: function (res) {
+            textNode[0].nodeValue = " " + res.reposts;
+
+            if (!wasReposted) {
+                sendNotification({
+                    recipientId: res.user_id,
+                    title: "New Retweet!",
+                    type: "post_retweet",
+                    identifier: postId,
+                    message: res.reposts > 1
+                        ? res.current_user_name + " and " + (res.reposts - 1) + " others retweeted your post."
+                        : res.current_user_name + " retweeted your post.",
+                    Push: res.reposts > 1 ? "false" : "true",
+                    state: 3
+                });
+
+                if ([100, 1000, 10000].includes(res.reposts)) {
+                    const label = res.reposts >= 1000 ? (res.reposts / 1000) + "k" : String(res.reposts);
+                    sendNotification({
+                        recipientId: res.user_id,
+                        title: label + " Retweets",
+                        type: "post_retweet_milestone",
+                        identifier: postId,
+                        message: "Your post has reached " + label + " retweets!",
+                        Push: "true",
+                        state: 3
+                    });
+                }
+            }
+        },
+        error: function () {
+            $btn.toggleClass("text-warning", wasReposted);
+            textNode[0].nodeValue = " " + count;
+        },
+        complete: function () {
+            $btn.data("loading", false);
+        }
+    });
+});
+
+$(document).off("click.sharePost", ".share, .shares").on("click.sharePost", ".share, .shares", async function (e) {
+    e.preventDefault();
+
+    const $btn = $(this);
+    const context = getShareContext($btn);
+    const postId = context.postId;
+    const text = context.text || "Check out this post on ChatFlick";
+    const url = "https://ChatFlick.pythonanywhere.com";
+
+    if (!postId || String(postId).indexOf("temp-") === 0) {
+        console.warn("Share aborted: invalid post id", postId);
+        return;
+    }
+
+    if ($btn.data("loading")) {
+        return;
+    }
+
+    $btn.data("loading", true);
+
+    function getShortText(text, maxLength = 100) {
+        return text.length > maxLength
+            ? text.substring(0, maxLength) + "..."
+            : text;
+    }
+
+    const shortText = getShortText(text);
+    const shareText = shortText;
+    const shareData = {
+        title: "ChatFlick Post",
+        text: shareText,
+        url: url
+    };
+
+    try {
+        const result = await sharePostContent(shareData);
+
+        if (result.mode === "clipboard") {
+            alert("Post copied to clipboard!");
+        }
+
+        $.ajax({
+            url: "/PostAction/4",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                post_id: postId
+            }),
+            success: function (res) {
+                if (typeof res.shares === "number") {
+                    setActionCount($btn, res.shares);
+                }
+            },
+            error: function (xhr) {
+                console.error("Share count update failed:", xhr.responseJSON || xhr);
+            },
+            complete: function () {
+                $btn.data("loading", false);
+            }
+        });
+    } catch (err) {
+        if (err && err.name === "AbortError") {
+            $btn.data("loading", false);
+            return;
+        }
+
+        console.error("Share failed:", err);
+        alert("Unable to share this post right now.");
+        $btn.data("loading", false);
+    }
+});
+
+$(document).off("click.likeComment", ".like-comment").on("click.likeComment", ".like-comment", function (e) {
+    e.preventDefault();
+
+    const $btn = $(this);
+    const $icon = $btn.find("i");
+    const textNode = getTextNode($btn);
+    const likes = parseInt(textNode.text().trim(), 10) || 0;
+    const wasLiked = $icon.hasClass("bi-heart-fill");
+    const postId = $btn.closest(".comment-actions").data("commentid");
+    const newLikes = wasLiked ? likes - 1 : likes + 1;
+
+    $btn.toggleClass("text-warning", !wasLiked);
+    $icon.toggleClass("bi-heart-fill", !wasLiked);
+    $icon.toggleClass("bi-heart", wasLiked);
+    textNode[0].nodeValue = " " + newLikes;
+
+    $.ajax({
+        url: "/PostAction/3",
+        method: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({
+            post_id: postId,
+            like: !wasLiked
+        }),
+        success: function (res) {
+            textNode[0].nodeValue = " " + res.likes;
+        },
+        error: function (err) {
+            console.error("Failed to like comment:", err);
+            $btn.toggleClass("text-warning", wasLiked);
+            $icon.toggleClass("bi-heart-fill", wasLiked);
+            $icon.toggleClass("bi-heart", !wasLiked);
+            textNode[0].nodeValue = " " + likes;
+            alert("Failed to update like. Please try again.");
+        }
+    });
+});
+
+$(document).off("click.commentBack", ".back-post > i").on("click.commentBack", ".back-post > i", showFullPost);
+$(document).off("click.submitComment", "#submitComment").on("click.submitComment", "#submitComment", submitComment);
+$(document).off("keydown.submitComment", ".my-comment input").on("keydown.submitComment", ".my-comment input", function (e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        submitComment();
+    }
+});
+
+checkForNotifications(getCurrentUserId());

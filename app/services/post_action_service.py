@@ -62,14 +62,13 @@ class PostActionService:
 
 
     @staticmethod
-    def share_post(post_id, share):
+    def share_post(post_id):
 
         post = db.session.get(Post, post_id)
+        if not post:
+            return None
 
-        if share:
-            post.shares += 1
-        else:
-            post.shares = max(post.shares - 1, 0)
+        post.shares += 1
 
         db.session.commit()
 
