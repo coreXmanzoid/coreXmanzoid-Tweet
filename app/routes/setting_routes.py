@@ -18,6 +18,8 @@ from app.services.email_service import EmailService
 from app.services.auth_service import AuthService
 from datetime import datetime
 
+from app.utils.username import validate_username
+
 setting_bp = Blueprint("setting", __name__)
 
 VALID_SECTIONS = {
@@ -72,6 +74,8 @@ def profile_setting():
             if current_user.username != new_username:
                 if temp_user:
                     flash("Username Already Exists", "error")
+                elif not validate_username(new_username):
+                    flash("Username can only contain letters, numbers, underscores and dots.", "error")
                 else:
                     SettingService.change_username(user, new_username)
                     flash("Username Updated Successfully", "success")

@@ -5,6 +5,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app.extensions import db
 from app.models.users import UserData
 from app.services.email_service import EmailService
+from app.utils.username import validate_username
+
 def get_serializer():
     return URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
 
@@ -14,22 +16,23 @@ class AuthService:
     @staticmethod
     def username_exists(username):
         return db.session.execute(
-            db.select(UserData).where(UserData.username == username)
+            db.select(UserData).where(UserData.username == username.lower())
         ).scalar()
 
     @staticmethod
     def email_exists(email):
         return db.session.execute(
-            db.select(UserData).where(UserData.email == email)
+            db.select(UserData).where(UserData.email == email.lower())
         ).scalar()
 
     @staticmethod
     def create_user(name, username, email, birth_date, password):
-
+        if not validate_username(username):
+            return None
         user = UserData(
             name=name,
-            username=username,
-            email=email,
+            username=username.lower(),
+            email=email.lower(),
             birth_date=birth_date,
             password=generate_password_hash(
                 password, method="pbkdf2:sha256", salt_length=8
@@ -46,7 +49,7 @@ class AuthService:
 
         user = db.session.execute(
             db.select(UserData).where(
-            (UserData.email == identifier) | (UserData.username == identifier)
+            (UserData.email == identifier.lower()) | (UserData.username == identifier.lower())
             )
         ).scalar()
 
@@ -87,7 +90,7 @@ class AuthService:
             _external=True,
         )
 
-        return EmailService.send_link_email(user.email, verify_link, st=1)
+        return EmailService.send_link_email(user.email.lower(), verify_link, st=1)
 
     @staticmethod
     def verify_email_token(token):

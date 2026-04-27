@@ -1,6 +1,5 @@
 if user delete a post then we have to clear all his likes repossts, notifications and comments from database
 scrollTo(0,0);
-newpost double click problem
 
 
 

@@ -14,7 +14,7 @@ class SettingService:
     
     @staticmethod
     def change_username(user, new_username):
-        user.username = new_username
+        user.username = new_username.lower()
         db.session.commit()
 
     @staticmethod
@@ -40,7 +40,7 @@ class SettingService:
     @staticmethod
     def change_email(user, new_email):
         user.status = "UNVERIFIED"
-        user.email = new_email
+        user.email = new_email.lower()
         db.session.commit()
    
     @staticmethod

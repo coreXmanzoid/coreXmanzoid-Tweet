@@ -36,7 +36,7 @@ class AccountService:
             db.session.execute(
                 db.select(UserData)
                 .outerjoin(Follow, Follow.following_id == UserData.id)
-                .where(UserData.username.contains(query))
+                .where(UserData.username.contains(query.lower()))
                 .group_by(UserData.id)
                 .order_by(func.count(Follow.id).desc())
             )

@@ -6,7 +6,8 @@ from app.models.users import UserData
 def mentions_parser(content: str):
 
     mentioned_usernames = [
-        word[1:] for word in content.split() if word.startswith("@")
+        word[1:].lower()
+        for word in content.split() if word.startswith("@")
     ]
 
     users = (

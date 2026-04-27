@@ -237,12 +237,12 @@ button:hover {
     }
 
 
-    .post {
+    .newPost {
         display: flex;
         margin-top: 25px;
     }
 
-    .post img {
+    .newPost img {
         float: left;
         margin: 0 15px 10px 0;
     }
@@ -409,6 +409,17 @@ button:hover {
 
 .profile {
     background-color: #DEDED1 !important;
+}
+.back-profile {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    a{
+        color: #46423b !important;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 16px;
+    }
 }
 
 .profile .info {

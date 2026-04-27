@@ -9,6 +9,7 @@ from app.services.auth_service import AuthService
 from app.services.captcha_service import CaptchaService
 from app.services.email_service import EmailService
 from app.services.google_auth_service import GoogleAuthService
+from app.utils.username import validate_username
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -126,7 +127,9 @@ def signup(st):
         if AuthService.username_exists(username):
             flash("Username already taken.")
             return redirect(url_for("auth.signup", st=0))
-
+        if not validate_username(username):
+            flash("Username can only contain letters, numbers, underscores and dots.", "error")
+            return redirect(url_for("auth.signup", st=0))
         AuthService.create_user(name, username, email, birth_date, password)
 
         flash("Account created successfully. Please verify your email.")
