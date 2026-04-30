@@ -1,58 +1,63 @@
-<div class="post-button">
-    <div class="back-post">
-        <i class="bi bi-arrow-left" style="cursor: pointer;"></i>
-        <a href="">Post</a>
+<div class="feed-post">
+    <div class="post-button">
+        <div class="back-post">
+            <i class="bi bi-arrow-left" style="cursor: pointer;"></i>
+            <a href="">Post</a>
+        </div>
+        <i class="bi bi-three-dots"></i>
     </div>
-    <i class="bi bi-three-dots"></i>
-</div>
-<div class="post-detail" data-postid="{{ post.id }}">
-    <div class="post-heading">
-        <img src="{{ post.user.profile_image_url if post.user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
-            alt="" width="40" height="40" class="rounded-circle me-2">
-        <h5 data-userid="{{ post.user.id}}">{{ post.user.name }}<br /><span>@{{ post.user.username }}</span></h5>
-    </div>
-    <div class="post-content">
-        <p class="content">{{ post.content }}</p>
-        <p class="hashtag">{{" ".join(post.hashtags) }}</p>
-    </div>
-    <div class="post-actions commment post-action">
-        <a class="comments"><i class="bi bi-chat-heart"></i> <span>{{ post.comments }}</span></a>
-        <a class="retweets"><i class="bi bi-repeat"></i> <span>{{ post.retweets }}</span></a>
-        <a class="likes"><i class="bi bi-heart"></i> <span>{{ post.likes }}</span></a>
-        <a class="shares"><i class="bi bi-share"></i> <span>{{ post.shares }}</span></a>
-    </div>
-</div>
-<hr>
-
-<div class="my-comment">
-    <img src="{{ current_user.profile_image_url if current_user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
-        alt="" width="35" height="35" class="rounded-circle me-2">
-    <input type="text" autocomplete="off" name="content" maxlength="130" placeholder="Leave your Comment">
-    <button id="submitComment" data-current_user_username="{{ current_user.username }}"
-        data-current_user_name="{{ current_user.name }}">Reply</button>
-</div>
-<hr />
-<div class="all-comments">
-    {% if not comments %}
-    <div class="no-data text-center py-3">No comments yet.</div>
-    {% else %}
-    <div id="SMN" data-smn="{{ comment_id }}"></div>
-    {% for comment in comments %}
-    <div class="post-top">
+    <div class="post-detail" data-postid="{{ post.id }}">
         <div class="post-heading">
-            <img src="{{ comment.user.profile_image_url if comment.user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
-                alt="" width="30" height="30" class="rounded-circle me-2">
-            <h5 data-userid="{{ comment.user.id }}">{{ comment.user.name }} <br><span>@{{ comment.user.username
-                    }}</span></h5>
+            <img src="{{ post.user.profile_image_url if post.user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
+                alt="" width="40" height="40" class="rounded-circle me-2">
+            <h5 data-userid="{{ post.user.id}}">{{ post.user.name }}<br /><span>@{{ post.user.username }}</span></h5>
         </div>
-        <div class="post-actions comment-actions" data-commentId="{{ comment.id }}">
-            <a class="like-comment"><i class="bi bi-heart"></i> {{ comment.likes }}</a>
+        <div class="post-content">
+            <p class="content">{{ post.content }}</p>
+            <p class="hashtag">{{" ".join(post.hashtags) }}</p>
         </div>
-    </div>
-    <div class="post-content comment-content">
-        <p class="content" data-mentions='{{ comment.mentions | tojson | safe }}'>{{ comment.content }}</p>
+        <div class="post-actions commment post-action">
+            <a class="comments"><i class="bi bi-chat-heart"></i> <span>{{ post.comments }}</span></a>
+            <a class="retweets"><i class="bi bi-repeat"></i> <span>{{ post.retweets }}</span></a>
+            <a class="likes"><i class="bi bi-heart"></i> <span>{{ post.likes }}</span></a>
+            <a class="shares"><i class="bi bi-share"></i> <span>{{ post.shares }}</span></a>
+        </div>
     </div>
     <hr>
-    {% endfor %}
-    {% endif %}
+</div>
+<div class="commments-box">
+
+
+    <div class="my-comment">
+        <img src="{{ current_user.profile_image_url if current_user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
+            alt="" width="35" height="35" class="rounded-circle me-2">
+        <input type="text" autocomplete="off" name="content" maxlength="130" placeholder="Leave your Comment">
+        <button id="submitComment" data-current_user_username="{{ current_user.username }}"
+            data-current_user_name="{{ current_user.name }}">Reply</button>
+    </div>
+    <hr />
+    <div class="all-comments">
+        {% if not comments %}
+        <div class="no-data text-center py-3">No comments yet.</div>
+        {% else %}
+        <div id="SMN" data-smn="{{ comment_id }}"></div>
+        {% for comment in comments %}
+        <div class="post-top">
+            <div class="post-heading">
+                <img src="{{ comment.user.profile_image_url if comment.user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
+                    alt="" width="30" height="30" class="rounded-circle me-2">
+                <h5 data-userid="{{ comment.user.id }}">{{ comment.user.name }} <br><span>@{{ comment.user.username
+                        }}</span></h5>
+            </div>
+            <div class="post-actions comment-actions" data-commentId="{{ comment.id }}">
+                <a class="like-comment"><i class="bi bi-heart"></i> {{ comment.likes }}</a>
+            </div>
+        </div>
+        <div class="post-content comment-content">
+            <p class="content" data-mentions='{{ comment.mentions | tojson | safe }}'>{{ comment.content }}</p>
+        </div>
+        <hr>
+        {% endfor %}
+        {% endif %}
+    </div>
 </div>

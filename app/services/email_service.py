@@ -83,9 +83,9 @@ class EmailService:
             return False
 
         subject = (
-            "Password Reset Link - coreXmanzoid Tweet"
+            "Password Reset Link - ChatFlick"
             if st == 2
-            else "Verify Email - coreXmanzoid Tweet"
+            else "Verify Email - ChatFlick"
         )
 
         button_text = "Reset Password" if st == 2 else "Verify Email"
@@ -106,7 +106,7 @@ class EmailService:
         <p>
         Hello,<br><br>
 
-        {message_text} for <b>coreXmanzoid Tweet</b>.<br><br>
+        {message_text} for <b>ChatFlick</b>.<br><br>
 
         <a href="{reset_link}"
         style="
@@ -124,7 +124,7 @@ class EmailService:
         The link will expire in 20 minutes.<br>
         If you did not request this, simply ignore this email.<br><br>
 
-        <b>coreXmanzoid Development Team</b>
+        <b>ChatFlick Development Team</b>
         </p>
         </body>
         </html>

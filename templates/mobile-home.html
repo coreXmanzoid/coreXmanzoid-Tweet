@@ -6,206 +6,343 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ChatFlick Mobile</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/mobile.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
-    <style>
-        :root {
-            --bg: #FBF3D1;
-            --surface: #FFFFFF;
-            --soft-surface: #F7F1D5;
-            --border: #E4E1D5;
-            --text: #2F2F2F;
-            --muted: #9A9485;
-            --accent: #F94818;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        body {
-            background: var(--bg);
-            display: flex;
-            justify-content: center;
-        }
-
-        .app-shell {
-            width: 100%;
-            max-width: 430px;
-            min-height: 100vh;
-            position: relative;
-        }
-
-        .feed-preview {
-            padding: 20px 16px 110px;
-        }
-
-        /* Status */
-        .status-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--muted);
-            margin-bottom: 18px;
-        }
-
-        /* Cards */
-        .hero-card {
-            background: var(--surface);
-            border-radius: 16px;
-            padding: 18px;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.05);
-            margin-bottom: 16px;
-            border: 1px solid var(--border);
-        }
-
-        .hero-card h1 {
-            font-size: 1.3rem;
-            margin-bottom: 6px;
-            color: var(--text);
-        }
-
-        .hero-card p {
-            font-size: 0.9rem;
-            color: var(--muted);
-            line-height: 1.5;
-        }
-
-        /* Stories */
-        .story-row {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            margin: 14px 0 20px;
-        }
-
-        .story {
-            min-width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            padding: 3px;
-            background: linear-gradient(135deg, var(--accent), #ff9a7a);
-        }
-
-        .story span {
-            display: flex;
-            width: 100%;
-            height: 100%;
-            align-items: center;
-            justify-content: center;
-            background: var(--surface);
-            border-radius: 50%;
-            font-size: 0.72rem;
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        /* Bottom Navigation */
-        .navigation {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 430px;
-            height: 75px;
-            background: var(--surface);
-            border-top: 1px solid var(--border);
-            box-shadow: 0 -6px 20px rgba(0,0,0,0.08);
-            display: flex;
-            align-items: center;
-            z-index: 100;
-        }
-
-        .navigation ul {
-            display: flex;
-            width: 100%;
-            height: 100%;
-        }
-
-        .navigation ul li {
-            flex: 1;
-            list-style: none;
-        }
-
-        .navigation ul li a {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: var(--muted);
-            text-decoration: none;
-            transition: 0.2s ease;
-        }
-
-        .navigation ul li a .icon {
-            font-size: 1.4rem;
-            margin-bottom: 4px;
-        }
-
-        .navigation ul li a .text {
-            font-size: 0.65rem;
-            font-weight: 500;
-        }
-
-        /* Active State (IMPORTANT FIX) */
-        .navigation ul li.active a {
-            color: var(--accent);
-            transform: translateY(-4px);
-        }
-
-        .navigation ul li.active a .icon {
-            background: rgba(249, 72, 24, 0.1);
-            padding: 8px;
-            border-radius: 12px;
-        }
-
-        /* Tap effect */
-        .navigation ul li:active {
-            transform: scale(0.95);
-        }
-
-        /* Mobile tweak */
-        @media (max-width: 420px) {
-            .navigation {
-                height: 70px;
-            }
-        }
-    </style>
 </head>
 
 <body>
 
     <div class="app-shell">
-        <main class="feed-preview">
+        <div class="fullpost-overlay" hidden>
+            <div class="fullpost-box">
+                <div class="feed-post">
+                    <div class="post-button">
+                        <div class="back-post">
+                            <i class="bi bi-arrow-left" style="cursor: pointer;"></i>
+                            <a href="">Post</a>
+                        </div>
+                        <i class="bi bi-three-dots"></i>
+                    </div>
+                    <div class="post-detail" data-postid="{{ post.id }}">
+                        <div class="post-heading">
+                            <img src="{{ post.user.profile_image_url if post.user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
+                                alt="" width="40" height="40" class="rounded-circle me-2">
+                            <h5 data-userid="{{ post.user.id}}">Hammad<br /><span>@hammad</span></h5>
+                        </div>
+                        <div class="post-content">
+                            <p class="content">Hey there I am using whatsapp.</p>
+                            <p class="hashtag">#coreXmanzoid</p>
+                        </div>
+                        <div class="post-actions commment post-action">
+                            <a class="comments"><i class="bi bi-chat-heart"></i> <span>11</span></a>
+                            <a class="retweets"><i class="bi bi-repeat"></i> <span>5</span></a>
+                            <a class="likes"><i class="bi bi-heart"></i> <span>25</span></a>
+                            <a class="shares"><i class="bi bi-share"></i> <span>3</span></a>
+                        </div>
+                    </div>
+                    <hr>
+                </div>
+                <div class="commments-box">
+                    <div class="my-comment">
+                        <img src="{{ current_user.profile_image_url if current_user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
+                            alt="" width="35" height="35" class="rounded-circle me-2">
+                        <input type="text" autocomplete="off" name="content" maxlength="130"
+                            placeholder="Leave your Comment">
+                        <button id="submitComment" data-current_user_username="{{ current_user.username }}"
+                            data-current_user_name="{{ current_user.name }}">Reply</button>
+                    </div>
+                    <hr />
+                    <div class="all-comments">
+                        <div class="post-top">
+                            <div class="post-heading">
+                                <img src="{{ comment.user.profile_image_url if comment.user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
+                                    alt="" width="30" height="30" class="rounded-circle me-2">
+                                <h5 data-userid="{{ comment.user.id }}">Hammad<br><span>@hammad</span></h5>
+                            </div>
+                            <div class="post-actions comment-actions" data-commentId="{{ comment.id }}">
+                                <a class="like-comment"><i class="bi bi-heart"></i>22</a>
+                            </div>
+                        </div>
+                        <div class="post-content comment-content">
+                            <p class="content" data-mentions='{{ comment.mentions | tojson | safe }}'>my new comment</p>
+                        </div>
+                        <hr>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+
+        <main class="feed-preview">
             <div class="status-row">
-                <span>9:41</span>
-                <span>ChatFlick</span>
+                <img src="../static/assets/Logo_horizontal.png" class="img-fluid">
+                <span id="notification-icon"><i class="fa-solid fa-bell"></i></span>
             </div>
 
-            <section class="hero-card">
-                <h1>Welcome Back 👋</h1>
-                <p>Your feed is clean, modern, and ready. This UI now actually feels like a real mobile app.</p>
+            <section class="post-section">
+                <!-- insert new post, ai, profile, notification top section here -->
+                <!-- 
+                <div class="flex top-pages">
+                    <h6 data-state="0" class="active-a" data-userid={{ current_user.id }}>For you</h6>
+                    <hr>
+                    <h6 data-state="2" class="" data-userid="{{ current_user.id }}">Following</h6>
+                </div>
+                <hr>
+                <div class="newPost">
+                    <img src="{{ current_user.profile_image_url if current_user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
+                        alt="" width="50" height="50" class="rounded-circle me-2">
+                    <textarea name="post-input" spellcheck="false" placeholder="Whats-happening!"></textarea>
+                </div>
+                <div class="submit">
+                    <div class="progress-circle" style="width: 40px; height: 40px;">
+                        <svg viewBox="0 0 50 50">
+                            <circle class="progress-circle-track" cx="25" cy="25" r="22" stroke="#e2e8f0"
+                                stroke-width="3" fill="none" />
+                            <circle class="progress-circle-indicator" cx="25" cy="25" r="22" stroke="#3b82f6"
+                                stroke-width="3" fill="none" stroke-dasharray="138.23007675795088 138.23007675795088"
+                                stroke-dashoffset="0" transform="rotate(-90 25 25)" />
+                        </svg>
+                    </div>
+                    <button type="submit" data-userid="{{ current_user.id }}" disabled>Post</button>
+                </div> -->
+
+
+                <div class="Manzoid-container" hidden>
+                    <div class="main-content">
+                        <div class="ai-header">
+                            <img src="{{ u airl_for('static', filename='assets/logo.png') }}" alt=""> Md AI
+                        </div>
+
+                        <div id="chat-box" class="chat-box">
+                            <div class="message ai">
+                                Hi Hammad👋, It's Manzoid AI. Ask me anything!
+                            </div>
+
+                        </div>
+
+                        <div class="chat-input">
+                            <input type="text" id="user-input" autocomplete="off" maxlength="100"
+                                placeholder="write a motivation tweet..." />
+                            <button onclick="sendMessage()">Send</button>
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="container" hidden>
+                    <div class="profile-header d-flex justify-content-between align-items-center p-2">
+                        <div class="back-profile">
+                            <i class="backtohome bi bi-arrow-left"></i>
+                            <a href="">Home</a>
+                        </div>
+                        <i class="bi bi-three-dots"></i>
+                    </div>
+                    <img class="img-fluid ps-3 w-75 ms-5" src="../static/assets/logo1.png">
+                    <div class="profile row">
+
+                        <div class="info col-lg-6 col-md-12" data-user-id="{{user.id}}">
+
+                            <div class="profile-pic-wrapper">
+                                <img class="profile-pic" src="../static/assets/default-profile.jpg"
+                                    style="border-radius:50px;border: 2px solid #DEDED1;" width="100" height="100">
+
+
+                                <div class="profile-pic-overlay">Update</div>
+                                <input title="Update Profile Picture" type="file" name="profile" id="profileInput">
+                            </div>
+
+                            <h5>
+                                <b>Hammad Ashraf</b>
+                                <i class="bi bi-patch-check-fill m-1"></i>
+                            </h5>
+
+                            <h6>@hammad</h6>
+
+                            <div id="profile-data">
+                                <small>
+                                    <i class="bi bi-calendar-heart m-1"></i>
+                                    <span id="birthDate">15 march 2025</span>
+                                </small>
+                                <br>
+                                <small><em>Always codding...</em></small> <br>
+                                <small>
+                                    <a href="{{ user.get_setting('account-info', 'website') }}" target="_blank"
+                                        rel="noopener noreferrer">
+                                        myWebsite...
+                                    </a>
+                                </small>
+                            </div>
+
+                        </div>
+
+
+                        <div class="audience {{user.id}} col-lg-6 col-md-12 pt-3">
+
+                            <small class="edit-profile">Edit Profile</small>
+                            <div class="audience-box">
+                                <strong
+                                    class="{% if user.get_setting('privacy-setting', 'show_status') %}followers{% endif %} {{user.id}}"
+                                    style="color: #F94818;">
+                                    10 Followers
+                                </strong>
+
+                                <strong
+                                    class="{% if user.get_setting('privacy-setting', 'show_status') %}following {% endif %} {{user.id}}">
+                                    10 Following
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+                    <hr style="margin:0px;">
+                    <div class="ProfileOptions">
+                        <h6>Posts</h6>
+                        <hr>
+                        <h6>Likes</h6>
+                        <hr>
+                        <h6>Reposts</h6>
+                        <hr>
+                        <h6>Dummy</h6>
+                    </div>
+                </div>
+
+                <div class="profile-tab" style="padding: 0;" hidden>
+                    <div class="premium">
+                        <h4>You aren't Verified Yet <i class="bi bi-patch-check-fill m-1" style="font-size: 18px;"></i>
+                        </h4>
+                        <p>Get verified for boosted replies, analytics, ad-free browsing, and more. Upgrade your
+                            profile
+                            now.</p>
+                        <button style="width: 140px">Get Verified</button>
+                    </div>
+                </div>
+
+
+
+
+
+                <!-- notification -->
+                <!--                
+                 <div class="no-posts text-center d-flex align-items-center justify-content-center" style="min-height: 100vh;" id="notifications-permission">
+                    <div>
+                        <i class="bi bi-inbox" style="font-size:48px;opacity:.3"></i>
+                        <h4 class="no-data mt-3">Notifications Permission Denied</h4>
+                        <p class="text-muted px-3">Allow Notifications service to get notify about everything.</p>
+                        <button class="notifications-allow w-50">Allow Notifications</button>
+                    </div>
+                </div>
+                 -->
+
+                <div class="notifications" data-userid="{{current_user.id}}" hidden>
+                    <div class="notification-header py-3">
+                        <h4 href=""><i class="bi bi-arrow-left" style="cursor: pointer;"></i>&nbsp;Notifications</h4>
+                        <i class="bi bi-three-dots"></i>
+                    </div>
+                    <div class="no-posts text-center d-flex align-items-center justify-content-center"
+                        style="min-height: 100vh;">
+                        <div>
+                            <i class="bi bi-inbox" style="font-size:48px;opacity:.3"></i>
+                            <h4 class="no-data mt-3">No notifications Yet</h4>
+                            <p class="text-muted px-3">There are no notifications to show. You'll see notifications here
+                                when someone
+                                interacts with you.</p>
+                        </div>
+                    </div>
+
+
+                    <img src="{{notification.sender.profile_image_url if notification.sender.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
+                        width="45" height="45" class="rounded-circle">
+                    <div class="notification-info">
+                        <strong>Hammad Ashraf</strong>
+                        <small>&nbsp;New Follower<span class="badge rounded-circle">
+                            </span></small>
+                    </div>
+                    <div class="notification-message">
+                        <p>Hammad Started Following you &nbsp;<span
+                                data-timestamp="{{notification.created_at.isoformat()}}Z">2s</span></p>
+                    </div>
+                    <hr>
+                </div>
+
+
+
+                <div class="search" hidden>
+                    <i class="bi bi-search"></i>
+                    <input type="text" placeholder="Search By Name">
+                </div>
+
             </section>
 
-            <div class="story-row">
-                <div class="story"><span>You</span></div>
-                <div class="story"><span>Ali</span></div>
-                <div class="story"><span>Sara</span></div>
-                <div class="story"><span>Omar</span></div>
-                <div class="story"><span>Zain</span></div>
+            <div class="accounts-row" hidden>
+                <!-- show some accounts just like explorer -->
+                <!-- Add background profile with low visibility-->
+                <div class="account"><span>Ali</span></div>
+                <div class="account"><span>Sara</span></div>
+                <div class="account"><span>Omar</span></div>
+                <div class="account"><span>You</span></div>
+                <div class="account"><span>Zain</span></div>
+                <div class="account"><span>Zain</span></div>
             </div>
 
-            <section class="hero-card">
-                <h1>Better Navigation</h1>
-                <p>The bottom bar now has proper spacing, highlight, and feedback. It feels interactive and alive.</p>
+
+            <!-- insert feed post here and account-explorer here -->
+
+            <section id="feed-post">
+
+                <!-- <div class="no-data text-center py-3 fs-6">No accounts exist</div> -->
+                <div class="full-account" hidden>
+                    <div class="post-heading">
+                        <img src="{{ account.profile_image_url if account.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
+                            alt="" width="50" height="50" class="rounded-circle me-2">
+                        <h5 data-accountid="{{account.id}}">Hammad Ashraf<br /><span>@coreXmanzoid</span>
+                        </h5>
+                        <strong>15 Followers</strong>
+                    </div>
+                    <div class="follow">
+                        <button>Follow</button>
+                    </div>
+                </div>
+
+                <!-- 
+                    <div class="post info p-1" >
+                    <div class="post-heading">
+                        <img src="" alt="" width="40" height="40" class="rounded-circle me-2">
+                        <h5>Hammad Ashraf<br /><span>@coreXmanzoid</span></h5>
+                        <small class="post-time">
+                            1 day ago
+                        </small>
+                        <div class="edit-post ms-auto me-2" title="Edit Post">
+                            <svg style="width: 22px; cursor:pointer" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 640 640">
+                                <path
+                                    d="M505 122.9L517.1 135C526.5 144.4 526.5 159.6 517.1 168.9L488 198.1L441.9 152L471 122.9C480.4 113.5 495.6 113.5 504.9 122.9zM273.8 320.2L408 185.9L454.1 232L319.8 366.2C316.9 369.1 313.3 371.2 309.4 372.3L250.9 389L267.6 330.5C268.7 326.6 270.8 323 273.7 320.1zM437.1 89L239.8 286.2C231.1 294.9 224.8 305.6 221.5 317.3L192.9 417.3C190.5 425.7 192.8 434.7 199 440.9C205.2 447.1 214.2 449.4 222.6 447L322.6 418.4C334.4 415 345.1 408.7 353.7 400.1L551 202.9C579.1 174.8 579.1 129.2 551 101.1L538.9 89C510.8 60.9 465.2 60.9 437.1 89zM152 128C103.4 128 64 167.4 64 216L64 488C64 536.6 103.4 576 152 576L424 576C472.6 576 512 536.6 512 488L512 376C512 362.7 501.3 352 488 352C474.7 352 464 362.7 464 376L464 488C464 510.1 446.1 528 424 528L152 528C129.9 528 112 510.1 112 488L112 216C112 193.9 129.9 176 152 176L264 176C277.3 176 288 165.3 288 152C288 138.7 277.3 128 264 128L152 128z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="post-content">
+                    <p class="content" data-mentions='{{ post.mentions | tojson }}'>Hey there I am using ChatFlcik do
+                        you have any problem. Just let us know</p>
+                    <p class="hashtag">#coreXmanzoid #Hammad</p>
+                </div>
+
+                <div class="post-actions">
+                    <a class="comment"><i class="bi bi-chat-heart"></i>113</a>
+                    <a class="retweet"><i class="bi bi-repeat"></i> 133</a>
+                    <a class="like"><i class="bi bi-heart"></i>112</a>
+                    <a class="share"><i class="bi bi-share"></i>334</a>
+                </div>
+                <hr>
+                -->
             </section>
 
         </main>
@@ -227,13 +364,13 @@
                 <li class="list">
                     <a href="#">
                         <span class="icon"><i class="fa-regular fa-square-plus"></i></span>
-                        <span class="text">Create</span>
+                        <span class="text">More</span>
                     </a>
                 </li>
                 <li class="list">
                     <a href="#">
-                        <span class="icon"><i class="fa-regular fa-heart"></i></span>
-                        <span class="text">Activity</span>
+                        <span class="icon"><i class="fa-solid fa-robot"></i></span>
+                        <span class="text">AI</span>
                     </a>
                 </li>
                 <li class="list">
@@ -246,6 +383,9 @@
         </nav>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
     <script>
         const list = document.querySelectorAll('.list');
 
@@ -259,4 +399,5 @@
     </script>
 
 </body>
+
 </html>
