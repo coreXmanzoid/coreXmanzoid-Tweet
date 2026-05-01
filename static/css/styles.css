@@ -13,7 +13,7 @@ body {
 
 button {
     background-color: #c7c0b1;
-    width: 45%;
+    width: 50%;
     margin: 2% 25%;
     border-radius: 40px;
     padding: 10px;
@@ -47,7 +47,25 @@ button:hover {
         text-decoration: none;
         color: black;
     }
+    button {
+        background-color: #c7c0b1;
+        width: 65%;
+        margin: 2% 10%;
+        border-radius: 40px;
+        padding: 10px;
+        font-weight: 500;
+        transition: .4s;
+        border: 1px solid #46423b;
 
+        img {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+        }
+    }
+    h6{
+        padding: 0px 20px;
+    }
     transition: .5s;
 }
 
@@ -100,7 +118,7 @@ button:hover {
 }
 
 .signup-page {
-    margin: 8vh 7vh;
+    margin: 8vh 4%;
     display: flex;
     align-content: center;
     justify-content: space-around;
@@ -134,7 +152,7 @@ button:hover {
     }
 
     input {
-        width: 50%;
+        width: 70%;
         padding: 10px;
         margin: 10px auto;
         border-radius: 8px;
@@ -150,7 +168,7 @@ button:hover {
 }
 
 .flashes {
-    color: #F14F20;
+    color: #8f8674;
     padding: 0px 20px;
     border-radius: 5px;
 }

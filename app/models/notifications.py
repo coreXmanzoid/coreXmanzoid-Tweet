@@ -35,7 +35,7 @@ class Notification(db.Model):
     # Timestamp
     created_at: Mapped[datetime] = mapped_column(
         # Store UTC as naive to avoid offset-aware/naive mixing
-        DateTime, default=lambda: datetime.now(UTC), nullable=False
+        DateTime, default=lambda: datetime.now(UTC).replace(tzinfo=None), nullable=False
     )
 
     recipient = relationship(

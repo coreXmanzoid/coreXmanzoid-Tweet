@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 
 from app.extensions import db
 from app.models.notifications import Notification
@@ -36,7 +36,7 @@ class NotificationService:
         ).scalar_one_or_none()
 
         if notification:
-            notification.created_at = datetime.utcnow()
+            notification.created_at = datetime.now(UTC).replace(tzinfo=None)
             notification.is_read = False
             notification.message = message
             notification.title = title

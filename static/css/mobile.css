@@ -451,6 +451,42 @@ body {
     font-size: 12px;
 }
 
+@keyframes mobileFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes mobileFadeLeft {
+    from {
+        opacity: 0;
+        transform: translateX(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes mobileSoftPop {
+    from {
+        opacity: 0;
+        transform: scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
 .notification-dot {
     position: absolute;
     right: 18px;
@@ -469,6 +505,8 @@ body {
 }
 
 .notifications {
+    animation: mobileFadeLeft 0.28s ease both;
+
     .notification-info {
         display: flex;
         padding-top: 10px;
@@ -784,6 +822,7 @@ button:hover {
 
 
 .search {
+    animation: mobileSoftPop 0.24s ease both;
     background-color: #c7c0b1;
     width: 100%;
     border-radius: 50px;
@@ -1048,6 +1087,7 @@ button:hover {
     display: flex;
     max-width: 1200px;
     height: 560px;
+    animation: mobileFadeUp 0.28s ease both;
 }
 
 .main-content {
@@ -1204,27 +1244,49 @@ button:hover {
     overflow-x: auto;
     margin: 14px 0 20px;
     scrollbar-width: none;
+    animation: mobileFadeUp 0.24s ease both;
 }
 
 .account {
+    position: relative;
     min-width: 64px;
     height: 64px;
     border-radius: 50%;
     padding: 3px;
     background: linear-gradient(135deg, var(--accent), #ff9a7a);
+    border: 0;
+    overflow: hidden;
+    margin: 0;
+    flex: 0 0 64px;
+    cursor: pointer;
+}
+
+.account img {
+    position: absolute;
+    inset: 3px;
+    width: calc(100% - 6px);
+    height: calc(100% - 6px);
+    object-fit: cover;
+    border-radius: 50%;
+    opacity: 0.35;
 }
 
 .account span {
+    position: relative;
+    z-index: 1;
     display: flex;
     width: 100%;
     height: 100%;
     align-items: center;
     justify-content: center;
-    background: var(--surface);
+    background: rgba(255, 255, 255, 0.62);
     border-radius: 50%;
     font-size: 0.72rem;
     font-weight: 600;
     color: var(--text);
+    overflow-wrap: anywhere;
+    text-align: center;
+    padding: 4px;
 }
 
 .post-heading {
@@ -1269,6 +1331,7 @@ button:hover {
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
     margin-bottom: 16px;
     border: 1px solid var(--border);
+    animation: mobileSoftPop 0.22s ease both;
     
 
     .post-content {
@@ -1398,6 +1461,98 @@ button:hover {
     z-index: 100;
 }
 
+.more-menu-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 75px;
+    width: 100%;
+    padding: 10px 8px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.14);
+    animation: mobileFadeUp 0.24s ease both;
+}
+
+.more-menu-overlay[hidden] {
+    display: none;
+}
+
+.more-menu-item {
+    min-width: 0;
+    min-height: 64px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin: 5px;
+    padding: 7px 4px;
+    color: var(--text);
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.more-menu-item:hover,
+.more-menu-item:focus {
+    color: var(--accent) !important;
+    background: #FBF3D1;
+    box-shadow: none;
+    transform: none;
+}
+
+.more-menu-item i {
+    color: #F94818;
+    text-align: center;
+    font-size: 23px;
+    line-height: 1;
+}
+
+.more-menu-item span {
+    color: #8f8674;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    font-size: 11px;
+    line-height: 1.15;
+}
+
+.mobile-more-title h4 {
+    margin: 0;
+    color: #F94818;
+    font-size: 16px;
+    font-weight: 700;
+    animation: mobileFadeUp 0.24s ease both;
+}
+
+.post-section>.container,
+.post-section>.notifications,
+.post-section>.search,
+.post-section>.Manzoid-container {
+    will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
 .navigation ul {
     display: flex;
     width: 100%;
@@ -1454,5 +1609,9 @@ button:hover {
 @media (max-width: 420px) {
     .navigation {
         height: 70px;
+    }
+
+    .more-menu-overlay {
+        bottom: 70px;
     }
 }

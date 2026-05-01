@@ -70,6 +70,8 @@ def mark_as_read(user_id):
 @notification_bp.route("/check-notifications/<int:user_id>")
 @login_required
 def check_notifications(user_id):
+    if user_id != current_user.id:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 403
 
     unread_count = db.session.execute(
         db.select(db.func.count())
@@ -89,7 +91,11 @@ def send_notification_route(state, push):
 
     data = request.get_json(silent=True) or {}
 
-    sender_id = data.get("sender_id") or current_user.id
+    try:
+        sender_id = int(data.get("sender_id") or current_user.id)
+    except (TypeError, ValueError):
+        return jsonify({"status": "error", "message": "Invalid sender_id"}), 400
+
     if sender_id != current_user.id:
         return jsonify({"status": "error", "message": "Unauthorized sender"}), 403
 
@@ -144,7 +150,10 @@ def send_notification_route(state, push):
         if not recipient_id:
             return jsonify({"status": "error", "message": "recipient_id required"}), 400
 
-        recipient_id = int(recipient_id)
+        try:
+            recipient_id = int(recipient_id)
+        except (TypeError, ValueError):
+            return jsonify({"status": "error", "message": "Invalid recipient_id"}), 400
 
         if recipient_id == sender_id:
             return jsonify({"status": "skipped", "message": "No self notifications"})
