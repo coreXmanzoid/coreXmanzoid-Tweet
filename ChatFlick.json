@@ -84,7 +84,7 @@
       },
       "services": {
         "PostService.create_post": "Splits by newlines, strips #words per line, stores clean content. Hashtags stored as list of raw '#word' strings.",
-        "PostService.can_modify": "Checks post.user.id == user_id AND datetime.now(UTC) - post.timestamp < timedelta(minutes=3). Normalizes naive timestamps to UTC.",
+        "PostService.can_modify": "Checks post.user.id == user_id AND utc_now() - post.timestamp < timedelta(minutes=3). Normalizes legacy naive timestamps to aware UTC before comparison.",
         "PostActionService.like_post": "Checks post_id not in current_user.liked_posts before incrementing. Floors at 0 on unlike.",
         "PostActionService.repost_post": "Same uniqueness pattern as likes via current_user.reposted_posts JSON array.",
         "PostActionService.like_comment": "No per-user uniqueness check. Simply increments/decrements.",
@@ -229,7 +229,7 @@
         "POST /send-notification-route/<int:state>/<string:push>": "state=2 broadcasts to all followers of current_user. state=3 sends to single recipient. push='true' triggers Firebase push delivery."
       },
       "model": {
-        "Notification": "id, recipient_id (FK), sender_id (FK nullable), title (255), message, type (50), identifier (int nullable), is_read (bool, default False), created_at (DateTime naive UTC)."
+        "Notification": "id, recipient_id (FK), sender_id (FK nullable), title (255), message, type (50), identifier (int nullable), is_read (bool, default False), created_at (timezone-aware DateTime UTC)."
       },
       "notification_types_used": [
         "new_post — broadcast to followers when user posts",
@@ -258,7 +258,7 @@
         "Push delivery silently fails if Firebase not initialized or FCM token missing.",
         "Follower broadcast (state=2) skips sender (recipient_id == sender_id check).",
         "Self-notification prevention only in state=3 single-recipient route.",
-        "Notification created_at is stored as naive UTC (tzinfo stripped).",
+        "Notification created_at is stored as timezone-aware UTC and rendered as ISO-8601 UTC.",
         "check-notifications and mark_read both verify user_id == current_user.id.",
         "Notifications page shows sender.profile_image_url, sender.name, title, message, relative timestamp."
       ]

@@ -6,6 +6,7 @@ from app.models.notifications import Notification
 from app.services.notification_service import NotificationService
 from app.services.push_service import send_notification
 from app.decorators import verified_user
+from app.utils.time_utils import utc_iso_from
 
 
 notification_bp = Blueprint("notifications", __name__)
@@ -45,6 +46,7 @@ def notifications():
     return render_template(
         "notifications.html",
         notifications=notifications,
+        utc_iso_from=utc_iso_from,
     )
 
 

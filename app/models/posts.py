@@ -1,9 +1,10 @@
-from datetime import datetime, UTC
+from datetime import datetime
 
 from sqlalchemy import String, Integer, JSON, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.extensions import db
+from app.utils.time_utils import utc_now
 
 class Post(db.Model):
     __tablename__ = "posts"
@@ -17,8 +18,8 @@ class Post(db.Model):
     mentions: Mapped[JSON] = mapped_column(JSON, default=list)
 
     timestamp: Mapped[datetime] = mapped_column(
-    DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
-)
+        DateTime(timezone=True), nullable=False, default=utc_now
+    )
 
     likes: Mapped[int] = mapped_column(Integer, default=0)
     comments: Mapped[int] = mapped_column(Integer, default=0)

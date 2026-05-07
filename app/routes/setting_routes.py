@@ -16,7 +16,7 @@ from app.services.setting_service import SettingService
 from app.services.data_downloading_service import DownloadData
 from app.services.email_service import EmailService
 from app.services.auth_service import AuthService
-from datetime import datetime
+from datetime import date
 
 from app.utils.username import validate_username
 
@@ -115,11 +115,7 @@ def account_setting():
                 else:
                     SettingService.change_email(user, new_email)
                     flash("Email Updated Successfully", "success")
-            new_birthdate = (
-                datetime.strptime(new_birthdate, "%Y-%m-%d").date()
-                if new_birthdate
-                else None
-            )
+            new_birthdate = date.fromisoformat(new_birthdate) if new_birthdate else None
             if current_user.birth_date != new_birthdate:
                 SettingService.change_birthdate(user, new_birthdate)
                 flash("Birthdate Updated Successfully", "success")

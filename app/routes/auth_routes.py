@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 
 from flask import Blueprint, current_app, jsonify, redirect, render_template, request, session, url_for, flash
 from flask_login import login_required, current_user, login_user
@@ -114,11 +114,7 @@ def signup(st):
 
         birth_date_str = request.form.get("birthDate")
 
-        birth_date = (
-            datetime.strptime(birth_date_str, "%Y-%m-%d").date()
-            if birth_date_str
-            else None
-        )
+        birth_date = date.fromisoformat(birth_date_str) if birth_date_str else None
 
         if AuthService.email_exists(email):
             flash("Email already exists. Login instead")

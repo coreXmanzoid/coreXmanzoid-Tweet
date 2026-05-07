@@ -1,6 +1,7 @@
 from flask import send_file, jsonify
 from app.extensions import db
 from app.models.posts import Post
+from app.utils.time_utils import utc_iso_from
 import io, json, zipfile
 
 class DownloadData:
@@ -28,7 +29,7 @@ class DownloadData:
                 "id" : i + 1,
                 "content" : post.content,
                 "hashtags": post.hashtags,
-                "created_at": post.timestamp.isoformat() if post.timestamp else None,
+                "created_at": utc_iso_from(post.timestamp),
             }
             user_posts.append(post_data)
         return user_posts

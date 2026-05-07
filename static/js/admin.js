@@ -111,6 +111,23 @@ const statusClass = (status) => {
     return "pending";
 };
 
+function parseUtcTimestamp(timestamp) {
+    if (!timestamp || timestamp === "-") {
+        return null;
+    }
+
+    const value = String(timestamp);
+    // Admin APIs send ISO UTC; this also protects older naive values from local-time parsing.
+    const normalized = /(?:Z|[+-]\d{2}:\d{2})$/.test(value) ? value : value + "Z";
+    const date = new Date(normalized);
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatLocalTimestamp(timestamp) {
+    const date = parseUtcTimestamp(timestamp);
+    return date ? date.toLocaleString() : "-";
+}
+
 function currentDate() {
     el.currentDateLabel.textContent = new Date().toLocaleDateString("en-US", {
         month: "long", day: "numeric", year: "numeric"
@@ -187,7 +204,7 @@ function renderSupportTable() {
     const rows = filterSupport();
     el.supportTableBody.innerHTML = rows.map((item) => `
         <tr>
-            <td data-label="Request ID"><strong>${esc(item.id)}</strong><div class="table-meta">${esc(item.timestamp)}</div></td>
+            <td data-label="Request ID"><strong>${esc(item.id)}</strong><div class="table-meta">${esc(formatLocalTimestamp(item.timestamp))}</div></td>
             <td data-label="User"><div class="user-block"><span class="user-name">${esc(item.userName)}</span><span class="user-id">${esc(item.userId)}</span></div></td>
             <td data-label="Category">${esc(item.category)}</td>
             <td data-label="Message"><div class="message-preview">${esc(item.message)}</div></td>
@@ -202,7 +219,7 @@ function renderReportsTable() {
     const rows = filterReports();
     el.reportsTableBody.innerHTML = rows.map((item) => `
         <tr>
-            <td data-label="Report ID"><strong>${esc(item.id)}</strong><div class="table-meta">${esc(item.timestamp)}</div></td>
+            <td data-label="Report ID"><strong>${esc(item.id)}</strong><div class="table-meta">${esc(formatLocalTimestamp(item.timestamp))}</div></td>
             <td data-label="User"><div class="user-block"><span class="user-name">${esc(item.userName)}</span><span class="user-id">${esc(item.userId)}</span></div></td>
             <td data-label="Report Text"><div class="message-preview">${esc(item.text)}</div></td>
             <td data-label="Status"><span class="status-pill ${statusClass(item.status)}">${esc(item.status)}</span></td>
@@ -382,7 +399,7 @@ function openSupportModal(id) {
     el.modalSupportUser.textContent = `${item.userName} (${item.userId})`;
     el.modalSupportCategory.textContent = item.category;
     el.modalSupportStatus.textContent = item.status;
-    el.modalSupportTimestamp.textContent = item.timestamp;
+    el.modalSupportTimestamp.textContent = formatLocalTimestamp(item.timestamp);
     el.modalSupportMessage.textContent = item.message;
     el.adminReplyInput.value = item.adminReply || "";
     supportModal.show();
@@ -395,7 +412,7 @@ function openReportModal(id) {
     el.modalReportId.textContent = item.id;
     el.modalReportUser.textContent = `${item.userName} (${item.userId})`;
     el.modalReportStatus.textContent = item.status;
-    el.modalReportTimestamp.textContent = item.timestamp;
+    el.modalReportTimestamp.textContent = formatLocalTimestamp(item.timestamp);
     el.modalReportMessage.textContent = item.text;
     reportModal.show();
 }

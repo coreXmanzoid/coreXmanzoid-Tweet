@@ -31,7 +31,7 @@
             </span>{% endif %}</small>
     </div>
     <div class="notification-message">
-        <p>{{notification.message}} &nbsp;<span data-timestamp="{{notification.created_at.isoformat()}}Z"></span></p>
+        <p>{{notification.message}} &nbsp;<span data-timestamp="{{ utc_iso_from(notification.created_at) }}"></span></p>
     </div>
     <hr>
     {% endfor %}

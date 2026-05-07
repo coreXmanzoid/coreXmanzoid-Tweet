@@ -123,14 +123,35 @@ async function sharePostContent(shareData) {
     }
 }
 
+function parseUtcTimestamp(timestamp) {
+    if (!timestamp) {
+        return null;
+    }
+
+    const value = String(timestamp);
+    // Legacy rows may render without an offset; append UTC so browsers do not parse as local time.
+    const normalized = /(?:Z|[+-]\d{2}:\d{2})$/.test(value) ? value : value + "Z";
+    const date = new Date(normalized);
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatLocalTimestamp(timestamp) {
+    const date = parseUtcTimestamp(timestamp);
+    return date ? date.toLocaleString() : "";
+}
+
 function formatRelativeTime(timestamp) {
-    const date = new Date(timestamp);
-    if (Number.isNaN(date.getTime())) {
+    const date = parseUtcTimestamp(timestamp);
+    if (!date) {
         return "";
     }
 
     const diffMs = new Date() - date;
     const diffMins = Math.max(0, Math.floor(diffMs / 60000));
+
+    if (diffMins >= 43200) {
+        return formatLocalTimestamp(timestamp);
+    }
 
     if (diffMins < 1) {
         return "Just now";
@@ -146,18 +167,13 @@ function formatRelativeTime(timestamp) {
         const days = Math.floor(diffMins / 1440);
         return days === 1 ? "1 day ago" : days + " days ago";
     }
-    if (diffMins < 43200) {
-        const weeks = Math.floor(diffMins / 10080);
-        return weeks === 1 ? "1 week ago" : weeks + " weeks ago";
-    }
-
-    const months = Math.floor(diffMins / 43200);
-    return months === 1 ? "1 month ago" : months + " months ago";
+    const weeks = Math.floor(diffMins / 10080);
+    return weeks === 1 ? "1 week ago" : weeks + " weeks ago";
 }
 
 function formatCompactRelativeTime(timestamp) {
-    const date = new Date(timestamp);
-    if (Number.isNaN(date.getTime())) {
+    const date = parseUtcTimestamp(timestamp);
+    if (!date) {
         return "";
     }
 
@@ -180,7 +196,7 @@ function formatCompactRelativeTime(timestamp) {
         return Math.floor(diffMins / 10080) + "w";
     }
 
-    return Math.floor(diffMins / 43200) + "mo";
+    return formatLocalTimestamp(timestamp);
 }
 
 function parseMentions(value) {

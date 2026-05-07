@@ -6,10 +6,10 @@ from app.extensions import db
 from app.services.feed_service import FeedService
 from app.services.post_action_service import PostActionService
 from flask import render_template
-from datetime import datetime, timedelta
 from app.models.posts import Post
 from app.models.comments import Comments
 from app.decorators import verified_user
+from app.utils.time_utils import utc_iso_from
 
 post_bp = Blueprint("post", __name__)
 
@@ -59,7 +59,7 @@ def manage_posts(state):
             "username": current_user.username,
             "hashtags": post.hashtags,
             "mentions": post.mentions,
-            "timestamp": post.timestamp.isoformat()
+            "timestamp": utc_iso_from(post.timestamp)
         })
 
 
@@ -107,8 +107,10 @@ def show_posts(state, id):
     return render_template(
         "posts.html",
         posts=posts,
-        current_time=datetime.utcnow(),
-        timedelta=timedelta,
+        editable_post_ids={
+            post.id for post in posts if PostService.can_modify(post, current_user.id)
+        },
+        utc_iso_from=utc_iso_from,
         reposts=reposts,
     )
 

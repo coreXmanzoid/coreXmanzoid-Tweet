@@ -1,9 +1,10 @@
-from datetime import datetime, UTC
+from datetime import datetime
 
 from sqlalchemy import String, Integer, Boolean, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.extensions import db
+from app.utils.time_utils import utc_now
 
 
 
@@ -34,8 +35,7 @@ class Notification(db.Model):
 
     # Timestamp
     created_at: Mapped[datetime] = mapped_column(
-        # Store UTC as naive to avoid offset-aware/naive mixing
-        DateTime, default=lambda: datetime.now(UTC).replace(tzinfo=None), nullable=False
+        DateTime(timezone=True), default=utc_now, nullable=False
     )
 
     recipient = relationship(

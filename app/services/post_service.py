@@ -1,17 +1,15 @@
-from datetime import datetime, timedelta, UTC
+from datetime import timedelta
 from app.extensions import db
 from app.models.posts import Post
 from app.utils.mentions import mentions_parser
+from app.utils.time_utils import ensure_utc, utc_now
 
 
 class PostService:
 
     @staticmethod
     def _normalize_timestamp(timestamp):
-        if timestamp.tzinfo is None:
-            return timestamp.replace(tzinfo=UTC)
-
-        return timestamp.astimezone(UTC)
+        return ensure_utc(timestamp)
 
     @staticmethod
     def create_post(content, user_id):
@@ -58,6 +56,6 @@ class PostService:
         post_timestamp = PostService._normalize_timestamp(post.timestamp)
 
         return (
-            datetime.now(UTC) - post_timestamp < timedelta(minutes=3)
+            utc_now() - post_timestamp < timedelta(minutes=3)
             and post.user.id == user_id
         )

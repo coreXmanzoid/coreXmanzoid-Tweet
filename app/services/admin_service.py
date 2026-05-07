@@ -1,11 +1,10 @@
-from datetime import UTC, datetime
-
 from flask import url_for
 
 from app.extensions import db
 from app.models.report import Report
 from app.models.support_requests import Support
 from app.models.users import UserData
+from app.utils.time_utils import utc_iso_from, utc_now
 
 
 class AdminService:
@@ -37,7 +36,7 @@ class AdminService:
             raise ValueError("Support request not found")
 
         support_request.admin_reply = reply
-        support_request.updated_at = datetime.now(UTC)
+        support_request.updated_at = utc_now()
         db.session.commit()
         return AdminService._serialize_support_request(support_request)
 
@@ -51,7 +50,7 @@ class AdminService:
             support_request.admin_reply = reply
 
         support_request.status = "ANSWERED"
-        support_request.updated_at = datetime.now(UTC)
+        support_request.updated_at = utc_now()
         db.session.commit()
         return AdminService._serialize_support_request(support_request)
 
@@ -212,4 +211,4 @@ class AdminService:
     def _format_timestamp(value):
         if not value:
             return "-"
-        return value.strftime("%b %d, %Y - %I:%M %p").replace(" 0", " ")
+        return utc_iso_from(value)
