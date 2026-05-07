@@ -28,7 +28,7 @@ def only_admin(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
 
-        if current_user.username != "hammad":  # Assuming user with ID 1 is the admin
+        if current_user.username not in ["coreXmanzoid", "manza"]:
             return "Admin user required. Access Denied.", 403
 
         return func(*args, **kwargs)

@@ -75,6 +75,9 @@ const el = {
     sendReplyButton: document.getElementById("sendReplyButton"),
     markAnsweredButton: document.getElementById("markAnsweredButton"),
     markReviewedButton: document.getElementById("markReviewedButton"),
+    backupDataButton: document.getElementById("backupDataButton"),
+    restoreDataButton: document.getElementById("restoreDataButton"),
+    restoreBackupInput: document.getElementById("restoreBackupInput"),
     modalSupportId: document.getElementById("modalSupportId"),
     modalSupportUser: document.getElementById("modalSupportUser"),
     modalSupportCategory: document.getElementById("modalSupportCategory"),
@@ -141,7 +144,7 @@ async function api(url, options = {}) {
     });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok || payload.status === "error") {
-        throw new Error(payload.message || "Request failed");
+        throw new Error(payload.error || payload.message || "Request failed");
     }
     return payload;
 }
@@ -386,7 +389,7 @@ function showToast(message) {
     toastEl.className = "toast custom-toast align-items-center border-0";
     toastEl.innerHTML = `<div class="d-flex"><div class="toast-body fw-semibold">${esc(message)}</div><button type="button" class="btn-close me-3 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div>`;
     shell.appendChild(toastEl);
-    const toast = new bootstrap.Toast(toastEl, { delay: 2200 });
+    const toast = new bootstrap.Toast(toastEl, { delay: 6000 });
     toast.show();
     toastEl.addEventListener("hidden.bs.toast", () => toastEl.remove());
 }
@@ -479,6 +482,54 @@ async function userAction(action) {
     showToast(messages[action]);
 }
 
+function setSyncButtonsDisabled(disabled) {
+    [el.backupDataButton, el.restoreDataButton].forEach((button) => {
+        if (button) button.disabled = disabled;
+    });
+}
+
+function downloadSqliteBackup() {
+    window.location.href = "/admin/backup/sqlite-download";
+    showToast("Preparing SQLite backup download...");
+}
+
+async function uploadSqliteRestore(file) {
+    if (!file) return;
+    if (!window.confirm("Merge this SQLite backup into the local database? Existing local rows will be kept and duplicates will be skipped.")) {
+        return;
+    }
+
+    const label = el.restoreDataButton?.querySelector("span");
+    const formData = new FormData();
+    formData.append("backup_file", file);
+
+    setSyncButtonsDisabled(true);
+    if (label) label.textContent = "Uploading...";
+    showToast("Uploading SQLite backup...");
+
+    try {
+        const response = await fetch("/admin/restore/sqlite-upload", {
+            method: "POST",
+            body: formData
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || payload.status === "error") {
+            throw new Error(payload.error || payload.message || "Restore failed");
+        }
+
+        const inserted = payload.data?.inserted ?? 0;
+        const skipped = payload.data?.skipped ?? 0;
+        showToast(`SQLite backup restored. Inserted ${inserted}, skipped ${skipped}.`);
+        await loadDashboard();
+    } catch (error) {
+        showToast(error.message || "SQLite restore failed.");
+    } finally {
+        if (label) label.textContent = "Upload Restore";
+        if (el.restoreBackupInput) el.restoreBackupInput.value = "";
+        setSyncButtonsDisabled(false);
+    }
+}
+
 function openSidebar() {
     el.app.classList.add("sidebar-open");
 }
@@ -562,6 +613,9 @@ function bindEvents() {
     el.sendReplyButton.addEventListener("click", async () => { try { await saveReply(); } catch (error) { showToast(error.message); } });
     el.markAnsweredButton.addEventListener("click", async () => { try { await markAnswered(); } catch (error) { showToast(error.message); } });
     el.markReviewedButton.addEventListener("click", async () => { try { await markReviewed(); } catch (error) { showToast(error.message); } });
+    el.backupDataButton?.addEventListener("click", downloadSqliteBackup);
+    el.restoreDataButton?.addEventListener("click", () => el.restoreBackupInput?.click());
+    el.restoreBackupInput?.addEventListener("change", (e) => uploadSqliteRestore(e.target.files?.[0]));
 
     document.querySelector(".logout-button")?.addEventListener("click", () => {
         window.location.href = "/logout/0";

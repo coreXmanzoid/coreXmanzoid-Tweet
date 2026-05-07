@@ -330,6 +330,14 @@ button {
     font-weight: 700;
 }
 
+.data-sync-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
 .logout-button,
 .soft-button {
     background: var(--stone-400);
