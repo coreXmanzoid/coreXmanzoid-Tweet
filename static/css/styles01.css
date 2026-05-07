@@ -527,25 +527,6 @@ button:hover {
     font-size: 14px;
 }
 
-/* Mobile Fix */
-
-@media (max-width: 991px) {
-
-    .profile .info {
-        bottom: 0;
-        margin-top: -40px;
-    }
-
-    .profile .audience small {
-        display: none;
-    }
-
-    .profile .audience-box {
-        margin-top: 5px;
-        margin-bottom: 13px;
-        justify-content: flex-start;
-    }
-}
 
 /* Profile Options */
 
@@ -720,12 +701,9 @@ button:hover {
 h5:hover {
     cursor: pointer;
 }
-
+/* 
 .full-post {
     padding-top: 20px;
-    grid-row: span 3 / span 3;
-    grid-column-start: 3;
-    grid-row-start: 1;
 
     .post-button {
         display: flex;
@@ -798,7 +776,222 @@ h5:hover {
             font-weight: 600;
         }
     }
+} */
+
+
+.full-post {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #DEDED1;
+    border-radius: 18px 18px 0 0;
+    /* box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.18); */
 }
+
+.full-post .feed-post {
+    flex: 0 0 auto;
+    background: #DEDED1;
+    /* border-bottom: 1px solid rgba(70, 66, 59, 0.18); */
+}
+
+.full-post .post-button {
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: #DEDED1;
+    border-bottom: 1px solid rgba(70, 66, 59, 0.12);
+}
+
+.full-post .back-post {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.full-post .post-button i {
+    color: #2e2a22;
+    font-size: 20px;
+    line-height: 1;
+}
+
+.full-post .post-button a {
+    color: #F94818;
+    font-size: 18px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.full-post .post-detail {
+    padding: 14px 16px 8px;
+}
+
+.full-post .post-heading,
+.full-post .post-top {
+    display: flex;
+    align-items: center;
+}
+
+.full-post .post-top {
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 8px;
+}
+
+.full-post .post-heading img {
+    flex: 0 0 auto;
+    object-fit: cover;
+}
+
+.full-post .post-heading h5 {
+    margin: 0;
+    color: #2e2a22;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.full-post .post-heading span {
+    color: #F94818;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.full-post .post-content {
+    padding-left: 5px;
+    text-align: left;
+}
+
+.full-post .post-content p {
+    margin: 4px 0;
+    word-break: break-word;
+}
+
+.full-post .post-content .content {
+    color: #2e2a22;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: pre-line;
+}
+
+.full-post .post-content .hashtag,
+.full-post .mention {
+    color: #F94818;
+    font-size: 13.5px;
+    font-weight: 700;
+}
+
+.full-post .post-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 0 4px 10px;
+}
+
+.full-post .post-actions a {
+    color: #46423b;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.full-post .post-actions i {
+    margin-right: 4px;
+}
+
+.full-post .feed-post hr,
+.full-post .commments-box>hr,
+.full-post .comments-box>hr {
+    margin: 0;
+    border-color: rgba(70, 66, 59, 0.18);
+    opacity: 1;
+}
+
+.full-post .commments-box,
+.full-post .comments-box {
+    min-height: 0;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #FBF3D1;
+}
+
+.full-post .my-comment {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: 35px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #DEDED1;
+    border-bottom: 1px solid rgba(70, 66, 59, 0.14);
+}
+
+.full-post .my-comment img {
+    width: 35px;
+    height: 35px;
+    object-fit: cover;
+}
+
+.full-post .my-comment input {
+    min-width: 0;
+    height: 50px;
+    padding: 0 12px;
+    color: #2e2a22;
+    background: #FBF3D1;
+    border: 1px solid rgba(70, 66, 59, 0.16);
+    border-radius: 999px;
+    outline: none;
+}
+
+.full-post .my-comment input:focus {
+    border-color: #F94818;
+}
+
+.full-post .my-comment button {
+    width: auto;
+    min-width: 72px;
+    height: 50px;
+    margin: 0;
+    padding: 0 14px;
+    color: #2e2a22;
+    border-radius: 999px;
+}
+
+.full-post .my-comment button:hover {
+    transform: none;
+}
+
+.full-post .all-comments {
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 8px 16px 10px;
+}
+
+.full-post .all-comments .post-content {
+    padding-left: 30px;
+}
+
+.full-post .comment-actions {
+    flex: 0 0 auto;
+    padding: 0;
+}
+
+.full-post .comment-content .content {
+    font-size: 12px;
+}
+
+
+
+
+
+
+
 
 .notifications {
     .notification-info {

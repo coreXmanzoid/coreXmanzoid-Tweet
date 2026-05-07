@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import Blueprint, current_app, jsonify, redirect, render_template, request, url_for, flash
+from flask import Blueprint, current_app, jsonify, redirect, render_template, request, session, url_for, flash
 from flask_login import login_required, current_user, login_user
 
 from app.extensions import db, oauth
@@ -150,12 +150,20 @@ def login():
 
         username = request.form.get("username")
         password = request.form.get("pin")
-
+        remember = request.form.get("rememberMe") == "on"
         user = AuthService.authenticate(username, password)
 
         if not user:
             flash("Invalid credentials.")
             return redirect(url_for("auth.login"))
+
+        if user:
+            session['user_id'] = user.id
+
+        if remember:
+            session.permanent = True   # lasts 7 days
+        else:
+            session.permanent = False  # ends when browser closes
 
         login_user(user)
 

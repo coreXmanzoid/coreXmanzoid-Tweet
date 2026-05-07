@@ -49,8 +49,7 @@
                 {% for account in accounts %}
                 <button class="account" type="button" data-accountid="{{ account.id }}"
                     aria-label="Open {{ account.username }} profile">
-                    <img src="{{ account.profile_image_url if account.profile_image_url else none }}"
-                        alt="">
+                    <img src="{{ account.profile_image_url if account.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}" alt="">
                     {% if account.username | length > 10 %}
                     <span style="font-size: 0.45rem;">{{ account.username }}</span>
                     {% else %}
@@ -59,7 +58,7 @@
                 </button>
                 {% endfor %}
             </div>
-            
+
             <section id="feed-post">
                 <div class="loader-wrapper"><span class="loader"></span></div>
             </section>
@@ -83,7 +82,7 @@
                     <i class="fa-solid fa-heart"></i>
                     <span>Liked post</span>
                 </button>
-                
+
                 <a href="{{ url_for('account.logout', st=1) }}" class="more-menu-item">
                     <i class="fa-solid fa-right-from-bracket"></i>
                     <span>Logout</span>
@@ -95,6 +94,10 @@
                 <a href="{{ url_for('setting.setting', section='support') }}" class="more-menu-item">
                     <i class="fa-solid fa-circle-question"></i>
                     <span>Help</span>
+                </a>
+                <a href="{{ url_for('pricing.pricing') }}" class="more-menu-item">
+                    <i class="fa-solid fa-tag"></i>
+                    <span>Pricing</span>
                 </a>
             </div>
             <ul>
@@ -138,23 +141,23 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script>
         window.firebaseRuntimeConfig = {
-            firebaseEnabled: {{ firebase_enabled | default(false) | tojson }},
-            vapidKey: {{ fcm_vapid_key | default('') | tojson }},
-            firebaseConfig: {
-                apiKey: "{{ firebase_api_key | default('') }}",
+            firebaseEnabled: {{ firebase_enabled | default (false) | tojson }},
+        vapidKey: { { fcm_vapid_key | default ('') | tojson } },
+        firebaseConfig: {
+            apiKey: "{{ firebase_api_key | default('') }}",
                 authDomain: "corexmanzoid-twitter-7a86a.firebaseapp.com",
-                projectId: "corexmanzoid-twitter-7a86a",
-                storageBucket: "corexmanzoid-twitter-7a86a.firebasestorage.app",
-                messagingSenderId: "266928901713",
-                appId: "1:266928901713:web:b092a1071e9467deccf270",
-                measurementId: "G-5BXH7TMB3S"
-            }
+                    projectId: "corexmanzoid-twitter-7a86a",
+                        storageBucket: "corexmanzoid-twitter-7a86a.firebasestorage.app",
+                            messagingSenderId: "266928901713",
+                                appId: "1:266928901713:web:b092a1071e9467deccf270",
+                                    measurementId: "G-5BXH7TMB3S"
+        }
         };
     </script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js"></script>
     <script src="{{ url_for('static', filename='js/firebase.js') }}?v=2026-05-01-1"></script>
-    <script src="{{ url_for('static', filename='js/mobile-home.js') }}?v=2026-05-01-1"></script>
+    <script src="{{ url_for('static', filename='js/mobile-home.js') }}?v=2026-05-02-1"></script>
 </body>
 
 </html>

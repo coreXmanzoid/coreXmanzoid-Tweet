@@ -1,3 +1,4 @@
+from datetime import timedelta
 import os
 from flask import Flask, app
 from dotenv import load_dotenv
@@ -17,6 +18,7 @@ from app.routes.setting_routes import setting_bp
 from app.routes.admin_routes import admin_bp
 from app.routes.pricing_routes import pricing_bp
 
+
 def create_app():
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     load_dotenv(os.path.join(base_dir, ".env"))
@@ -30,7 +32,12 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///ChatFlick.db"
     # app.config["SQLALCHEMY_DATABASE_URI"] = str(os.environ.get("SQLALCHEMY_DATABASE_URI"))
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
+    app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
+    app.config.update(
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SECURE=True,  # only if using HTTPS
+        SESSION_COOKIE_SAMESITE="Lax",
+    )
     db.init_app(app)
     login_manager.init_app(app)
     # migrate = Migrate(app, db)
@@ -48,11 +55,12 @@ def create_app():
     app.register_blueprint(setting_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(pricing_bp)
-    
+
     with app.app_context():
         from app import models
         from app import auth
         from app.oauth import google_oauth
+
         try:
             db.create_all()
         except Exception as e:

@@ -204,7 +204,7 @@ function renderMentions(selector) {
         mentions.forEach(function (mention) {
             const username = mention.username.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
             const regex = new RegExp("@" + username + "\\b", "g");
-            text = text.replace(regex, '<span class="mention">@' + mention.username + "</span>");
+            text = text.replace(regex, '<span onclick="showProfile(' + mention.user_id + ')" class="mention" style="cursor: pointer;" title="View profile">@' + mention.username + "</span>");
         });
 
         el.innerHTML = text;
@@ -1002,7 +1002,7 @@ $(document).off("click.editPost", ".edit-post").on("click.editPost", ".edit-post
     saveBtn.on("click", function () {
         const confirmChange = confirm("Do you want to update you post. This action cannot be undone.");
         if (!confirmChange) {
-            return;
+            return; 
         }
 
         $.ajax({

@@ -11,7 +11,7 @@ class AccountService:
     def random_accounts():
         accounts = (
             db.session.execute(
-                db.select(UserData).order_by(func.random()).limit(10)
+                db.select(UserData).order_by(func.random()).limit(8)
             )
             .scalars()
             .all()

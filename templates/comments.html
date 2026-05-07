@@ -18,7 +18,7 @@
         </div>
         <div class="post-actions commment post-action">
             <a class="comments"><i class="bi bi-chat-heart"></i> <span>{{ post.comments }}</span></a>
-            <a class="retweets"><i class="bi bi-repeat"></i> <span>{{ post.retweets }}</span></a>
+            <a class="retweets"><i class="bi bi-repeat"></i> <span>{{ post.reposts }}</span></a>
             <a class="likes"><i class="bi bi-heart"></i> <span>{{ post.likes }}</span></a>
             <a class="shares"><i class="bi bi-share"></i> <span>{{ post.shares }}</span></a>
         </div>
@@ -26,7 +26,6 @@
     <hr>
 </div>
 <div class="commments-box">
-
 
     <div class="my-comment">
         <img src="{{ current_user.profile_image_url if current_user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"

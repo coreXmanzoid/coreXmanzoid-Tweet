@@ -892,7 +892,8 @@ button:hover {
 
     display: flex;
     justify-content: space-between;
-    button{
+
+    button {
         font-size: 14px;
     }
 }
@@ -922,8 +923,21 @@ button:hover {
         margin-top: -40px;
     }
 
+    .profile {
+        position: relative;
+    }
+
+    .profile .audience {
+        position: relative;
+        min-height: 58px;
+        padding-top: 0 !important;
+    }
+
     .profile .audience small {
-        display: none;
+        position: absolute;
+        top: -185%;
+        right: 10px;
+        display: block;
     }
 
     .profile .audience-box {
@@ -989,7 +1003,7 @@ button:hover {
         text-decoration: none;
         font-weight: 600;
         font-size: 16px;
-        padding: 6px 11px;
+        padding: 6px 9px;
         margin: auto;
         color: #46423b;
         cursor: pointer;
@@ -1316,7 +1330,8 @@ button:hover {
         color: #46423b;
         font-weight: 500;
     }
-    strong{
+
+    strong {
         color: #2e2a22;
         margin-left: 2px;
         font-weight: 600;
@@ -1332,7 +1347,7 @@ button:hover {
     margin-bottom: 16px;
     border: 1px solid var(--border);
     animation: mobileSoftPop 0.22s ease both;
-    
+
 
     .post-content {
         margin-top: 10px;
@@ -1543,6 +1558,7 @@ button:hover {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
     *,
     *::before,
     *::after {

@@ -11,6 +11,7 @@ body {
     font-style: normal;
 }
 
+
 button {
     background-color: #c7c0b1;
     width: 50%;
@@ -165,12 +166,26 @@ button:hover {
         position: relative;
         right: 100px;
     }
+    input[type="checkbox"] {
+        width: 20px;
+        height: 18px;
+        position: relative;
+    }
+    label[for="rememberMe"] {
+        position: relative;
+        left: 8px;
+        bottom: 3px;
+    }
 }
 
 .flashes {
     color: #8f8674;
     padding: 0px 20px;
     border-radius: 5px;
+    text-decoration: none;
+    li{
+        list-style: none;
+    }
 }
 
 .confirm-email-form {
