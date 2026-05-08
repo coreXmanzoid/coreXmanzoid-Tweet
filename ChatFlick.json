@@ -1,6 +1,7 @@
 {
   "app": {
-    "name": "ChatFlick by coreXmanzoid",
+    "name": "ChatFlick",
+    "developers": "Hammad Ashraf (from coreXmanzoid) — Full-stack developer, designer, and sole creator of ChatFlick. A Studend from IUB- Computer Science. Passionate about building engaging social platforms and exploring AI integration.",
     "description": "A Flask-based full-stack social microblogging web application with dual desktop and mobile UIs, email and Google OAuth authentication, follower relationships, post creation and engagement, threaded comments, in-app and Firebase push notifications, profile management with Cloudinary image hosting, granular settings and privacy controls, an admin dashboard, a Groq-powered AI assistant (Manzoid-AI), a pricing/plans page, and account data export.",
     "stack": {
       "backend": "Flask (Python), SQLAlchemy ORM, Flask-Login, Authlib (Google OAuth), itsdangerous (signed tokens)",

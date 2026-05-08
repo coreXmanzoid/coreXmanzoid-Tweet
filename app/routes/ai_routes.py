@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, render_template
-from flask_login import login_required
+from flask_login import current_user, login_required
 
 from app.services.ai_service import AIService
 from app.decorators import verified_user, pro_user
@@ -8,17 +8,16 @@ ai_bp = Blueprint("ai", __name__)
 
 @ai_bp.route("/Manzoid-AI", methods=["GET", "POST"])
 @login_required
-# @verified_user
+@verified_user
 def manzoid_ai():
     
     if request.method == "POST":
 
         data = request.get_json()
 
-        if not data or "message" not in data or "user_id" not in data:
-            return jsonify({"error": "Message and user_id are required"}), 400
+        if not data or "message" not in data:
+            return jsonify({"error": "Message is required"}), 400
 
-        user_id = data["user_id"]
         message = data["message"].strip()
 
         if not message:
@@ -28,6 +27,7 @@ def manzoid_ai():
             return jsonify({"error": "Message too long"}), 400
 
         try:
+            user_id = str(current_user.id)
             answer = AIService.chat(user_id, message)
             return jsonify({"reply": answer})
 

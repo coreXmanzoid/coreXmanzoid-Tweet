@@ -14,6 +14,8 @@ from flask import (
     request,
     send_file,
     send_from_directory,
+    url_for,
+    redirect
 )
 from flask_login import login_required, current_user
 from sqlalchemy import UniqueConstraint, create_engine, inspect, select, tuple_
@@ -407,6 +409,12 @@ def restore_sqlite_upload_route():
 
 @main_bp.route("/")
 def home():
+
+    # If user already logged in
+    if current_user.is_authenticated:
+        return redirect(url_for("main.homepage"))
+
+    # Otherwise show landing page
     return render_template("index.html")
 
 @main_bp.route("/about")

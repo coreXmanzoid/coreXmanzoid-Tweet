@@ -1317,6 +1317,13 @@ button:hover {
         margin: 2px;
         color: #2e2a22;
         font-size: 15px;
+
+        strong {
+            font-size: 9px;
+            color: #a0a090;
+            opacity: 0.8;
+            padding: 0px 3px !important;
+        }
     }
 
     span {

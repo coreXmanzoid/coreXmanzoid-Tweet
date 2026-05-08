@@ -6,8 +6,7 @@
     <div class="post-heading">
         <img src="{{ account.profile_image_url if account.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
             alt="" width="50" height="50" class="rounded-circle me-2">
-        <h5 data-accountid="{{account.id}}">{{ account.name }}<br /><span>@{{ account.username }}</span></h5>
-        <strong>{{account.followers | length}} Followers</strong>
+        <h5 data-accountid="{{account.id}}">{{ account.name }}<br/><span>@{{ account.username }}</span><strong>. {{account.followers | length}} Followers</strong></span></h5>
     </div>
     <div class="follow">
         {% if account.id in following %}

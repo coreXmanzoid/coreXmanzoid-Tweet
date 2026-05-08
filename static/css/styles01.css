@@ -304,6 +304,12 @@ button:hover {
     h5 {
         color: #2e2a22;
         font-size: 17px;
+        strong{
+            font-size: 12px;
+            color: #a0a090;
+            opacity: 0.8;
+            padding: 0px 3px !important;
+        }
     }
 
     span {
@@ -691,7 +697,7 @@ button:hover {
         }
 
         strong {
-            padding-left: 8px !important;
+            padding-left: 8px;
             color: #46423b;
             font-weight: 500;
         }
