@@ -13,18 +13,19 @@
         <!-- Main Content Area -->
         <div class="main-content">
             <div class="ai-header">
-                <img src="{{ url_for('static', filename='assets/logo.png') }}" alt=""> Manzoid AI
+                <img src="{{ url_for('static', filename='assets/logo.png') }}" alt=""> FlickAI
             </div>
 
             <div id="chat-box" class="chat-box">
                 <div class="message ai">
-                    Hi {{current_user.name.split(' ')[0]}}👋, It's Manzoid AI. Ask me anything!
+                    Hi {{current_user.name.split(' ')[0]}}👋, It's FlickAI. Ask me anything!
                 </div>
 
             </div>
 
             <div class="chat-input">
-                <input type="text" id="user-input" autocomplete="off" maxlength="100" placeholder="write a motivation tweet..." />
+                <input type="text" id="user-input" autocomplete="off" maxlength="1000"
+                    placeholder="Ask..." />
                 <button onclick="sendMessage()">Send</button>
             </div>
         </div>
@@ -41,9 +42,10 @@
         });
         function addMessage(text, sender) {
             const $chatBox = $("#chat-box");
+
             const $msg = $("<div></div>")
                 .addClass("message " + sender)
-                .text(text);
+                .html(text);
 
             $chatBox.append($msg);
             $chatBox.scrollTop($chatBox[0].scrollHeight);
@@ -67,26 +69,39 @@
                 url: "/Manzoid-AI",
                 type: "POST",
                 contentType: "application/json",
+                dataType: "json",
+
                 data: JSON.stringify({
                     message: text,
                     user_id: {{ current_user.id }}
-                 }),
+                }),
 
         success: function (data) {
             $typing.remove();
 
             if (data.reply) {
-                addMessage(data.reply, "ai");
+
+                // Keep line breaks and formatting
+                let formattedReply = data.reply
+                    .replace(/\n/g, "<br>")
+                    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+                addMessage(formattedReply, "ai");
+
             } else {
                 addMessage("⚠️ AI service error.", "ai");
             }
         },
 
-        error: function () {
+        error: function (xhr, status, error) {
             $typing.remove();
+
+            console.error("AJAX Error:", error);
+            console.error("Response:", xhr.responseText);
+
             addMessage("⚠️ Network error.", "ai");
         }
-            });
+});
         }
     </script>
 

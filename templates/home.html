@@ -75,7 +75,7 @@
                                     <path
                                         d="M2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm6 3.993c1.664-1.711 5.825 1.283 0 5.132-5.825-3.85-1.664-6.843 0-5.132" />
                                 </svg>
-                                Manzoid-AI
+                                Flick-AI
                             </a>
                         </li>
                         <li>
@@ -189,7 +189,7 @@
                 firebaseEnabled: {{ firebase_enabled | default(false) | tojson }},
                 vapidKey: {{ fcm_vapid_key | default('') | tojson }},
                 firebaseConfig: {
-                    apiKey: "{{ firebase_api_key | default('') }}",
+                    apiKey: {{ firebase_api_key | default('') | tojson }},
                     authDomain: "corexmanzoid-twitter-7a86a.firebaseapp.com",
                     projectId: "corexmanzoid-twitter-7a86a",
                     storageBucket: "corexmanzoid-twitter-7a86a.firebasestorage.app",
@@ -199,7 +199,7 @@
                 }
             };
         </script>
-        <script src="{{ url_for('static', filename='js/firebase.js') }}?v=2026-04-25-1"></script>
+        <script src="{{ url_for('static', filename='js/firebase.js') }}?v=2026-05-08-1"></script>
         <script src="{{ url_for('static', filename='js/home.js') }}?v=2026-04-25-2"></script>
 
 </body>

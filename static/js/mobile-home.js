@@ -402,9 +402,9 @@ function showAi() {
     $(".post-section").html(
         '<div class="Manzoid-container">' +
         '<div class="main-content">' +
-        '<div class="ai-header"><img src="/static/assets/logo.png" alt=""> Manzoid AI</div>' +
+        '<div class="ai-header"><img src="/static/assets/logo.png" alt="">FlickAI</div>' +
         '<div id="chat-box" class="chat-box">' +
-        "<div class=\"message ai\">Hi, It's Manzoid AI. Ask me anything!</div>" +
+        "<div class=\"message ai\">Welcome! I'm FlickAI. How can I help you today?</div>" +
         "</div>" +
         '<div class="chat-input">' +
         '<input type="text" id="user-input" autocomplete="off" maxlength="100" placeholder="write a motivation tweet...">' +

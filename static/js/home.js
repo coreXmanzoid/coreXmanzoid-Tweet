@@ -157,18 +157,18 @@ function formatRelativeTime(timestamp) {
         return "Just now";
     }
     if (diffMins < 60) {
-        return diffMins === 1 ? "1 min ago" : diffMins + " mins ago";
+        return diffMins === 1 ? "1m ago" : diffMins + " m ago";
     }
     if (diffMins < 1440) {
         const hours = Math.floor(diffMins / 60);
-        return hours === 1 ? "1 hour ago" : hours + " hours ago";
+        return hours === 1 ? "1h ago" : hours + "h ago";
     }
     if (diffMins < 10080) {
         const days = Math.floor(diffMins / 1440);
-        return days === 1 ? "1 day ago" : days + " days ago";
+        return days === 1 ? "1d ago" : days + "d ago";
     }
     const weeks = Math.floor(diffMins / 10080);
-    return weeks === 1 ? "1 week ago" : weeks + " weeks ago";
+    return weeks === 1 ? "1w ago" : weeks + "w ago";
 }
 
 function formatCompactRelativeTime(timestamp) {
@@ -454,7 +454,7 @@ function showFullPost(e) {
         $post.addClass("active-post");
         $(".explore-tab").hide();
         $(".ai-bar").hide();
-        $(".full-post").show();
+        $(".full-post").css("display", "flex");
         $(".notifications-tab").hide();
         loadFragment(
             "showComments",
@@ -504,8 +504,8 @@ function prependPost(content, userId) {
         <div class="post info p-1" data-postid="${tempId}">
             <div class="post-heading">
                 <img src="${profileImg}" alt="" width="40" height="40" class="rounded-circle me-2">
-                <h5 class="${userId}">${name}<br><span>@${username}</span></h5>
-                <small class="post-time" data-timestamp="${timestamp}">Just now</small>
+                <h5 class="${userId}">${name}<br><span>@${username}
+                .<strong class="post-time" data-timestamp="${timestamp}">Just now</strong></span></h5>
                 <div class="edit-post ms-auto me-2" title="Edit Post">
                     Posting...
                 </div>
@@ -1018,7 +1018,7 @@ $(document).off("click.editPost", ".edit-post").on("click.editPost", ".edit-post
     saveBtn.on("click", function () {
         const confirmChange = confirm("Do you want to update you post. This action cannot be undone.");
         if (!confirmChange) {
-            return; 
+            return;
         }
 
         $.ajax({

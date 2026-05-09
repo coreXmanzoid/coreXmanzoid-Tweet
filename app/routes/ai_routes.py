@@ -23,7 +23,7 @@ def manzoid_ai():
         if not message:
             return jsonify({"error": "Empty message"}), 400
 
-        if len(message) > 130:
+        if len(message) > 1000:
             return jsonify({"error": "Message too long"}), 400
 
         try:
@@ -37,7 +37,7 @@ def manzoid_ai():
 
     return render_template("AI.html")
 
-@ai_bp.route("/api/ai/chat", methods=["POST"])
+@ai_bp.route("/api_chat", methods=["POST"])
 def ai_chat():
 
     data = request.get_json()
@@ -50,7 +50,7 @@ def ai_chat():
     if not prompt:
         return jsonify({"error": "Empty message"}), 400
 
-    if len(prompt) > 100:
+    if len(prompt) > 1000:
         return jsonify({"error": "Message too long"}), 400
 
     try:

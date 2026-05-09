@@ -72,6 +72,7 @@ const el = {
     dashboardPendingPro: document.getElementById("dashboardPendingPro"),
     currentDateLabel: document.getElementById("currentDateLabel"),
     adminReplyInput: document.getElementById("adminReplyInput"),
+    generateAIReplyButton: document.getElementById("generateAIReplyButton"),
     sendReplyButton: document.getElementById("sendReplyButton"),
     markAnsweredButton: document.getElementById("markAnsweredButton"),
     markReviewedButton: document.getElementById("markReviewedButton"),
@@ -446,6 +447,24 @@ async function markAnswered() {
     showToast(`${item.id} marked as answered.`);
 }
 
+async function generateAIReply() {
+    const item = supportRequests.find((v) => v.id === state.selectedSupportId);
+    if (!item) return;
+
+    const originalText = el.generateAIReplyButton.textContent;
+    el.generateAIReplyButton.disabled = true;
+    el.generateAIReplyButton.textContent = "Generating...";
+
+    try {
+        const payload = await api(`/admin/api/support/${item.dbId}/ai-answer`, { method: "POST" });
+        el.adminReplyInput.value = payload.reply || "";
+        showToast(`AI reply drafted for ${item.id}.`);
+    } finally {
+        el.generateAIReplyButton.disabled = false;
+        el.generateAIReplyButton.textContent = originalText;
+    }
+}
+
 async function markReviewed() {
     const item = userReports.find((v) => v.id === state.selectedReportId);
     if (!item) return;
@@ -611,6 +630,7 @@ function bindEvents() {
         if (user?.profileUrl) window.location.href = user.profileUrl;
     });
     el.sendReplyButton.addEventListener("click", async () => { try { await saveReply(); } catch (error) { showToast(error.message); } });
+    el.generateAIReplyButton.addEventListener("click", async () => { try { await generateAIReply(); } catch (error) { showToast(error.message); } });
     el.markAnsweredButton.addEventListener("click", async () => { try { await markAnswered(); } catch (error) { showToast(error.message); } });
     el.markReviewedButton.addEventListener("click", async () => { try { await markReviewed(); } catch (error) { showToast(error.message); } });
     el.backupDataButton?.addEventListener("click", downloadSqliteBackup);

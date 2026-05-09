@@ -1,0 +1,305 @@
+{
+  "_comment": "ChatFlick Subscription Tiers — source of truth for feature gating. All limits are enforced server-side; frontend values are mirrors only.",
+
+  "free": {
+    "price": 0,
+    "billing_cycle": null,
+    "status_value": "VERIFIED",
+    "features": {
+
+      "auth": {
+        "is_remember_me": false,
+        "session_lifetime_days": 1,
+        "google_oauth": true
+      },
+
+      "posts": {
+        "post_length": 180,
+        "max_hashtags_per_post": 3,
+        "post_per_day": 10,
+        "can_edit_post": false,
+        "edit_window_minutes": 0,
+        "can_delete_post": true,
+        "delete_window_minutes": 3
+      },
+
+      "feed": {
+        "following_feed_limit": 10,
+        "random_feed_limit": 10,
+        "liked_posts_limit": 10
+      },
+
+      "comments": {
+        "comment_length": 100,
+        "can_comment": true,
+        "comments_per_day": 20
+      },
+
+      "social": {
+        "can_follow": true,
+        "can_mention": false,
+        "can_repost": true,
+        "can_like": true,
+        "can_share": true,
+        "max_following": 200
+      },
+
+      "profile": {
+        "profile_image_resolution": "256x256",
+        "can_set_bio": true,
+        "bio_length": 80,
+        "can_set_website": false,
+        "can_set_contact": false
+      },
+
+      "notifications": {
+        "push_notifications": false,
+        "email_notifications": false,
+        "in_app_notifications": true,
+        "notification_history_days": 7
+      },
+
+      "ai": {
+        "ai_access": true,
+        "ai_route": "/ai-chat",
+        "ai_message_length": 100,
+        "ai_conversation_memory": 0,
+        "ai_requests_per_day": 5
+      },
+
+      "analytics": {
+        "can_see_own_post_stats": false,
+        "can_see_follower_growth": false,
+        "can_export_data": false
+      },
+
+      "monetization": {
+        "verified_badge": false,
+        "pro_badge": false,
+        "is_see_ads": true,
+        "can_apply_for_pro": true
+      },
+
+      "support": {
+        "support_sla_days": 5,
+        "can_submit_support_ticket": true,
+        "can_report_content": true,
+        "priority_support": false
+      },
+
+      "account": {
+        "can_download_data": true,
+        "can_deactivate": true,
+        "can_delete": true,
+        "theme_options": ["light", "dark"],
+        "multi_device_login": false
+      }
+    }
+  },
+
+  "pro": {
+    "price": 12.00,
+    "billing_cycle": "monthly",
+    "annual_price": 115.20,
+    "status_value": "PRO",
+    "features": {
+
+      "auth": {
+        "is_remember_me": true,
+        "session_lifetime_days": 7,
+        "google_oauth": true
+      },
+
+      "posts": {
+        "post_length": 230,
+        "max_hashtags_per_post": 8,
+        "post_per_day": 50,
+        "can_edit_post": true,
+        "edit_window_minutes": 3,
+        "can_delete_post": true,
+        "delete_window_minutes": 3
+      },
+
+      "feed": {
+        "following_feed_limit": 50,
+        "random_feed_limit": 20,
+        "liked_posts_limit": 50
+      },
+
+      "comments": {
+        "comment_length": 130,
+        "can_comment": true,
+        "comments_per_day": 100
+      },
+
+      "social": {
+        "can_follow": true,
+        "can_mention": true,
+        "can_repost": true,
+        "can_like": true,
+        "can_share": true,
+        "max_following": 1000
+      },
+
+      "profile": {
+        "profile_image_resolution": "512x512",
+        "can_set_bio": true,
+        "bio_length": 160,
+        "can_set_website": true,
+        "can_set_contact": true
+      },
+
+      "notifications": {
+        "push_notifications": true,
+        "email_notifications": true,
+        "in_app_notifications": true,
+        "notification_history_days": 30
+      },
+
+      "ai": {
+        "ai_access": true,
+        "ai_route": "/Manzoid-AI",
+        "ai_message_length": 130,
+        "ai_conversation_memory": 8,
+        "ai_requests_per_day": 100
+      },
+
+      "analytics": {
+        "can_see_own_post_stats": true,
+        "can_see_follower_growth": false,
+        "can_export_data": false
+      },
+
+      "monetization": {
+        "verified_badge": true,
+        "pro_badge": true,
+        "is_see_ads": false,
+        "can_apply_for_pro": false
+      },
+
+      "support": {
+        "support_sla_days": 2,
+        "can_submit_support_ticket": true,
+        "can_report_content": true,
+        "priority_support": true
+      },
+
+      "account": {
+        "can_download_data": true,
+        "can_deactivate": true,
+        "can_delete": true,
+        "theme_options": ["light", "dark"],
+        "multi_device_login": true
+      }
+    }
+  },
+
+  "enterprise": {
+    "price": 49.00,
+    "billing_cycle": "monthly",
+    "annual_price": 470.40,
+    "status_value": "ENTERPRISE",
+    "features": {
+
+      "auth": {
+        "is_remember_me": true,
+        "session_lifetime_days": 30,
+        "google_oauth": true
+      },
+
+      "posts": {
+        "post_length": -1,
+        "max_hashtags_per_post": -1,
+        "post_per_day": -1,
+        "can_edit_post": true,
+        "edit_window_minutes": 10,
+        "can_delete_post": true,
+        "delete_window_minutes": 10
+      },
+
+      "feed": {
+        "following_feed_limit": -1,
+        "random_feed_limit": 50,
+        "liked_posts_limit": -1
+      },
+
+      "comments": {
+        "comment_length": 500,
+        "can_comment": true,
+        "comments_per_day": -1
+      },
+
+      "social": {
+        "can_follow": true,
+        "can_mention": true,
+        "can_repost": true,
+        "can_like": true,
+        "can_share": true,
+        "max_following": -1
+      },
+
+      "profile": {
+        "profile_image_resolution": "1024x1024",
+        "can_set_bio": true,
+        "bio_length": 300,
+        "can_set_website": true,
+        "can_set_contact": true
+      },
+
+      "notifications": {
+        "push_notifications": true,
+        "email_notifications": true,
+        "in_app_notifications": true,
+        "notification_history_days": -1
+      },
+
+      "ai": {
+        "ai_access": true,
+        "ai_route": "/Manzoid-AI",
+        "ai_message_length": -1,
+        "ai_conversation_memory": -1,
+        "ai_requests_per_day": -1
+      },
+
+      "analytics": {
+        "can_see_own_post_stats": true,
+        "can_see_follower_growth": true,
+        "can_export_data": true
+      },
+
+      "monetization": {
+        "verified_badge": true,
+        "pro_badge": true,
+        "is_see_ads": false,
+        "can_apply_for_pro": false
+      },
+
+      "support": {
+        "support_sla_days": 1,
+        "can_submit_support_ticket": true,
+        "can_report_content": true,
+        "priority_support": true
+      },
+
+      "account": {
+        "can_download_data": true,
+        "can_deactivate": true,
+        "can_delete": true,
+        "theme_options": ["light", "dark"],
+        "multi_device_login": true
+      }
+    }
+  },
+
+  "_legend": {
+    "-1": "Unlimited / no restriction enforced",
+    "status_value": "Maps to UserData.status column in the database",
+    "ai_conversation_memory": "Number of past exchanges kept in AIService.user_history per session",
+    "ai_message_length": "Max chars accepted by the POST /Manzoid-AI or /ai-chat route",
+    "post_length": "Max chars accepted by POST /managePosts/1",
+    "edit_window_minutes": "Window checked by PostService.can_modify()",
+    "profile_image_resolution": "Cloudinary transformation width x height in CloudinaryService",
+    "following_feed_limit": "LIMIT applied in FeedService.following_posts()",
+    "session_lifetime_days": "PERMANENT_SESSION_LIFETIME in app config when remember_me is on"
+  }
+}

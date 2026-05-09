@@ -16,6 +16,7 @@ from app.services.setting_service import SettingService
 from app.services.data_downloading_service import DownloadData
 from app.services.email_service import EmailService
 from app.services.auth_service import AuthService
+from app.services.ai_service import AIService
 from datetime import date
 
 from app.utils.username import validate_username
@@ -305,11 +306,16 @@ def create_support_request():
         category = data["category"]
         message = data["message"]
         SettingService.create_support_request(user_id, category, message)
+        ai_reply = None
+        try:
+            ai_reply = AIService.answer_support_request(category, message)
+        except Exception as e:
+            print("Support AI reply error:", e)
         flash(
             "Your Request is Submitted Successfully. We will try to respond you as soon as possible.",
             "success",
         )
-        return jsonify({"status": "success"})
+        return jsonify({"status": "success", "reply": ai_reply})
     return jsonify({"status": "error", "message": "invalid request"})
 
 @setting_bp.route("/danger-zone/<int:st>", methods=["POST"])

@@ -304,11 +304,13 @@ button:hover {
     h5 {
         color: #2e2a22;
         font-size: 17px;
-        strong{
+
+        strong {
             font-size: 12px;
             color: #a0a090;
             opacity: 0.8;
             padding: 0px 3px !important;
+            font-weight: 500;
         }
     }
 
@@ -416,11 +418,13 @@ button:hover {
 .profile {
     background-color: #DEDED1 !important;
 }
+
 .back-profile {
     display: flex;
     align-items: center;
     gap: 5px;
-    a{
+
+    a {
         color: #46423b !important;
         text-decoration: none;
         font-weight: 600;
@@ -581,6 +585,37 @@ button:hover {
     grid-row: span 3 / span 3;
     grid-column-start: 3;
     grid-row-start: 1;
+
+    height: 100vh;
+    min-height: 0;
+
+    position: sticky;
+    top: 0;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    /* Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: #8f8674 #DEDED1;
+}
+
+/* Chrome, Edge, Safari */
+.div5::-webkit-scrollbar {
+    width: 3px;
+}
+
+.div5::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.div5::-webkit-scrollbar-thumb {
+    background: #8f8674;
+    border-radius: 10px;
+}
+
+.div5::-webkit-scrollbar-thumb:hover {
+    background: #756c5d;
 }
 
 
@@ -688,6 +723,13 @@ button:hover {
         h5 {
             color: #2e2a22;
             font-size: 17px;
+
+            strong {
+                font-size: 12px;
+                color: #a0a090;
+                opacity: 0.8;
+                padding: 0px 3px !important;
+            }
         }
 
         span {
@@ -707,6 +749,7 @@ button:hover {
 h5:hover {
     cursor: pointer;
 }
+
 /* 
 .full-post {
     padding-top: 20px;
@@ -786,18 +829,27 @@ h5:hover {
 
 
 .full-post {
-    height: auto;
+    height: 100vh;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     background: #DEDED1;
-    border-radius: 18px 18px 0 0;
+    /* border-radius: 18px 18px 0 0; */
     /* box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.18); */
+}
+
+.full-post .coreXmanzoid {
+    min-height: 0;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .full-post .feed-post {
     flex: 0 0 auto;
-    background: #DEDED1;
+    /* background: #DEDED1; */
+    background: #c7c0b1;
     /* border-bottom: 1px solid rgba(70, 66, 59, 0.18); */
 }
 
@@ -807,8 +859,8 @@ h5:hover {
     align-items: center;
     justify-content: space-between;
     padding: 10px 16px;
-    background: #DEDED1;
     border-bottom: 1px solid rgba(70, 66, 59, 0.12);
+    /* background: #DEDED1; */
 }
 
 .full-post .back-post {
@@ -825,6 +877,7 @@ h5:hover {
 
 .full-post .post-button a {
     color: #F94818;
+    align-items: center;
     font-size: 18px;
     font-weight: 700;
     text-decoration: none;
@@ -837,7 +890,7 @@ h5:hover {
 .full-post .post-heading,
 .full-post .post-top {
     display: flex;
-    align-items: center;
+    flex: 0 0 auto;
 }
 
 .full-post .post-top {
@@ -847,7 +900,6 @@ h5:hover {
 }
 
 .full-post .post-heading img {
-    flex: 0 0 auto;
     object-fit: cover;
 }
 
@@ -923,7 +975,7 @@ h5:hover {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    background: #FBF3D1;
+    background: #DEDED1;
 }
 
 .full-post .my-comment {
@@ -933,7 +985,9 @@ h5:hover {
     align-items: center;
     gap: 8px;
     padding: 10px 12px;
-    background: #DEDED1;
+    /* background: #DEDED1; */
+    background: #c7c0b1;
+
     border-bottom: 1px solid rgba(70, 66, 59, 0.14);
 }
 
@@ -1131,12 +1185,12 @@ h5:hover {
     position: absolute;
     background-image: linear-gradient(100deg, transparent, rgba(249, 72, 24, 0.18) 50%, transparent 80%), radial-gradient(circle 28px at 28px 28px, #b6ae9f 99%, transparent 0), linear-gradient(#8f8674 24px, transparent 0), linear-gradient(#c7c0b1 18px, transparent 0), linear-gradient(#deded1 66px, transparent 0);
     background-repeat: no-repeat;
-    background-size: 
-    20% 130px,
-    55px 56px,
-    40% 20px,
-    50% 20px,
-    100% 65px;
+    background-size:
+        20% 130px,
+        55px 56px,
+        40% 20px,
+        50% 20px,
+        100% 65px;
     background-position: 0% 0, 0 0, 70px 5px, 70px 38px, 0px 66px;
     box-sizing: border-box;
     animation: animloader1 1s linear infinite;

@@ -316,11 +316,16 @@ $("#verifyBtn").click(function () {
     const problem = $("#help-center-input").val().trim();
     const category = $("#issue-category").val();
     const userId = getCurrentSettingUserId();
+    const $button = $(this);
+    const $answer = $("#support-ai-answer");
 
     if (!userId || !problem) {
         showSettingToast("Please write your support request before submitting.", "error");
         return;
     }
+
+    $button.prop("disabled", true).text("Submitting...");
+    $answer.hide().text("");
 
     $.ajax({
         url: "/setting/create-support-request",
@@ -331,12 +336,21 @@ $("#verifyBtn").click(function () {
             message: problem
         }),
         contentType: "application/json",
-        success: function () {
-            window.location.reload();
+        success: function (data) {
+            if (data.reply) {
+                $answer.text(data.reply).show();
+                showSettingToast("Your request was submitted and Manzoid AI drafted an answer.", "success");
+            } else {
+                showSettingToast("Your request was submitted. Support will respond soon.", "success");
+            }
+            $("#help-center-input").val("");
         },
         error: function (err) {
             const message = err?.responseJSON?.message || "Unable to save your changes right now.";
             showSettingToast(message, "error");
+        },
+        complete: function () {
+            $button.prop("disabled", false).text("Submit");
         }
     });
 });

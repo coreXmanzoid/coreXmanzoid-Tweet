@@ -3,6 +3,9 @@ import json
 import re
 from groq import Groq
 
+from app.extensions import db
+from app.models.support_requests import Support
+
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 client = Groq(api_key=GROQ_API_KEY)
@@ -14,6 +17,7 @@ CHATFLICK_JSON_PATH = os.path.abspath(
 )
 MAX_KNOWLEDGE_SECTIONS = 4
 MAX_SECTION_CHARS = 900
+MAX_SUPPORT_EXAMPLES = 3
 
 
 class ChatFlickKnowledge:
@@ -132,17 +136,31 @@ class ChatFlickKnowledge:
 class AIService:
 
     @staticmethod
-    def _messages_for_prompt(message, history=None):
+    def _messages_for_prompt(message, history=None, mode="chat", extra_context=None):
         knowledge = ChatFlickKnowledge.relevant_context(message)
-        system_prompt = (
-            "You are Manzoid-AI, the helpful assistant inside ChatFlick. "
-            "Use the ChatFlick app knowledge below when the user asks about this application. "
-            "Answer clearly and briefly. If the knowledge does not contain the answer, say what you know "
-            "and avoid inventing app behavior."
-        )
+        if mode == "support":
+            system_prompt = (
+                "You are Manzoid-AI, the support assistant for ChatFlick. "
+                "Answer support requests with a clear, helpful, ready-to-send reply. "
+                "Use ChatFlick app knowledge and prior support examples when relevant. "
+                "If the request needs account-specific admin action, explain the likely next step and ask for the "
+                "needed details without pretending the action was completed. "
+                "Do not invent policies, charges, or account changes. Keep the answer friendly and concise."
+            )
+        else:
+            system_prompt = (
+                "You are Manzoid-AI, the helpful assistant inside ChatFlick. "
+                "Answer the user's question clearly and briefly. "
+                "Use ChatFlick app knowledge when the user asks about this application. "
+                "If the knowledge does not contain an exact app detail, provide the safest helpful answer and say "
+                "when the user should contact support."
+            )
 
         if knowledge:
             system_prompt += f"\n\nChatFlick app knowledge:\n{knowledge}"
+
+        if extra_context:
+            system_prompt += f"\n\nSupport context:\n{extra_context}"
 
         messages = [{"role": "system", "content": system_prompt}]
 
@@ -154,6 +172,50 @@ class AIService:
         return messages
 
     @staticmethod
+    def _support_context(category, message):
+        examples = AIService._support_examples(category, message)
+        if not examples:
+            return f"Current category: {category or 'General'}"
+
+        lines = [f"Current category: {category or 'General'}", "Prior answered support examples:"]
+        for item in examples:
+            lines.append(
+                f"- Category: {item.category}\n"
+                f"  User asked: {item.message}\n"
+                f"  Admin replied: {item.admin_reply}"
+            )
+        return "\n".join(lines)
+
+    @staticmethod
+    def _support_examples(category, message):
+        terms = ChatFlickKnowledge._keywords(f"{category or ''} {message or ''}")
+        query = (
+            db.select(Support)
+            .where(Support.admin_reply.is_not(None))
+            .order_by(Support.updated_at.desc().nullslast(), Support.created_at.desc())
+            .limit(25)
+        )
+
+        try:
+            answered_requests = db.session.scalars(query).all()
+        except Exception as error:
+            print("Support examples load error:", error)
+            return []
+
+        scored = []
+        category_text = (category or "").lower()
+        for item in answered_requests:
+            haystack = f"{item.category} {item.message} {item.admin_reply}".lower()
+            score = sum(haystack.count(term) for term in terms)
+            if category_text and category_text == (item.category or "").lower():
+                score += 3
+            if score > 0:
+                scored.append((score, item))
+
+        scored.sort(key=lambda value: value[0], reverse=True)
+        return [item for _, item in scored[:MAX_SUPPORT_EXAMPLES]]
+
+    @staticmethod
     def chat(user_id, message):
 
         history = user_history.get(user_id, [])
@@ -161,7 +223,7 @@ class AIService:
         response = client.chat.completions.create(
             model="llama-3.1-8b-instant",
             messages=AIService._messages_for_prompt(message, history),
-            max_tokens=180,
+            max_tokens=320,
         )
 
         answer = response.choices[0].message.content.strip()
@@ -182,7 +244,27 @@ class AIService:
         response = client.chat.completions.create(
             model="llama-3.1-8b-instant",
             messages=AIService._messages_for_prompt(prompt),
-            max_tokens=150,
+            max_tokens=260,
+        )
+
+        return response.choices[0].message.content.strip()
+
+    @staticmethod
+    def answer_support_request(category, message):
+        prompt = (
+            f"Support request category: {category or 'General'}\n"
+            f"User question/request: {message}\n\n"
+            "Write the support answer only."
+        )
+
+        response = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=AIService._messages_for_prompt(
+                prompt,
+                mode="support",
+                extra_context=AIService._support_context(category, message),
+            ),
+            max_tokens=360,
         )
 
         return response.choices[0].message.content.strip()

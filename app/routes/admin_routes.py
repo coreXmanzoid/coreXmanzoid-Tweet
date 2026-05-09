@@ -3,6 +3,7 @@ from flask_login import login_required
 from app.decorators import verified_user, only_admin
 
 from app.services.admin_service import AdminService
+from app.services.ai_service import AIService
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -57,6 +58,35 @@ def mark_support_answered(request_id):
         return jsonify({"status": "error", "message": str(exc)}), 404
 
     return jsonify({"status": "success", "item": support_request})
+
+
+@admin_bp.route("/admin/api/support/<int:request_id>/ai-answer", methods=["POST"])
+@login_required
+@verified_user
+@only_admin
+def generate_support_ai_answer(request_id):
+    data = AdminService.dashboard_data()
+    support_request = next(
+        (
+            item
+            for item in data["supportRequests"]
+            if item["dbId"] == request_id
+        ),
+        None,
+    )
+    if not support_request:
+        return jsonify({"status": "error", "message": "Support request not found"}), 404
+
+    try:
+        reply = AIService.answer_support_request(
+            support_request["category"],
+            support_request["message"],
+        )
+    except Exception as exc:
+        print("Support AI answer error:", exc)
+        return jsonify({"status": "error", "message": "AI service unavailable"}), 503
+
+    return jsonify({"status": "success", "reply": reply})
 
 
 @admin_bp.route("/admin/api/reports/<int:report_id>/review", methods=["POST"])
