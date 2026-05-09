@@ -88,21 +88,31 @@ def manage_posts(state):
 def show_posts(state, id):
 
     reposts = None
+    per_page = min(max(request.args.get("per_page", 10, type=int), 1), 25)
+    append_mode = request.args.get("append") == "1"
+    raw_exclude_ids = request.args.get("exclude_ids", "")
+    exclude_ids = []
+
+    for raw_id in raw_exclude_ids.split(","):
+        try:
+            exclude_ids.append(int(raw_id))
+        except ValueError:
+            continue
 
     if state == 1:
-        posts = FeedService.profile_posts(id)
+        posts = FeedService.profile_posts(id, limit=per_page, exclude_ids=exclude_ids)
 
     elif state == 2:
-        posts = FeedService.following_posts(id)
+        posts = FeedService.following_posts(id, limit=per_page, exclude_ids=exclude_ids)
 
     elif state == 3:
-        posts = FeedService.liked_posts(id)
+        posts = FeedService.liked_posts(id, limit=per_page, exclude_ids=exclude_ids)
 
     elif state == 4:
-        posts, reposts = FeedService.reposted_posts(id)
+        posts, reposts = FeedService.reposted_posts(id, limit=per_page, exclude_ids=exclude_ids)
 
     else:
-        posts = FeedService.random_posts()
+        posts = FeedService.random_posts(limit=per_page, exclude_ids=exclude_ids)
 
     return render_template(
         "posts.html",
@@ -112,6 +122,7 @@ def show_posts(state, id):
         },
         utc_iso_from=utc_iso_from,
         reposts=reposts,
+        append_mode=append_mode,
     )
 
 @post_bp.route("/PostAction/<int:state>", methods=["POST"])

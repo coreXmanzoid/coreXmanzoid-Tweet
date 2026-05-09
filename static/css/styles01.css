@@ -152,7 +152,7 @@ button:hover {
 }
 
 .div1 {
-    grid-row: span 3 / span 3;
+    grid-row: span 2 / span 2;
     position: fixed;
     height: 100vh;
     overflow-y: auto;
@@ -576,13 +576,9 @@ button:hover {
     grid-row-start: 2;
 }
 
-.div4 {
-    grid-column-start: 2;
-    grid-row-start: 3;
-}
 
 .div5 {
-    grid-row: span 3 / span 3;
+    grid-row: span 2 / span 2;
     grid-column-start: 3;
     grid-row-start: 1;
 

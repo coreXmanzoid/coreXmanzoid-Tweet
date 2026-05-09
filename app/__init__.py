@@ -1,9 +1,11 @@
 from datetime import timedelta
 import os
-from flask import Flask, app
+from flask import Flask
 from dotenv import load_dotenv
+from flask_login import current_user
 
 from app.extensions import db, login_manager, oauth as oauth_client
+from app.utils.time_utils import utc_now
 
 from app.routes.notification_routes import notification_bp
 from app.firebase.firebase_config import init_firebase
@@ -42,7 +44,18 @@ def create_app():
     login_manager.init_app(app)
     # migrate = Migrate(app, db)
     oauth_client.init_app(app)
-    init_firebase()
+    firebase_enabled, firebase_status = init_firebase()
+
+    @app.context_processor
+    def inject_runtime_config():
+        return {
+            "firebase_enabled": firebase_enabled,
+            "firebase_status": firebase_status,
+            "fcm_vapid_key": os.getenv("FCM_VAPID_KEY", ""),
+            "firebase_api_key": os.getenv("FIREBASE_API_KEY", ""),
+            "current_time": utc_now(),
+            "current_user": current_user if current_user else None,
+        }
 
     app.register_blueprint(notification_bp)
     app.register_blueprint(profile_bp)

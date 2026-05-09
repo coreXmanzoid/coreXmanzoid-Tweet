@@ -1,5 +1,13 @@
 const mobileControllers = {};
 let mobileCurrentUserId = 0;
+const MOBILE_FEED_PER_PAGE = 10;
+const mobileFeedState = {
+    state: 0,
+    id: 0,
+    loading: false,
+    hasMore: true,
+    active: false
+};
 
 function abortAndRenew(key) {
     if (mobileControllers[key]) {
@@ -246,6 +254,83 @@ function loadFragment(key, $target, url, loaderHtml) {
     });
 }
 
+function getLoadedPostIds($target) {
+    return $target.find(".post").map(function () {
+        const postId = $(this).data("postid");
+        return /^\d+$/.test(String(postId)) ? postId : null;
+    }).get();
+}
+
+function buildPostsUrl(state, id, append) {
+    const params = new URLSearchParams({
+        per_page: MOBILE_FEED_PER_PAGE
+    });
+
+    if (append) {
+        params.set("append", "1");
+        params.set("exclude_ids", getLoadedPostIds($("#feed-post")).join(","));
+    }
+
+    return "/showPosts/" + state + "/" + id + "?" + params.toString();
+}
+
+function appendHtmlResponse($target, response) {
+    const dummy = $("<div>").html(response);
+    dummy.find("script").remove();
+    const $posts = dummy.find(".post");
+
+    $target.append(dummy.html());
+    initializeDynamicContent($target);
+
+    return $posts.length;
+}
+
+function appendNextPosts() {
+    if (!mobileFeedState.active || mobileFeedState.loading || !mobileFeedState.hasMore) {
+        return;
+    }
+
+    mobileFeedState.loading = true;
+    const $loader = $('<div class="loader-wrapper feed-more-loader"><span class="loader"></span></div>');
+    $("#feed-post").append($loader);
+
+    ajaxWithAbort("mobileAppendPosts", {
+        url: buildPostsUrl(mobileFeedState.state, mobileFeedState.id, true),
+        method: "GET",
+        success: function (response) {
+            $loader.remove();
+            const newPostCount = appendHtmlResponse($("#feed-post"), response);
+            mobileFeedState.hasMore = newPostCount >= MOBILE_FEED_PER_PAGE;
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            $loader.remove();
+            if (textStatus !== "abort") {
+                console.error("Ajax error [mobileAppendPosts]:", textStatus, errorThrown);
+            }
+        },
+        complete: function () {
+            mobileFeedState.loading = false;
+        }
+    });
+}
+
+function isNearFeedBottom() {
+    const threshold = 500;
+    const $feed = $(".feed-preview");
+
+    if ($feed.length && $feed[0].scrollHeight > $feed.innerHeight() + 20) {
+        return $feed.scrollTop() + $feed.innerHeight() >= $feed[0].scrollHeight - threshold;
+    }
+
+    return window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - threshold;
+}
+
+function maybeLoadMorePosts() {
+    if (isNearFeedBottom()) {
+        appendNextPosts();
+    }
+}
+
 function setActiveTab(label) {
     $(".navigation .list").removeClass("active");
     $(".navigation .list").filter(function () {
@@ -295,12 +380,27 @@ function updateComposerState($textarea) {
 }
 
 function showPosts(state, id) {
+    if (mobileControllers.mobileAppendPosts) {
+        mobileControllers.mobileAppendPosts.abort();
+    }
+
+    mobileFeedState.state = state;
+    mobileFeedState.id = id;
+    mobileFeedState.loading = true;
+    mobileFeedState.hasMore = true;
+    mobileFeedState.active = true;
+
     loadFragment(
         "mobilePosts",
         $("#feed-post"),
-        "/showPosts/" + state + "/" + id,
+        buildPostsUrl(state, id, false),
         '<div class="loader-wrapper"><span class="loader"></span></div>'
-    );
+    ).done(function () {
+        mobileFeedState.hasMore = $("#feed-post .post").length >= MOBILE_FEED_PER_PAGE;
+    }).always(function () {
+        mobileFeedState.loading = false;
+        maybeLoadMorePosts();
+    });
 }
 
 function showComposer() {
@@ -351,6 +451,7 @@ function showLikedPosts() {
 }
 
 function exploreAccounts(url) {
+    mobileFeedState.active = false;
     $("#feed-post").html('<div class="loader-wrapper"><span class="loader"></span></div>');
 
     ajaxWithAbort("mobileExploreAccounts", {
@@ -379,6 +480,7 @@ function showSearch() {
 
 function showNotifications() {
     resetOverlay();
+    mobileFeedState.active = false;
     setActiveTab("Search");
     setMoreMenuVisible(false);
     setAccountsRowVisible(false);
@@ -395,6 +497,7 @@ function showNotifications() {
 
 function showAi() {
     resetOverlay();
+    mobileFeedState.active = false;
     setActiveTab("AI");
     setMoreMenuVisible(false);
     setAccountsRowVisible(false);
@@ -705,6 +808,8 @@ function sendMessage() {
 
 $(function () {
     showHome();
+    $(window).on("scroll.mobileFeedInfinite", maybeLoadMorePosts);
+    $(".feed-preview").on("scroll.mobileFeedInfinite", maybeLoadMorePosts);
 
     $(document).on("click", ".navigation .list a", function (e) {
         e.preventDefault();
@@ -716,7 +821,7 @@ $(function () {
             showSearch();
         } else if (label === "More") {
             toggleMoreMenu();
-        } else if (label === "AI") {
+        } else if (label === "FlickAI") {
             showAi();
         } else if (label === "Profile") {
             showProfile(getCurrentUserId());

@@ -8,19 +8,30 @@ from app.models.follows import Follow
 class FeedService:
 
     @staticmethod
-    def profile_posts(user_id):
+    def _with_exclusions(query, exclude_ids):
+        if exclude_ids:
+            query = query.where(Post.id.notin_(exclude_ids))
+        return query
+
+    @staticmethod
+    def profile_posts(user_id, limit=None, exclude_ids=None):
+        query = (
+            db.select(Post)
+            .where(Post.user_id == user_id)
+            .order_by(Post.timestamp.desc())
+        )
+        query = FeedService._with_exclusions(query, exclude_ids)
+        if limit:
+            query = query.limit(limit)
+
         return (
-            db.session.execute(
-                db.select(Post)
-                .where(Post.user_id == user_id)
-                .order_by(Post.timestamp.desc())
-            )
+            db.session.execute(query)
             .scalars()
             .all()
         )
 
     @staticmethod
-    def following_posts(user_id):
+    def following_posts(user_id, limit=None, exclude_ids=None):
 
         follows = (
             db.session.execute(
@@ -35,50 +46,63 @@ class FeedService:
         if not following_ids:
             return []
 
+        query = (
+            db.select(Post)
+            .where(Post.user_id.in_(following_ids))
+            .order_by(Post.timestamp.desc())
+        )
+        query = FeedService._with_exclusions(query, exclude_ids)
+        if limit:
+            query = query.limit(limit)
+
         return (
-            db.session.execute(
-                db.select(Post)
-                .where(Post.user_id.in_(following_ids))
-                .order_by(Post.timestamp.desc())
-                .limit(10)
-            )
+            db.session.execute(query)
             .scalars()
             .all()
         )
 
     @staticmethod
-    def liked_posts(user_id):
+    def liked_posts(user_id, limit=None, exclude_ids=None):
 
         user = db.session.get(UserData, user_id)
 
         if not user.liked_posts:
             return []
 
+        query = (
+            db.select(Post)
+            .where(Post.id.in_(user.liked_posts))
+            .order_by(Post.timestamp.desc())
+        )
+        query = FeedService._with_exclusions(query, exclude_ids)
+        if limit:
+            query = query.limit(limit)
+
         return (
-            db.session.execute(
-                db.select(Post)
-                .where(Post.id.in_(user.liked_posts))
-                .order_by(Post.timestamp.desc())
-                .limit(10)
-            )
+            db.session.execute(query)
             .scalars()
             .all()
         )
 
     @staticmethod
-    def reposted_posts(user_id):
+    def reposted_posts(user_id, limit=None, exclude_ids=None):
 
         user = db.session.get(UserData, user_id)
 
         if not user.reposted_posts:
             return [], None
 
+        query = (
+            db.select(Post)
+            .where(Post.id.in_(user.reposted_posts))
+            .order_by(Post.timestamp.desc())
+        )
+        query = FeedService._with_exclusions(query, exclude_ids)
+        if limit:
+            query = query.limit(limit)
+
         posts = (
-            db.session.execute(
-                db.select(Post)
-                .where(Post.id.in_(user.reposted_posts))
-                .order_by(Post.timestamp.desc())
-            )
+            db.session.execute(query)
             .scalars()
             .all()
         )
@@ -86,14 +110,14 @@ class FeedService:
         return posts, user.username
 
     @staticmethod
-    def random_posts():
+    def random_posts(limit=None, exclude_ids=None):
+        query = db.select(Post).order_by(func.random())
+        query = FeedService._with_exclusions(query, exclude_ids)
+        if limit:
+            query = query.limit(limit)
 
         return (
-            db.session.execute(
-                db.select(Post)
-                .order_by(func.random())
-                .limit(10)
-            )
+            db.session.execute(query)
             .scalars()
             .all()
         )

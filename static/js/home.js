@@ -1,4 +1,12 @@
 const controllers = {};
+const FEED_PER_PAGE = 10;
+const feedState = {
+    state: 0,
+    id: 0,
+    loading: false,
+    hasMore: true,
+    active: false
+};
 
 function abortAndRenew(key) {
     if (controllers[key]) {
@@ -340,6 +348,83 @@ function loadFragment(key, $target, url, loaderHtml) {
     });
 }
 
+function getLoadedPostIds($target) {
+    return $target.find(".post").map(function () {
+        const postId = $(this).data("postid");
+        return /^\d+$/.test(String(postId)) ? postId : null;
+    }).get();
+}
+
+function buildPostsUrl(state, id, append) {
+    const params = new URLSearchParams({
+        per_page: FEED_PER_PAGE
+    });
+
+    if (append) {
+        params.set("append", "1");
+        params.set("exclude_ids", getLoadedPostIds($(".div3")).join(","));
+    }
+
+    return "/showPosts/" + state + "/" + id + "?" + params.toString();
+}
+
+function appendHtmlResponse($target, response) {
+    const dummy = $("<div>").html(response);
+    dummy.find("script").remove();
+    const $posts = dummy.find(".post");
+
+    $target.append(dummy.html());
+    initializeDynamicContent($target);
+
+    return $posts.length;
+}
+
+function appendNextPosts() {
+    if (!feedState.active || feedState.loading || !feedState.hasMore) {
+        return;
+    }
+
+    feedState.loading = true;
+    const $loader = $('<div class="loader-wrapper feed-more-loader"><span class="loader"></span></div>');
+    $(".div3").append($loader);
+
+    ajaxWithAbort("appendPosts", {
+        url: buildPostsUrl(feedState.state, feedState.id, true),
+        method: "GET",
+        success: function (response) {
+            $loader.remove();
+            const newPostCount = appendHtmlResponse($(".div3"), response);
+            feedState.hasMore = newPostCount >= FEED_PER_PAGE;
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            $loader.remove();
+            if (textStatus !== "abort") {
+                console.error("Ajax error [appendPosts]:", textStatus, errorThrown);
+            }
+        },
+        complete: function () {
+            feedState.loading = false;
+        }
+    });
+}
+
+function isNearFeedBottom() {
+    const threshold = 500;
+    const $feed = $(".div3");
+
+    if ($feed.length && $feed[0].scrollHeight > $feed.innerHeight() + 20) {
+        return $feed.scrollTop() + $feed.innerHeight() >= $feed[0].scrollHeight - threshold;
+    }
+
+    return window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - threshold;
+}
+
+function maybeLoadMorePosts() {
+    if (isNearFeedBottom()) {
+        appendNextPosts();
+    }
+}
+
 function updateComposerState($textarea) {
     const inputLength = $textarea.val().length;
     const maxLength = 180;
@@ -374,12 +459,27 @@ function exploreAccounts(url) {
 }
 
 function showPosts(state, id) {
+    if (controllers.appendPosts) {
+        controllers.appendPosts.abort();
+    }
+
+    feedState.state = state;
+    feedState.id = id;
+    feedState.loading = true;
+    feedState.hasMore = true;
+    feedState.active = true;
+
     loadFragment(
         "showPosts",
         $(".div3"),
-        "/showPosts/" + state + "/" + id,
+        buildPostsUrl(state, id, false),
         '<div class="page-loader page-loader--posts"><span class="loader1"></span></div>'
-    );
+    ).done(function () {
+        feedState.hasMore = $(".div3 .post").length >= FEED_PER_PAGE;
+    }).always(function () {
+        feedState.loading = false;
+        maybeLoadMorePosts();
+    });
 }
 
 function markAsRead() {
@@ -703,7 +803,7 @@ function checkForNotifications(id) {
 }
 
 exploreAccounts("/exploreAccounts/0/random");
-loadFragment("initialPosts", $(".div3"), "/showPosts/0/0", '<div class="page-loader page-loader--posts"><span class="loader1"></span></div>');
+showPosts(0, 0);
 initializeDynamicContent($(document.body));
 
 $(".search input").on("input", function () {
@@ -745,13 +845,13 @@ $(".verification-box button").on("click", function () {
     });
 });
 
-$(".div4 button").on("click", function () {
-    $(".ai-bar").hide();
-    $(".notifications-tab").hide();
-    $(".full-post").hide();
-    $(".explore-tab").show();
-    showPosts(0, 0);
-});
+// $(".div4 button").on("click", function () {
+//     $(".ai-bar").hide();
+//     $(".notifications-tab").hide();
+//     $(".full-post").hide();
+//     $(".explore-tab").show();
+//     showPosts(0, 0);
+// });
 
 $(".switch-account-link").on("click", function () {
     const confirmSwitch = confirm("Are you sure you want to switch accounts? Unsaved changes will be lost.");
@@ -764,6 +864,7 @@ $(".switch-account-link").on("click", function () {
 });
 
 $(".notifications-button").on("click", function () {
+    feedState.active = false;
     $(".full-post").hide();
     $(".notifications-tab").show().html('<div class="loader-wrapper"><span class="loader"></span></div>');
     $(".explore-tab").hide();
@@ -780,6 +881,7 @@ $(".notifications-button").on("click", function () {
 });
 
 $(".ai-button").on("click", function () {
+    feedState.active = false;
     $(".full-post").hide();
     $(".div2").hide();
     $(".div3").html('<div class="loader-wrapper"><span class="loader"></span></div>');
@@ -797,6 +899,7 @@ $(".post-button").on("click", function () {
 });
 
 $(".explore-button").on("click", function () {
+    feedState.active = false;
     $(".full-post").hide();
     $(".ai-bar").hide();
     $(".explore-tab").show();
@@ -820,6 +923,9 @@ $(".profile-link").on("click", function () {
 });
 
 $(".home-link").on("click", Backtohome);
+
+$(window).on("scroll.feedInfinite", maybeLoadMorePosts);
+$(".div3").on("scroll.feedInfinite", maybeLoadMorePosts);
 
 $(document).off("click.topPages", ".top-pages h6").on("click.topPages", ".top-pages h6", function (e) {
     e.preventDefault();
