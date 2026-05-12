@@ -508,7 +508,9 @@ function showProfile(userId) {
     $(".ai-bar").hide();
     $(".explore-tab").show();
     $(".notifications-tab").hide();
+    $(".div2").show();
     showPosts(1, userId);
+    initializeOptionsToggle($(".div2"));
 }
 
 function Backtohome() {
@@ -532,7 +534,7 @@ function showFullPost(e) {
     if (e) {
         e.preventDefault();
     }
-
+    
     let $post = $(this).closest(".post");
     if ($post.length === 0) {
         $post = $(".post.active-post").first();
@@ -544,9 +546,10 @@ function showFullPost(e) {
         $(".notifications-tab").hide();
         return;
     }
-
+    
     const postId = $post.data("postid");
     const activePost = $post.hasClass("active-post");
+    initializeOptionsToggle();
 
     $(".post").removeClass("active-post");
 
@@ -1431,3 +1434,61 @@ $(document).off("keydown.submitComment", ".my-comment input").on("keydown.submit
 });
 
 checkForNotifications(getCurrentUserId());
+
+function initializeOptionsToggle($root) {
+
+    let root = document;
+
+    // jQuery object
+    if ($root && $root.length) {
+        root = $root[0];
+    }
+
+    // Native DOM element
+    else if ($root instanceof Element) {
+        root = $root;
+    }
+
+    const toggles = root.querySelectorAll(".options-toggle");
+
+    toggles.forEach(function (toggleBtn) {
+
+        const menu = toggleBtn.closest(".post-options")?.querySelector(".options-menu");
+
+        if (!menu || toggleBtn.__optionsToggleInitialized) {
+            return;
+        }
+
+        toggleBtn.__optionsToggleInitialized = true;
+
+        toggleBtn.addEventListener("click", function (e) {
+
+            e.stopPropagation();
+
+            const isOpen = menu.classList.contains("show");
+
+            document.querySelectorAll(".options-menu.show").forEach(function (m) {
+                m.classList.remove("show");
+            });
+
+            if (!isOpen) {
+                menu.classList.add("show");
+            }
+
+        });
+
+    });
+
+}
+// Close on outside click
+document.addEventListener("click", function (e) {
+
+    if (!e.target.closest(".post-options")) {
+
+        document.querySelectorAll(".options-menu.show").forEach(function (menu) {
+            menu.classList.remove("show");
+        });
+
+    }
+
+});

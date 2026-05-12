@@ -450,6 +450,91 @@ body {
 .fullpost-box .comment-content .content {
     font-size: 12px;
 }
+.full-post .post-options {
+    position: relative;
+    display: inline-block;
+}
+
+.options-toggle {
+    border: none;
+    background: transparent;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.options-toggle:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.options-toggle i {
+    font-size: 15px;
+    color: #444;
+}
+
+.options-menu {
+    position: absolute;
+    top: 45px;
+    right: 0;
+    min-width: 100px;
+    background: #c7c0b1;
+    border-radius: 12px;
+    border: 1.5px solid #2e2a22 !important;
+    padding: 8px 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    border: 1px solid rgba(0,0,0,0.06);
+
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: 0.2s ease;
+
+    z-index: 999;
+
+    hr{
+        margin: 4px 0;
+        border-color: rgba(70, 66, 59, 0.14);
+    }
+}
+
+.options-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.option-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 8px 10px;
+    text-decoration: none;
+    color: #222;
+    font-size: 12px !important;
+    transition: 0.2s ease;
+}
+
+.option-item:hover {
+    background: #b6ae9f;
+}
+
+.option-item i {
+    font-size: 10px;
+}
+
+.option-item.delete {
+    color: #F94818;
+}
+
+.option-item.delete:hover {
+    background: rgba(220, 53, 69, 0.08);
+}
 
 @keyframes mobileFadeUp {
     from {

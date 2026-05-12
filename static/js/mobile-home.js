@@ -231,8 +231,35 @@ function initializeDynamicContent($root) {
     });
 
     renderMentions(".post-content .content, .comment-content .content");
+    initializeOptionsToggle($root);
     $root.find(".ProfileOptions h6").removeClass("active-a").first().addClass("active-a");
 }
+
+function initializeOptionsToggle($root) {
+    const root = $root ? $root[0] : document;
+    const toggles = root === document ? document.querySelectorAll(".options-toggle") : root.querySelectorAll(".options-toggle");
+
+    toggles.forEach(function (toggleBtn) {
+        const menu = toggleBtn.closest(".post-options")?.querySelector(".options-menu");
+        if (!menu || toggleBtn.__optionsToggleInitialized) {
+            return;
+        }
+
+        toggleBtn.__optionsToggleInitialized = true;
+        toggleBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            menu.classList.toggle("show");
+        });
+    });
+}
+
+document.addEventListener("click", function (e) {
+    if (!e.target.closest(".post-options")) {
+        document.querySelectorAll(".options-menu.show").forEach(function (menu) {
+            menu.classList.remove("show");
+        });
+    }
+});
 
 function injectHtmlResponse($target, response) {
     const dummy = $("<div>").html(response);
@@ -425,6 +452,7 @@ function showProfile(userId) {
     setActiveTab("Profile");
     setMoreMenuVisible(false);
     setAccountsRowVisible(false);
+    initializeOptionsToggle();
     loadFragment(
         "mobileProfile",
         $(".post-section"),

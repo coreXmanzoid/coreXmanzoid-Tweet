@@ -4,7 +4,35 @@
             <i class="bi bi-arrow-left" style="cursor: pointer;"></i>
             <a href="">Post</a>
         </div>
-        <i class="bi bi-three-dots"></i>
+        <div class="post-options">
+            <button class="options-toggle" aria-label="Post options">
+                <i class="bi bi-three-dots"></i>
+            </button>
+
+            <div class="options-menu">
+                <a href="#" class="option-item">
+                    Follow @{{ post.user.username }}
+                </a>
+                <hr>
+
+                <a href="#" class="option-item delete">
+                    Copy Link
+                </a>
+                <hr>
+                <a href="#" class="option-item">
+                    Report Post
+                </a>
+                <hr>
+
+                <a href="#" class="option-item delete">
+                    Not interested in this Post
+                </a>
+                <hr>
+                <a href="#" class="option-item delete">
+                    Block Posts from @{{ post.user.username }}
+                </a>
+            </div>
+        </div>
     </div>
     <div class="post-detail" data-postid="{{ post.id }}">
         <div class="post-heading">
@@ -60,3 +88,6 @@
         {% endif %}
     </div>
 </div>
+<script>
+    initializeOptionsToggle();
+</script>

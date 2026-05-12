@@ -4,7 +4,35 @@
             <i class="backtohome bi bi-arrow-left"></i>
             <a href="">Home</a>
         </div>
-        <i class="bi bi-three-dots"></i>
+        <div class="post-options">
+            <button class="options-toggle" aria-label="Post options">
+                <i class="bi bi-three-dots"></i>
+            </button>
+
+            <div class="options-menu">
+                <a href="#" class="option-item">
+                    About this account
+                </a>
+                <hr>
+
+                <a href="#" class="option-item">
+                    Copy profile Link
+                </a>
+                <hr>
+                <a href="#" class="option-item">
+                    Report @{{ current_user.username }}
+                </a>
+                <hr>
+
+                <a href="#" class="option-item delete">
+                    Not interested in this account
+                </a>
+                <hr>
+                <a href="#" class="option-item delete">
+                    Block @{{ current_user.username }}
+                </a>
+            </div>
+        </div>
     </div>
     <img class="img-fluid ps-5 w-75 ms-5 " src="{{ url_for('static', filename='assets/logo1.png') }}">
     <div class="profile row">
@@ -43,7 +71,8 @@
                 <small><em>{{ user.get_setting('profile-info', 'bio') }}</em></small>
                 {% endif %}
                 <small>
-                    <a href="{{ user.get_setting('account-info', 'website') }}" target="_blank" rel="noopener noreferrer">
+                    <a href="{{ user.get_setting('account-info', 'website') }}" target="_blank"
+                        rel="noopener noreferrer">
                         {% if user.get_setting('account-info', 'website')|length > 30 %}
                         {{ user.get_setting('account-info', 'website')[:30] }}...
                         {% else %}
@@ -67,11 +96,14 @@
             {% endif %}
 
             <div class="audience-box">
-                <strong class="{% if user.get_setting('privacy-setting', 'show_status') %}followers{% endif %} {{user.id}}" style="color: #F94818;">
+                <strong
+                    class="{% if user.get_setting('privacy-setting', 'show_status') %}followers{% endif %} {{user.id}}"
+                    style="color: #F94818;">
                     {{user.followers | length}} Followers
                 </strong>
 
-                <strong class="{% if user.get_setting('privacy-setting', 'show_status') %}following {% endif %} {{user.id}}">
+                <strong
+                    class="{% if user.get_setting('privacy-setting', 'show_status') %}following {% endif %} {{user.id}}">
                     {{user.following | length}} Following
                 </strong>
             </div>
@@ -109,3 +141,8 @@
     </div>
 </div>
 {% endif %}
+<script>
+    $(document).ready(function () {
+        initializeOptionsToggle($(".div2"));
+    });
+</script>
