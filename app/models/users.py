@@ -12,6 +12,8 @@ DEFAULT_USER_SETTINGS = {
     "account-info": {
         "website": "",
         "about": "",
+        "created_at": None,  # Set to account creation date when user is created.
+        "level": "New Member",
         "warnings": 0,  # Track and block account on third warning.
     },
     "privacy-setting": {

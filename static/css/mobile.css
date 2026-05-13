@@ -481,31 +481,58 @@ body {
     position: absolute;
     top: 45px;
     right: 0;
-    min-width: 100px;
-    background: #c7c0b1;
-    border-radius: 12px;
-    border: 1.5px solid #2e2a22 !important;
+    min-width: 170px;
+
+    background: rgba(255, 255, 255, 0.35);
+
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+
+    border-radius: 16px;
+
+    border: 1px solid rgba(255, 255, 255, 0.22);
+
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.18),
+        inset 0 1px 1px rgba(255, 255, 255, 0.15);
+
     padding: 8px 0;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
-    border: 1px solid rgba(0,0,0,0.06);
 
     opacity: 0;
     visibility: hidden;
     transform: translateY(10px);
-    transition: 0.2s ease;
+
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease,
+        visibility 0.2s ease;
 
     z-index: 999;
-
-    hr{
-        margin: 4px 0;
-        border-color: rgba(70, 66, 59, 0.14);
-    }
 }
 
 .options-menu.show {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
+}
+
+.options-menu a {   
+    color: #F94818;
+    font-weight: 500 !important;
+
+    display: block;
+    padding: 10px 14px;
+
+    transition: 0.2s ease;
+}
+
+.options-menu a:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.options-menu hr {
+    margin: 4px 0;
+    border-color: rgba(255, 255, 255, 0.12);
 }
 
 .option-item {

@@ -128,18 +128,18 @@ function formatRelativeTime(timestamp) {
         return "Just now";
     }
     if (diffMins < 60) {
-        return diffMins === 1 ? "1 min ago" : diffMins + " mins ago";
+        return diffMins === 1 ? "1m ago" : diffMins + "m ago";
     }
     if (diffMins < 1440) {
         const hours = Math.floor(diffMins / 60);
-        return hours === 1 ? "1 hour ago" : hours + " hours ago";
+        return hours === 1 ? "1h ago" : hours + "h ago";
     }
     if (diffMins < 10080) {
         const days = Math.floor(diffMins / 1440);
-        return days === 1 ? "1 day ago" : days + " days ago";
+        return days === 1 ? "1d ago" : days + "d ago";
     }
     const weeks = Math.floor(diffMins / 10080);
-    return weeks === 1 ? "1 week ago" : weeks + " weeks ago";
+    return weeks === 1 ? "1w ago" : weeks + "w ago";
 }
 
 function formatCompactRelativeTime(timestamp) {
@@ -1008,6 +1008,13 @@ $(function () {
             showPosts(3, userId);
         } else if (option === "Reposts") {
             showPosts(4, userId);
+        } else if (option === "About") {
+            loadFragment(
+                "profileAbout",
+                $("#feed-post"),
+                "/profile/" + userId + "/about",
+                '<div class="page-loader page-loader--profile"><span class="loader2"></span></div>'
+            );
         }
     });
 

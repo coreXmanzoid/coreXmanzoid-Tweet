@@ -20,16 +20,16 @@
                 </a>
                 <hr>
                 <a href="#" class="option-item">
-                    Report @{{ current_user.username }}
+                    Report @{{ user.username }}
                 </a>
                 <hr>
 
-                <a href="#" class="option-item delete">
+                <a href="#" class="option-item">
                     Not interested in this account
                 </a>
                 <hr>
-                <a href="#" class="option-item delete">
-                    Block @{{ current_user.username }}
+                <a href="#" class="option-item">
+                    Block @{{ user.username }}
                 </a>
             </div>
         </div>
@@ -120,13 +120,13 @@
         <hr>
         <h6>Reposts</h6>
         <hr>
-        <h6>Dummy</h6>
+        <h6>About</h6>
         {% else %}
         <h6>Posts</h6>
         <hr>
         <h6>Reposts</h6>
         <hr>
-        <h6>Dummy</h6>
+        <h6>About</h6>
         {% endif %}
     </div>
 </div>

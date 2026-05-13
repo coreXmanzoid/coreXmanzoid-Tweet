@@ -1093,6 +1093,13 @@ $(document).off("click.profileOptions", ".ProfileOptions h6").on("click.profileO
         showPosts(3, userId);
     } else if (option === "Reposts") {
         showPosts(4, userId);
+    } else if (option === "About"){
+        loadFragment(
+            "profileAbout",
+            $(".div3"),
+            "/profile/" + userId + "/about",
+            '<div class="page-loader page-loader--profile"><span class="loader2"></span></div>'
+        );
     }
 });
 

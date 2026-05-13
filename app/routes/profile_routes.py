@@ -41,6 +41,17 @@ def upload_profile(id):
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+
+@profile_bp.route("/profile/<int:id>/about")
+@login_required
+def profile_about(id):
+    user = db.session.get(UserData, id)
+
+    if not user:
+        return jsonify({"status": "error", "message": "User not found"}), 404
+
+    return render_template("profileAbout.html", user=user)
+
 @profile_bp.route("/profile/<int:id>")
 @login_required
 def profile(id):
