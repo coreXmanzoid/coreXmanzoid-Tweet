@@ -1,6 +1,7 @@
 from flask import url_for
 
 from app.extensions import db
+from app.models.payment import PaymentSubmission
 from app.models.report import Report
 from app.models.support_requests import Support
 from app.models.users import UserData
@@ -19,6 +20,11 @@ class AdminService:
         users = db.session.scalars(
             db.select(UserData).order_by(UserData.id.desc())
         ).all()
+        payments = db.session.scalars(
+            db.select(PaymentSubmission).order_by(
+                PaymentSubmission.created_at.desc(), PaymentSubmission.id.desc()
+            )
+        ).all()
 
         return {
             "supportRequests": [
@@ -27,6 +33,9 @@ class AdminService:
             ],
             "userReports": [AdminService._serialize_report(item) for item in reports],
             "managedUsers": [AdminService._serialize_user(item) for item in users],
+            "paymentSubmissions": [
+                AdminService._serialize_payment_submission(item) for item in payments
+            ],
         }
 
     @staticmethod
@@ -99,6 +108,38 @@ class AdminService:
         return AdminService._serialize_user(user)
 
     @staticmethod
+    def approve_payment(submission_id):
+        submission = AdminService._get_payment_submission(submission_id)
+        if (submission.status or "").lower() != "pending":
+            raise ValueError("Only pending payment submissions can be approved")
+
+        user = submission.user or AdminService._get_user(submission.user_id)
+        if user.status == "BLOCKED":
+            raise ValueError("Blocked users cannot receive Pro access")
+
+        user.status = "PRO"
+        submission.status = "approved"
+        submission.reviewed_at = utc_now()
+        db.session.commit()
+        return AdminService._serialize_payment_submission(submission)
+
+    @staticmethod
+    def reject_payment(submission_id, reason=None):
+        submission = AdminService._get_payment_submission(submission_id)
+        if (submission.status or "").lower() != "pending":
+            raise ValueError("Only pending payment submissions can be rejected")
+
+        user = submission.user
+        if user and user.status == "PENDING_PRO":
+            user.status = "VERIFIED"
+
+        submission.status = "rejected"
+        submission.admin_note = reason
+        submission.reviewed_at = utc_now()
+        db.session.commit()
+        return AdminService._serialize_payment_submission(submission)
+
+    @staticmethod
     def create_warning(user_id):
         user = AdminService._get_user(user_id)
         if user.status == "BLOCKED":
@@ -146,6 +187,13 @@ class AdminService:
         if not user:
             raise ValueError("User not found")
         return user
+
+    @staticmethod
+    def _get_payment_submission(submission_id):
+        submission = db.session.get(PaymentSubmission, submission_id)
+        if not submission:
+            raise ValueError("Payment submission not found")
+        return submission
 
     @staticmethod
     def _remember_previous_status(user):
@@ -200,6 +248,30 @@ class AdminService:
             "rawStatus": status,
             "warnings": int(user.get_setting("account-info", "warnings", 0) or 0),
             "profileUrl": url_for("profile.profile", id=user.id),
+        }
+
+    @staticmethod
+    def _serialize_payment_submission(item):
+        return {
+            "id": f"PAY-{item.id:04d}",
+            "dbId": item.id,
+            "userId": f"USR-{item.user_id:04d}",
+            "userDbId": item.user_id,
+            "userName": item.user.name if item.user else "Unknown User",
+            "fullName": item.full_name,
+            "email": item.email,
+            "plan": item.plan,
+            "paymentMethod": item.payment_method,
+            "transactionId": item.transaction_id,
+            "screenshotUrl": url_for(
+                "admin.payment_screenshot",
+                filename=item.screenshot_path,
+            ),
+            "note": item.note or "",
+            "status": AdminService._present_status(item.status),
+            "adminNote": item.admin_note or "",
+            "timestamp": AdminService._format_timestamp(item.created_at),
+            "reviewedAt": AdminService._format_timestamp(item.reviewed_at),
         }
 
     @staticmethod

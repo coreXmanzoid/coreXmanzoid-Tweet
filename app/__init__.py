@@ -20,7 +20,6 @@ from app.routes.setting_routes import setting_bp
 from app.routes.admin_routes import admin_bp
 from app.routes.pricing_routes import pricing_bp
 
-
 def create_app():
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     load_dotenv(os.path.join(base_dir, ".env"))

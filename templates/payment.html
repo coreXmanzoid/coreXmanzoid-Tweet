@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upgrade to ChatFlick Pro</title>
+  <link rel="shortcut icon" href="{{ url_for('static', filename='assets/logo.png') }}" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/payment.css') }}">
+</head>
+
+<body>
+
+
+  <!-- ── HEADER ── -->
+  <header class="pay-header">
+    <a href="/" class="pay-logo">
+      <img src="{{ url_for('static', filename='assets/Logo_horizontal.png') }}" alt="ChatFlick">
+    </a>
+    <div class="pay-header-badge">
+      <span class="pay-lock-icon">🔒</span>
+      Secure Checkout
+    </div>
+  </header>
+
+  <main class="pay-main">
+
+    <!-- ── HERO ── -->
+    <section class="pay-hero">
+      <div class="pay-hero-tag">
+        <span class="pay-tag-dot"></span>
+        Pro Upgrade
+      </div>
+      <h1 class="pay-hero-title">Unlock <em>ChatFlick Pro</em></h1>
+      <p class="pay-hero-sub">Complete your payment below — our team manually verifies every transaction within 24 hours.</p>
+    </section>
+
+    <div class="pay-grid">
+
+      <!-- ── LEFT COLUMN ── -->
+      <div class="pay-left">
+
+        <!-- Plan Card -->
+        <div class="pay-plan-card">
+          <div class="pay-plan-badge">Most Popular</div>
+          <div class="pay-plan-top">
+            <div class="pay-plan-icon">⚡</div>
+            <div>
+              <p class="pay-plan-label">Selected Plan</p>
+              <h2 class="pay-plan-name">Pro</h2>
+            </div>
+            <div class="pay-plan-price-wrap">
+              <span class="pay-plan-price">$12 <small>/mo</small></span>
+            </div>
+          </div>
+          <div class="pay-plan-divider"></div>
+          <ul class="pay-plan-features">
+            <li><span class="pay-check">✓</span> 230 characters per post</li>
+            <li><span class="pay-check">✓</span> Unlimited posts per day</li>
+            <li><span class="pay-check">✓</span> Verified Pro badge</li>
+            <li><span class="pay-check">✓</span> Manzoid-AI full access</li>
+            <li><span class="pay-check">✓</span> Post edit window (3 min)</li>
+            <li><span class="pay-check">✓</span> Priority notifications</li>
+            <li><span class="pay-check">✓</span> Multi-device login</li>
+            <li><span class="pay-check">✓</span> 2 business day support SLA</li>
+          </ul>
+          <div class="pay-billing-toggle">
+            <div class="pay-billing-opts">
+              <button class="pay-billing-btn active" data-billing="monthly" onclick="setBilling('monthly', this)">Monthly — $12 /mo</button>
+              <button class="pay-billing-btn" data-billing="yearly" onclick="setBilling('yearly', this)">Yearly — $115.20 /yr <span class="pay-save">-20%</span></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="pay-how-card">
+          <h3 class="pay-how-title">How it works</h3>
+          <ol class="pay-steps">
+            <li>
+              <span class="pay-step-num">01</span>
+              <div>
+                <strong>Send payment</strong>
+                <p>Use any method below to transfer the plan amount.</p>
+              </div>
+            </li>
+            <li>
+              <span class="pay-step-num">02</span>
+              <div>
+                <strong>Submit this form</strong>
+                <p>Fill in your details and upload your transaction screenshot.</p>
+              </div>
+            </li>
+            <li>
+              <span class="pay-step-num">03</span>
+              <div>
+                <strong>Get verified</strong>
+                <p>Admin activates your Pro account within 24 hours.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+
+      </div>
+
+      <!-- ── RIGHT COLUMN ── -->
+      <div class="pay-right">
+
+        <!-- Payment Methods -->
+        <div class="pay-section-label">Payment Methods <small>(Only Bank Transfer is Working*)</small></div>
+
+        <div class="pay-methods-grid">
+
+          <!-- JazzCash -->
+          <div class="pay-method-card" data-method="jazzcash">
+            <div class="pay-method-header">
+              <div class="pay-method-logo jazzcash-logo">
+                <span>J</span>
+              </div>
+              <div>
+                <h4>JazzCash</h4>
+                <p>Mobile Account</p>
+              </div>
+              <span class="pay-method-tag">Recommended</span>
+            </div>
+            <div class="pay-method-body">
+              <div class="pay-account-row">
+                <div class="pay-account-info">
+                  <span class="pay-account-label">Account Title</span>
+                  <span class="pay-account-val" id="jc-title">Muhammad Hammad Ashraf</span>
+                </div>
+                <button class="pay-copy-btn" onclick="copyText('Muhammad Hammad Ashraf', this)">Copy</button>
+              </div>
+              <div class="pay-account-row">
+                <div class="pay-account-info">
+                  <span class="pay-account-label">Mobile Number</span>
+                  <span class="pay-account-val" id="jc-number">0313-6382001</span>
+                </div>
+                <button class="pay-copy-btn" onclick="copyText('03136382001', this)">Copy</button>
+              </div>
+              <div class="pay-qr-placeholder">
+                <div class="pay-qr-box">
+                  <div class="pay-qr-inner">
+                    <span>QR</span>
+                    <small>Add your QR image here</small>
+                  </div>
+                </div>
+              </div>
+              <p class="pay-method-note">Open JazzCash app → Send Money → Enter number → Send exact amount</p>
+            </div>
+          </div>
+
+          <!-- Easypaisa -->
+          <div class="pay-method-card" data-method="easypaisa">
+            <div class="pay-method-header">
+              <div class="pay-method-logo easypaisa-logo">
+                <span>E</span>
+              </div>
+              <div>
+                <h4>Easypaisa</h4>
+                <p>Mobile Account</p>
+              </div>
+            </div>
+            <div class="pay-method-body">
+              <div class="pay-account-row">
+                <div class="pay-account-info">
+                  <span class="pay-account-label">Account Title</span>
+                  <span class="pay-account-val">Muhammad Hammad Ashraf</span>
+                </div>
+                <button class="pay-copy-btn" onclick="copyText('Muhammad Hammad Ashraf', this)">Copy</button>
+              </div>
+              <div class="pay-account-row">
+                <div class="pay-account-info">
+                  <span class="pay-account-label">Mobile Number</span>
+                  <span class="pay-account-val">0313-6382001</span>
+                </div>
+                <button class="pay-copy-btn" onclick="copyText('03136382001', this)">Copy</button>
+              </div>
+              <div class="pay-qr-placeholder">
+                <div class="pay-qr-box">
+                  <div class="pay-qr-inner">
+                    <span>QR</span>
+                    <small>Add your QR image here</small>
+                  </div>
+                </div>
+              </div>
+              <p class="pay-method-note">Open Easypaisa app → Send Money → Enter account → Transfer exact amount</p>
+            </div>
+          </div>
+
+          <!-- Bank Transfer -->
+          <div class="pay-method-card pay-method-full" data-method="bank">
+            <div class="pay-method-header">
+              <div class="pay-method-logo bank-logo">
+                <span>🏦</span>
+              </div>
+              <div>
+                <h4>Bank Transfer</h4>
+                <p>Direct Bank / IBFT</p>
+              </div>
+            </div>
+            <div class="pay-method-body pay-bank-grid">
+              <div class="pay-account-row">
+                <div class="pay-account-info">
+                  <span class="pay-account-label">Account Title</span>
+                  <span class="pay-account-val">Muhammad Hammad Ashraf</span>
+                </div>
+                <button class="pay-copy-btn" onclick="copyText('Muhammad Hammad Ashraf', this)">Copy</button>
+              </div>
+              <div class="pay-account-row">
+                <div class="pay-account-info">
+                  <span class="pay-account-label">Bank Name</span>
+                  <span class="pay-account-val">Meezan Bank</span>
+                </div>
+              </div>
+              <div class="pay-account-row">
+                <div class="pay-account-info">
+                  <span class="pay-account-label">IBAN / Account No</span>
+                  <span class="pay-account-val">PK88MEZN0076010111486200</span>
+                </div>
+                <button class="pay-copy-btn" onclick="copyText('PK88MEZN0076010111486200', this)">Copy</button>
+              </div>
+              <p class="pay-method-note">Use your bank's IBFT / Interbank transfer. Reference: <strong>ChatFlick Pro - [your email]</strong></p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Payment Form -->
+        <div class="pay-section-label" style="margin-top: 32px;">Verification Form</div>
+
+        <div class="pay-form-card" id="payFormCard">
+
+          <!-- Success State (hidden by default) -->
+          <div class="pay-success" id="paySuccess" style="display:none;">
+            <div class="pay-success-icon">✓</div>
+            <h3>Payment Submitted!</h3>
+            <p>Your payment verification request has been received.</p>
+            <div class="pay-pending-badge">
+              <span class="pay-pending-dot"></span>
+              Pending Verification
+            </div>
+            <p class="pay-success-note">Our admin will review your transaction and activate your Pro account within <strong>24 hours</strong>. You'll receive a notification once verified.</p>
+            <a href="{{ url_for('main.home') }}" class="pay-success-btn">Return to ChatFlick</a>
+          </div>
+
+          <!-- Form -->
+          <form id="payForm" novalidate>
+            <div class="pay-form-grid">
+
+              <div class="pay-field">
+                <label for="pay-name">Full Name</label>
+                <input type="text" id="pay-name" name="full_name" placeholder="Your full name" required>
+                <span class="pay-field-err" id="err-name"></span>
+              </div>
+
+              <div class="pay-field">
+                <label for="pay-email">Email Address</label>
+                <input type="email" id="pay-email" name="email"
+                  value="{{ current_user.email if current_user and current_user.is_authenticated else '' }}"
+                  placeholder="you@example.com" required>
+                <span class="pay-field-err" id="err-email"></span>
+              </div>
+
+              <div class="pay-field">
+                <label for="pay-plan">Selected Plan</label>
+                <select id="pay-plan" name="plan">
+                  <option value="pro_monthly">Pro — $12 / month</option>
+                  <option value="pro_yearly">Pro — $115.20 / year (Save 20%)</option>
+                </select>
+                <span class="pay-field-err" id="err-plan"></span>
+              </div>
+
+              <div class="pay-field">
+                <label for="pay-method">Payment Method</label>
+                <select id="pay-method" name="payment_method" required>
+                  <option value="">Select method...</option>
+                  <option value="jazzcash">JazzCash</option>
+                  <option value="easypaisa">Easypaisa</option>
+                  <option value="bank_transfer">Bank Transfer</option>
+                </select>
+                <span class="pay-field-err" id="err-method"></span>
+              </div>
+
+              <div class="pay-field pay-field-full">
+                <label for="pay-txn">Transaction ID / Reference Number</label>
+                <input type="text" id="pay-txn" name="transaction_id" placeholder="e.g. TXN1234567890" required>
+                <span class="pay-field-err" id="err-txn"></span>
+              </div>
+
+              <!-- Screenshot Upload -->
+              <div class="pay-field pay-field-full">
+                <label>Payment Screenshot</label>
+                <div class="pay-upload-zone" id="uploadZone">
+                  <div class="pay-upload-inner" id="uploadInner">
+                    <div class="pay-upload-icon">📸</div>
+                    <p class="pay-upload-title">Drag & drop screenshot here</p>
+                    <p class="pay-upload-sub">or <span class="pay-upload-link">browse files</span></p>
+                    <p class="pay-upload-hint">PNG, JPG up to 5MB</p>
+                  </div>
+                  <img id="uploadPreview" class="pay-upload-preview" src="" alt="Preview" style="display:none;">
+                  <button type="button" class="pay-upload-remove" id="uploadRemove" style="display:none;" onclick="removeFile()">✕ Remove</button>
+                  <input type="file" id="pay-screenshot" name="screenshot" accept="image/*" style="display:none;">
+                </div>
+                <span class="pay-field-err" id="err-screenshot"></span>
+              </div>
+
+              <div class="pay-field pay-field-full">
+                <label for="pay-note">Additional Note <span class="pay-optional">(optional)</span></label>
+                <textarea id="pay-note" name="note" rows="3" placeholder="Any extra info for the admin..."></textarea>
+              </div>
+
+            </div>
+
+            <button type="submit" class="pay-submit-btn" id="paySubmitBtn">
+              <span class="pay-btn-text">I Have Completed Payment</span>
+              <span class="pay-btn-loader" style="display:none;"></span>
+            </button>
+
+            <p class="pay-disclaimer">By submitting, you confirm the payment details are accurate. Fraudulent submissions result in account suspension.</p>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ── FOOTER ── -->
+  <footer class="pay-footer">
+    <p>© 2026 coreXmanzoid — ChatFlick. All rights reserved.</p>
+    <nav>
+      <a href="{{ url_for('main.privacy_policy') }}">Privacy Policy</a>
+      <a href="{{ url_for('main.terms_of_service') }}">Terms of Service</a>
+      <a href="mailto:coreXmanzoid@gmail.com">Contact</a>
+    </nav>
+  </footer>
+
+  <script>
+    // ── Billing toggle ──
+    let currentBilling = 'monthly';
+    function setBilling(type, btn) {
+      currentBilling = type;
+      document.querySelectorAll('.pay-billing-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('pay-plan').value = type === 'monthly' ? 'pro_monthly' : 'pro_yearly';
+    }
+
+    // ── Copy to clipboard ──
+    function copyText(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1800);
+      });
+    }
+
+    // ── File upload (drag & drop) ──
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('pay-screenshot');
+    const uploadInner = document.getElementById('uploadInner');
+    const uploadPreview = document.getElementById('uploadPreview');
+    const uploadRemove = document.getElementById('uploadRemove');
+
+    function openFilePicker() {
+      fileInput.value = '';
+      fileInput.click();
+    }
+
+    uploadZone.addEventListener('click', e => {
+      if (e.target.closest('#uploadRemove')) return;
+      openFilePicker();
+    });
+    uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+    uploadZone.addEventListener('drop', e => {
+      e.preventDefault();
+      uploadZone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    });
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) handleFile(fileInput.files[0]);
+    });
+
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) {
+        document.getElementById('err-screenshot').textContent = 'Please upload an image file.';
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        document.getElementById('err-screenshot').textContent = 'File size must be under 5MB.';
+        return;
+      }
+      document.getElementById('err-screenshot').textContent = '';
+      const reader = new FileReader();
+      reader.onload = e => {
+        uploadPreview.src = e.target.result;
+        uploadPreview.style.display = 'block';
+        uploadInner.style.display = 'none';
+        uploadRemove.style.display = 'inline-flex';
+      };
+      reader.readAsDataURL(file);
+
+      // Transfer to actual input
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      fileInput.files = dt.files;
+    }
+
+    function removeFile() {
+      fileInput.value = '';
+      uploadPreview.src = '';
+      uploadPreview.style.display = 'none';
+      uploadInner.style.display = 'flex';
+      uploadRemove.style.display = 'none';
+    }
+
+    // ── Form validation & submit ──
+    document.getElementById('payForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      let valid = true;
+
+      const name = document.getElementById('pay-name').value.trim();
+      const email = document.getElementById('pay-email').value.trim();
+      const method = document.getElementById('pay-method').value;
+      const txn = document.getElementById('pay-txn').value.trim();
+      const screenshot = document.getElementById('pay-screenshot').files[0];
+
+      if (!name) { document.getElementById('err-name').textContent = 'Full name is required.'; valid = false; }
+      else document.getElementById('err-name').textContent = '';
+
+      const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRe.test(email)) { document.getElementById('err-email').textContent = 'Enter a valid email.'; valid = false; }
+      else document.getElementById('err-email').textContent = '';
+
+      if (!method) { document.getElementById('err-method').textContent = 'Select a payment method.'; valid = false; }
+      else document.getElementById('err-method').textContent = '';
+
+      if (!txn) { document.getElementById('err-txn').textContent = 'Transaction ID is required.'; valid = false; }
+      else document.getElementById('err-txn').textContent = '';
+
+      if (!screenshot) { document.getElementById('err-screenshot').textContent = 'Please upload a payment screenshot.'; valid = false; }
+      else document.getElementById('err-screenshot').textContent = '';
+
+      if (!valid) return;
+
+      // Show loader
+      const btn = document.getElementById('paySubmitBtn');
+      btn.disabled = true;
+      document.querySelector('.pay-btn-text').style.display = 'none';
+      document.querySelector('.pay-btn-loader').style.display = 'inline-block';
+
+      const formData = new FormData(this);
+      try {
+        const res = await fetch('/payment/submit', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.status === 'success') {
+          document.getElementById('payForm').style.display = 'none';
+          document.getElementById('paySuccess').style.display = 'flex';
+        } else {
+          alert(data.message || 'Submission failed. Please try again.');
+          btn.disabled = false;
+          document.querySelector('.pay-btn-text').style.display = 'inline';
+          document.querySelector('.pay-btn-loader').style.display = 'none';
+        }
+      } catch (err) {
+        alert('Network error. Please try again.');
+        btn.disabled = false;
+        document.querySelector('.pay-btn-text').style.display = 'inline';
+        document.querySelector('.pay-btn-loader').style.display = 'none';
+      }
+    });
+
+    // Highlight selected method card
+    document.getElementById('pay-method').addEventListener('change', function() {
+      document.querySelectorAll('.pay-method-card').forEach(c => c.classList.remove('highlighted'));
+      const val = this.value;
+      const map = { jazzcash: 'jazzcash', easypaisa: 'easypaisa', bank_transfer: 'bank' };
+      if (map[val]) {
+        document.querySelector(`[data-method="${map[val]}"]`)?.classList.add('highlighted');
+      }
+    });
+  </script>
+</body>
+</html>

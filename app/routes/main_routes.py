@@ -445,7 +445,7 @@ def firebase_messaging_sw():
 @login_required
 def homepage():
 
-    is_user_verified = current_user.status == "VERIFIED" or current_user.status == "PRO"
+    is_user_verified = current_user.status not in ["UNVERIFIED", "BANNED", "BLOCKED", "RESTRICTED", "DEACTIVATED"]
     mobile_accounts = AccountService.random_accounts()
 
     if is_mobile_request():

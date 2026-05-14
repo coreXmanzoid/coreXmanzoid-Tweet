@@ -6,7 +6,7 @@ def verified_user(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
 
-        if current_user.status != "VERIFIED":
+        if (current_user.status or "").upper() not in {"VERIFIED", "PENDING_PRO", "PRO", "ENTERPRISE"}:
             return "Email not verified. Access Denied.", 403
 
         return func(*args, **kwargs)

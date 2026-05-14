@@ -1228,6 +1228,39 @@ button {
     resize: vertical;
 }
 
+.payment-review-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.payment-screenshot-panel {
+    display: grid;
+    gap: 10px;
+}
+
+.payment-screenshot-panel label {
+    color: var(--muted);
+    font-weight: 700;
+}
+
+.payment-screenshot-panel a {
+    display: block;
+    overflow: hidden;
+    border-radius: 22px;
+    border: 1px solid var(--border-strong);
+    background: rgba(255, 255, 255, 0.76);
+}
+
+.payment-screenshot-panel img {
+    display: block;
+    width: 100%;
+    max-height: 560px;
+    object-fit: contain;
+    background: #fff;
+}
+
 .modal-footer {
     gap: 10px;
 }
@@ -1267,6 +1300,10 @@ button {
     }
 
     .user-management-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .payment-review-layout {
         grid-template-columns: 1fr;
     }
 

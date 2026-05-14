@@ -1,6 +1,7 @@
 let supportRequests = [];
 let userReports = [];
 let managedUsers = [];
+let paymentSubmissions = [];
 
 const state = {
     activeSection: "dashboard",
@@ -12,6 +13,9 @@ const state = {
     supportStatus: "all",
     reportsQuery: "",
     reportsStatus: "all",
+    paymentsQuery: "",
+    paymentsStatus: "all",
+    selectedPaymentId: null,
     usersQuery: "",
     usersFilter: "all"
 };
@@ -20,6 +24,7 @@ const pageMeta = {
     dashboard: { title: "Dashboard", kicker: "Admin Workspace" },
     support: { title: "Support Requests", kicker: "Support Desk" },
     reports: { title: "Reports", kicker: "Moderation Desk" },
+    payments: { title: "Payments", kicker: "Payment Verification" },
     users: { title: "Users", kicker: "Account Control" }
 };
 
@@ -29,19 +34,24 @@ const el = {
     pageKicker: document.getElementById("pageKicker"),
     supportTableBody: document.getElementById("supportTableBody"),
     reportsTableBody: document.getElementById("reportsTableBody"),
+    paymentsTableBody: document.getElementById("paymentsTableBody"),
     usersTableBody: document.getElementById("usersTableBody"),
     usersOverviewGrid: document.getElementById("usersOverviewGrid"),
     supportEmptyState: document.getElementById("supportEmptyState"),
     reportsEmptyState: document.getElementById("reportsEmptyState"),
+    paymentsEmptyState: document.getElementById("paymentsEmptyState"),
     usersEmptyState: document.getElementById("usersEmptyState"),
     supportSearchInput: document.getElementById("supportSearchInput"),
     supportStatusFilter: document.getElementById("supportStatusFilter"),
     reportsSearchInput: document.getElementById("reportsSearchInput"),
     reportsStatusFilter: document.getElementById("reportsStatusFilter"),
+    paymentsSearchInput: document.getElementById("paymentsSearchInput"),
+    paymentsStatusFilter: document.getElementById("paymentsStatusFilter"),
     usersSearchInput: document.getElementById("usersSearchInput"),
     usersFilterTabs: document.getElementById("usersFilterTabs"),
     supportPendingBadge: document.getElementById("supportPendingBadge"),
     reportsPendingBadge: document.getElementById("reportsPendingBadge"),
+    paymentsPendingBadge: document.getElementById("paymentsPendingBadge"),
     usersBlockedBadge: document.getElementById("usersBlockedBadge"),
     selectedUserName: document.getElementById("selectedUserName"),
     selectedUserMeta: document.getElementById("selectedUserMeta"),
@@ -64,18 +74,23 @@ const el = {
     pendingProMetric: document.getElementById("pendingProMetric"),
     blockedUsersMetric: document.getElementById("blockedUsersMetric"),
     pendingTotalMetric: document.getElementById("pendingTotalMetric"),
+    paymentsTotalMetric: document.getElementById("paymentsTotalMetric"),
+    approvedPaymentsMetric: document.getElementById("approvedPaymentsMetric"),
     answeredMetric: document.getElementById("answeredMetric"),
     reviewedMetric: document.getElementById("reviewedMetric"),
     verifiedUsersMetric: document.getElementById("verifiedUsersMetric"),
     dashboardSupportPending: document.getElementById("dashboardSupportPending"),
     dashboardReportsPending: document.getElementById("dashboardReportsPending"),
     dashboardPendingPro: document.getElementById("dashboardPendingPro"),
+    dashboardPaymentsPending: document.getElementById("dashboardPaymentsPending"),
     currentDateLabel: document.getElementById("currentDateLabel"),
     adminReplyInput: document.getElementById("adminReplyInput"),
     generateAIReplyButton: document.getElementById("generateAIReplyButton"),
     sendReplyButton: document.getElementById("sendReplyButton"),
     markAnsweredButton: document.getElementById("markAnsweredButton"),
     markReviewedButton: document.getElementById("markReviewedButton"),
+    approvePaymentButton: document.getElementById("approvePaymentButton"),
+    rejectPaymentButton: document.getElementById("rejectPaymentButton"),
     backupDataButton: document.getElementById("backupDataButton"),
     restoreDataButton: document.getElementById("restoreDataButton"),
     restoreBackupInput: document.getElementById("restoreBackupInput"),
@@ -90,6 +105,19 @@ const el = {
     modalReportStatus: document.getElementById("modalReportStatus"),
     modalReportTimestamp: document.getElementById("modalReportTimestamp"),
     modalReportMessage: document.getElementById("modalReportMessage"),
+    modalPaymentId: document.getElementById("modalPaymentId"),
+    modalPaymentUser: document.getElementById("modalPaymentUser"),
+    modalPaymentPlan: document.getElementById("modalPaymentPlan"),
+    modalPaymentMethod: document.getElementById("modalPaymentMethod"),
+    modalPaymentTransaction: document.getElementById("modalPaymentTransaction"),
+    modalPaymentStatus: document.getElementById("modalPaymentStatus"),
+    modalPaymentTimestamp: document.getElementById("modalPaymentTimestamp"),
+    modalPaymentReviewed: document.getElementById("modalPaymentReviewed"),
+    modalPaymentEmail: document.getElementById("modalPaymentEmail"),
+    modalPaymentNote: document.getElementById("modalPaymentNote"),
+    modalPaymentAdminNote: document.getElementById("modalPaymentAdminNote"),
+    modalPaymentScreenshot: document.getElementById("modalPaymentScreenshot"),
+    modalPaymentScreenshotLink: document.getElementById("modalPaymentScreenshotLink"),
     sidebarCollapseButton: document.getElementById("sidebarCollapseButton"),
     sidebarOpenButton: document.getElementById("sidebarOpenButton"),
     sidebarCloseButton: document.getElementById("sidebarCloseButton"),
@@ -98,6 +126,7 @@ const el = {
 
 const supportModal = new bootstrap.Modal(document.getElementById("supportDetailsModal"));
 const reportModal = new bootstrap.Modal(document.getElementById("reportDetailsModal"));
+const paymentModal = new bootstrap.Modal(document.getElementById("paymentDetailsModal"));
 
 const esc = (v) => String(v ?? "")
     .replace(/&/g, "&amp;")
@@ -110,9 +139,28 @@ const statusClass = (status) => {
     const s = String(status).toLowerCase();
     if (s === "answered") return "answered";
     if (s === "reviewed") return "reviewed";
+    if (s === "approved") return "reviewed";
+    if (s === "rejected") return "blocked";
     if (s === "blocked") return "blocked";
     if (s === "verified") return "verified";
     return "pending";
+};
+
+const formatPlan = (plan) => {
+    const labels = {
+        pro_monthly: "Pro Monthly",
+        pro_yearly: "Pro Yearly"
+    };
+    return labels[plan] || String(plan || "Unknown").replace(/_/g, " ");
+};
+
+const formatPaymentMethod = (method) => {
+    const labels = {
+        jazzcash: "JazzCash",
+        easypaisa: "Easypaisa",
+        bank_transfer: "Bank Transfer"
+    };
+    return labels[method] || String(method || "Unknown").replace(/_/g, " ");
 };
 
 function parseUtcTimestamp(timestamp) {
@@ -155,6 +203,7 @@ async function loadDashboard() {
     supportRequests = payload.data?.supportRequests || [];
     userReports = payload.data?.userReports || [];
     managedUsers = payload.data?.managedUsers || [];
+    paymentSubmissions = payload.data?.paymentSubmissions || [];
     if (!managedUsers.some((u) => u.id === state.selectedUserId)) {
         state.selectedUserId = managedUsers[0]?.id || null;
     }
@@ -185,6 +234,24 @@ function filterReports() {
         const okStatus = state.reportsStatus === "all" || item.status === state.reportsStatus;
         const okQuery = !q || [item.id, item.userId, item.userName, item.text]
             .some((field) => String(field).toLowerCase().includes(q));
+        return okStatus && okQuery;
+    });
+}
+
+function filterPayments() {
+    const q = state.paymentsQuery.trim().toLowerCase();
+    return paymentSubmissions.filter((item) => {
+        const okStatus = state.paymentsStatus === "all" || item.status === state.paymentsStatus;
+        const okQuery = !q || [
+            item.id,
+            item.userId,
+            item.userName,
+            item.fullName,
+            item.email,
+            item.plan,
+            item.paymentMethod,
+            item.transactionId
+        ].some((field) => String(field).toLowerCase().includes(q));
         return okStatus && okQuery;
     });
 }
@@ -231,6 +298,22 @@ function renderReportsTable() {
         </tr>
     `).join("");
     el.reportsEmptyState.classList.toggle("d-none", rows.length > 0);
+}
+
+function renderPaymentsTable() {
+    const rows = filterPayments();
+    el.paymentsTableBody.innerHTML = rows.map((item) => `
+        <tr>
+            <td data-label="Payment ID"><strong>${esc(item.id)}</strong><div class="table-meta">${esc(formatLocalTimestamp(item.timestamp))}</div></td>
+            <td data-label="User"><div class="user-block"><span class="user-name">${esc(item.fullName || item.userName)}</span><span class="user-id">${esc(item.userId)} - ${esc(item.email)}</span></div></td>
+            <td data-label="Plan">${esc(formatPlan(item.plan))}</td>
+            <td data-label="Method">${esc(formatPaymentMethod(item.paymentMethod))}</td>
+            <td data-label="Transaction"><div class="message-preview">${esc(item.transactionId)}</div></td>
+            <td data-label="Status"><span class="status-pill ${statusClass(item.status)}">${esc(item.status)}</span></td>
+            <td data-label="Action" class="text-end row-action-cell"><button class="row-action-button" type="button" data-payment-id="${esc(item.id)}">Verify</button></td>
+        </tr>
+    `).join("");
+    el.paymentsEmptyState.classList.toggle("d-none", rows.length > 0);
 }
 
 function renderUsersOverview() {
@@ -338,27 +421,33 @@ function renderUserPanel() {
 function updateMetrics() {
     const supportPending = supportRequests.filter((v) => v.status === "Pending").length;
     const reportPending = userReports.filter((v) => v.status === "Pending").length;
+    const paymentPending = paymentSubmissions.filter((v) => v.status === "Pending").length;
     const blocked = managedUsers.filter((v) => v.status === "Blocked").length;
     const verified = managedUsers.filter((v) => v.verified).length;
     el.supportPendingBadge.textContent = supportPending;
     el.reportsPendingBadge.textContent = reportPending;
+    el.paymentsPendingBadge.textContent = paymentPending;
     el.usersBlockedBadge.textContent = blocked;
     el.supportTotalMetric.textContent = supportRequests.length;
     el.usersTotalMetric.textContent = managedUsers.length;
     el.pendingProMetric.textContent = managedUsers.filter((v) => v.pendingPro).length;
+    el.paymentsTotalMetric.textContent = paymentSubmissions.length;
+    el.approvedPaymentsMetric.textContent = paymentSubmissions.filter((v) => v.status === "Approved").length;
     el.blockedUsersMetric.textContent = blocked;
-    el.pendingTotalMetric.textContent = supportPending + reportPending;
+    el.pendingTotalMetric.textContent = supportPending + reportPending + paymentPending;
     el.answeredMetric.textContent = supportRequests.filter((v) => v.status === "Answered").length;
     el.reviewedMetric.textContent = userReports.filter((v) => v.status === "Reviewed").length;
     el.verifiedUsersMetric.textContent = verified;
     el.dashboardSupportPending.textContent = supportPending;
     el.dashboardReportsPending.textContent = reportPending;
     el.dashboardPendingPro.textContent = managedUsers.filter((v) => v.pendingPro).length;
+    el.dashboardPaymentsPending.textContent = paymentPending;
 }
 
 function renderAll() {
     renderSupportTable();
     renderReportsTable();
+    renderPaymentsTable();
     renderUsersOverview();
     renderUsersTable();
     renderUserPanel();
@@ -421,6 +510,30 @@ function openReportModal(id) {
     reportModal.show();
 }
 
+function openPaymentModal(id) {
+    const item = paymentSubmissions.find((v) => v.id === id);
+    if (!item) return;
+    state.selectedPaymentId = id;
+    el.modalPaymentId.textContent = item.id;
+    el.modalPaymentUser.textContent = `${item.fullName || item.userName} (${item.userId})`;
+    el.modalPaymentPlan.textContent = formatPlan(item.plan);
+    el.modalPaymentMethod.textContent = formatPaymentMethod(item.paymentMethod);
+    el.modalPaymentTransaction.textContent = item.transactionId;
+    el.modalPaymentStatus.textContent = item.status;
+    el.modalPaymentTimestamp.textContent = formatLocalTimestamp(item.timestamp);
+    el.modalPaymentReviewed.textContent = formatLocalTimestamp(item.reviewedAt);
+    el.modalPaymentEmail.textContent = item.email || "-";
+    el.modalPaymentNote.textContent = item.note || "No note added.";
+    el.modalPaymentAdminNote.value = item.adminNote || "";
+    el.modalPaymentScreenshot.src = item.screenshotUrl;
+    el.modalPaymentScreenshot.alt = `Payment screenshot for ${item.id}`;
+    el.modalPaymentScreenshotLink.href = item.screenshotUrl;
+    const pending = item.status === "Pending";
+    el.approvePaymentButton.disabled = !pending;
+    el.rejectPaymentButton.disabled = !pending;
+    paymentModal.show();
+}
+
 async function saveReply() {
     const item = supportRequests.find((v) => v.id === state.selectedSupportId);
     const reply = el.adminReplyInput.value.trim();
@@ -472,6 +585,24 @@ async function markReviewed() {
     await loadDashboard();
     openReportModal(item.id);
     showToast(`${item.id} marked as reviewed.`);
+}
+
+async function paymentAction(action) {
+    const item = paymentSubmissions.find((v) => v.id === state.selectedPaymentId);
+    if (!item) return;
+    const endpoint = action === "approve" ? "approve" : "reject";
+    const body = action === "reject"
+        ? JSON.stringify({ reason: el.modalPaymentAdminNote.value.trim() })
+        : undefined;
+    await api(`/admin/api/payments/${item.dbId}/${endpoint}`, {
+        method: "POST",
+        ...(body ? { body } : {})
+    });
+    await loadDashboard();
+    paymentModal.hide();
+    showToast(action === "approve"
+        ? `${item.id} approved. Pro access is active.`
+        : `${item.id} rejected.`);
 }
 
 async function userAction(action) {
@@ -589,6 +720,14 @@ function bindEvents() {
         state.reportsStatus = e.target.value;
         renderReportsTable();
     });
+    el.paymentsSearchInput.addEventListener("input", (e) => {
+        state.paymentsQuery = e.target.value;
+        renderPaymentsTable();
+    });
+    el.paymentsStatusFilter.addEventListener("change", (e) => {
+        state.paymentsStatus = e.target.value;
+        renderPaymentsTable();
+    });
     el.usersSearchInput.addEventListener("input", (e) => {
         state.usersQuery = e.target.value;
         renderAll();
@@ -606,6 +745,10 @@ function bindEvents() {
     el.reportsTableBody.addEventListener("click", (e) => {
         const button = e.target.closest("[data-report-id]");
         if (button) openReportModal(button.dataset.reportId);
+    });
+    el.paymentsTableBody.addEventListener("click", (e) => {
+        const button = e.target.closest("[data-payment-id]");
+        if (button) openPaymentModal(button.dataset.paymentId);
     });
     el.usersTableBody.addEventListener("click", (e) => {
         const row = e.target.closest("[data-user-select]");
@@ -633,6 +776,8 @@ function bindEvents() {
     el.generateAIReplyButton.addEventListener("click", async () => { try { await generateAIReply(); } catch (error) { showToast(error.message); } });
     el.markAnsweredButton.addEventListener("click", async () => { try { await markAnswered(); } catch (error) { showToast(error.message); } });
     el.markReviewedButton.addEventListener("click", async () => { try { await markReviewed(); } catch (error) { showToast(error.message); } });
+    el.approvePaymentButton.addEventListener("click", async () => { try { await paymentAction("approve"); } catch (error) { showToast(error.message); } });
+    el.rejectPaymentButton.addEventListener("click", async () => { try { await paymentAction("reject"); } catch (error) { showToast(error.message); } });
     el.backupDataButton?.addEventListener("click", downloadSqliteBackup);
     el.restoreDataButton?.addEventListener("click", () => el.restoreBackupInput?.click());
     el.restoreBackupInput?.addEventListener("change", (e) => uploadSqliteRestore(e.target.files?.[0]));

@@ -1,4 +1,6 @@
-from flask import Blueprint, jsonify, render_template, request
+from pathlib import Path
+
+from flask import Blueprint, current_app, jsonify, render_template, request, send_from_directory
 from flask_login import login_required
 from app.decorators import verified_user, only_admin
 
@@ -139,6 +141,47 @@ def reject_pro(user_id):
         return jsonify({"status": "error", "message": str(exc)}), 400
 
     return jsonify({"status": "success", "item": user})
+
+
+@admin_bp.route("/admin/api/payments/<int:submission_id>/approve", methods=["POST"])
+@login_required
+@verified_user
+@only_admin
+def approve_payment(submission_id):
+    try:
+        payment = AdminService.approve_payment(submission_id)
+    except ValueError as exc:
+        return jsonify({"status": "error", "message": str(exc)}), 400
+
+    return jsonify({"status": "success", "item": payment})
+
+
+@admin_bp.route("/admin/api/payments/<int:submission_id>/reject", methods=["POST"])
+@login_required
+@verified_user
+@only_admin
+def reject_payment(submission_id):
+    data = request.get_json(silent=True) or {}
+    reason = data.get("reason")
+    if isinstance(reason, str):
+        reason = reason.strip() or None
+
+    try:
+        payment = AdminService.reject_payment(submission_id, reason)
+    except ValueError as exc:
+        return jsonify({"status": "error", "message": str(exc)}), 400
+
+    return jsonify({"status": "success", "item": payment})
+
+
+@admin_bp.route("/admin/payment-screenshots/<path:filename>")
+@login_required
+@verified_user
+@only_admin
+def payment_screenshot(filename):
+    safe_name = Path(filename).name
+    upload_dir = Path(current_app.instance_path) / "payment_screenshots"
+    return send_from_directory(upload_dir, safe_name)
 
 
 @admin_bp.route("/admin/api/users/<int:user_id>/warning", methods=["POST"])

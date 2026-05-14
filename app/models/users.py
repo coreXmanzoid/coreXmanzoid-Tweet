@@ -208,3 +208,9 @@ class UserData(UserMixin, db.Model):
         back_populates="sender",
         cascade="all, delete-orphan",  # optional but recommended
     )
+
+    payment_submissions = relationship(
+        "PaymentSubmission",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )

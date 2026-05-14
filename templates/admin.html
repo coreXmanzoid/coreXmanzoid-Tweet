@@ -49,6 +49,11 @@
                     <span class="nav-label">Reports</span>
                     <span class="nav-badge" id="reportsPendingBadge">0</span>
                 </button>
+                <button class="nav-item" type="button" data-section="payments">
+                    <span class="nav-icon"><i class="bi bi-credit-card-fill"></i></span>
+                    <span class="nav-label">Payments</span>
+                    <span class="nav-badge" id="paymentsPendingBadge">0</span>
+                </button>
                 <button class="nav-item" type="button" data-section="users">
                     <span class="nav-icon"><i class="bi bi-people-fill"></i></span>
                     <span class="nav-label">Users</span>
@@ -121,6 +126,10 @@
                             <span>Pending Pro</span>
                             <strong id="dashboardPendingPro">0</strong>
                         </div>
+                        <div class="hero-stat">
+                            <span>Pending Payments</span>
+                            <strong id="dashboardPaymentsPending">0</strong>
+                        </div>
                     </div>
                 </div>
 
@@ -188,6 +197,24 @@
                             <div>
                                 <p>Pending Pro Requests</p>
                                 <h3 id="pendingProMetric">0</h3>
+                            </div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-md-6 col-xl-3">
+                        <article class="metric-card">
+                            <div class="metric-icon pending-icon"><i class="bi bi-hourglass-split"></i></div>
+                            <div>
+                                <p>Total Payment Requests</p>
+                                <h3 id="paymentsTotalMetric">0</h3>
+                            </div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-md-6 col-xl-3">
+                        <article class="metric-card">
+                            <div class="metric-icon reviewed-icon"><i class="bi bi-credit-card-2-front-fill"></i></div>
+                            <div>
+                                <p>Approved Payments</p>
+                                <h3 id="approvedPaymentsMetric">0</h3>
                             </div>
                         </article>
                     </div>
@@ -294,6 +321,56 @@
                             <i class="bi bi-shield-x"></i>
                             <h4>No reports found</h4>
                             <p>There are no results matching the current filters.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content-section" id="paymentsSection" data-section-panel="payments">
+                <div class="content-card">
+                    <div class="section-toolbar">
+                        <div>
+                            <span class="eyebrow-text">Payment Desk</span>
+                            <h3>Payment Verification</h3>
+                            <p class="section-copy">Review submitted transaction details, inspect screenshots, and
+                                approve Pro access after confirming payment.</p>
+                        </div>
+                        <div class="toolbar-controls">
+                            <div class="search-shell">
+                                <i class="bi bi-search"></i>
+                                <input type="search" id="paymentsSearchInput"
+                                    placeholder="Search payment, user, email, or transaction">
+                            </div>
+                            <select class="filter-select" id="paymentsStatusFilter">
+                                <option value="all">All Statuses</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Approved">Approved</option>
+                                <option value="Rejected">Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-shell">
+                        <div class="table-responsive">
+                            <table class="table admin-table align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Payment ID</th>
+                                        <th>User</th>
+                                        <th>Plan</th>
+                                        <th>Method</th>
+                                        <th>Transaction</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="paymentsTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div class="empty-state d-none" id="paymentsEmptyState">
+                            <i class="bi bi-credit-card"></i>
+                            <h4>No payment requests found</h4>
+                            <p>There are no submissions matching the current filters.</p>
                         </div>
                     </div>
                 </div>
@@ -527,6 +604,88 @@
                 </div>
                 <div class="modal-footer border-0">
                     <button type="button" class="primary-button" id="markReviewedButton">Mark as Reviewed</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="paymentDetailsModal" tabindex="-1" aria-labelledby="paymentDetailsLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content admin-modal">
+                <div class="modal-header border-0">
+                    <div>
+                        <span class="eyebrow-text">Payment Details</span>
+                        <h4 class="modal-title" id="paymentDetailsLabel">Verification Request</h4>
+                    </div>
+                    <button type="button" class="btn-close admin-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="payment-review-layout">
+                        <div>
+                            <div class="detail-grid">
+                                <div class="detail-card">
+                                    <span>Payment ID</span>
+                                    <strong id="modalPaymentId">-</strong>
+                                </div>
+                                <div class="detail-card">
+                                    <span>User</span>
+                                    <strong id="modalPaymentUser">-</strong>
+                                </div>
+                                <div class="detail-card">
+                                    <span>Plan</span>
+                                    <strong id="modalPaymentPlan">-</strong>
+                                </div>
+                                <div class="detail-card">
+                                    <span>Method</span>
+                                    <strong id="modalPaymentMethod">-</strong>
+                                </div>
+                                <div class="detail-card">
+                                    <span>Transaction</span>
+                                    <strong id="modalPaymentTransaction">-</strong>
+                                </div>
+                                <div class="detail-card">
+                                    <span>Status</span>
+                                    <strong id="modalPaymentStatus">-</strong>
+                                </div>
+                                <div class="detail-card">
+                                    <span>Submitted</span>
+                                    <strong id="modalPaymentTimestamp">-</strong>
+                                </div>
+                                <div class="detail-card">
+                                    <span>Reviewed</span>
+                                    <strong id="modalPaymentReviewed">-</strong>
+                                </div>
+                                <div class="detail-card detail-card-wide">
+                                    <span>Email</span>
+                                    <strong id="modalPaymentEmail">-</strong>
+                                </div>
+                            </div>
+
+                            <div class="message-panel">
+                                <label>User Note</label>
+                                <div class="message-box" id="modalPaymentNote"></div>
+                            </div>
+
+                            <div class="message-panel">
+                                <label for="modalPaymentAdminNote">Admin Note</label>
+                                <textarea id="modalPaymentAdminNote" rows="4"
+                                    placeholder="Optional rejection reason or internal note"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="payment-screenshot-panel">
+                            <label>Payment Screenshot</label>
+                            <a id="modalPaymentScreenshotLink" href="#" target="_blank" rel="noopener">
+                                <img id="modalPaymentScreenshot" src="" alt="Payment screenshot">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="soft-button" id="rejectPaymentButton">Reject Payment</button>
+                    <button type="button" class="primary-button" id="approvePaymentButton">Approve Pro</button>
                 </div>
             </div>
         </div>

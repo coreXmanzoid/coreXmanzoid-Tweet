@@ -45,7 +45,7 @@
                 {% if user is none %}
                 <div class="d-flex ms-auto">
                         <a href="{{ url_for('auth.login') }}" class="me-2"><button class="py-3 px-4">Login</button></a>
-                        <a href="{{ url_for('auth.signup') }}" ><button class="p-3">Sign Up</button></a>
+                        <a href="{{ url_for('auth.signup', st=0) }}" ><button class="p-3">Sign Up</button></a>
                     </div>
                 {% else %}
                 <div class="d-flex ms-auto">
@@ -105,7 +105,7 @@
                 <div class="feature-item disabled"><i class="bi bi-x-circle"></i> Edit flicks after posting</div>
                 <div class="feature-item disabled"><i class="bi bi-x-circle"></i> Verified Badge</div>
                 <div class="feature-item disabled"><i class="bi bi-x-circle"></i> Ad-free experience</div>
-                <button class="btn-plan btn-free mt-3">Get started free</button>
+                <a href="{{ url_for('auth.signup', st=0) }}"><button>Get started free</button></a>
             </div>
 
             <!-- PRO (featured) -->
@@ -128,7 +128,7 @@
                 <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Edit flicks after posting</div>
                 <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Priority in search results</div>
                 <div class="feature-item disabled"><i class="bi bi-x-circle"></i> Maintain history of AI Chats</div>
-                <button class="btn-plan btn-pro mt-3">Start Pro <i class="bi bi-arrow-right"></i></button>
+                <a href="{{ url_for('pricing.payment_page')}}" style="text-decoration: none;"><button class="btn-plan btn-pro mt-3">Start Pro <i class="bi bi-arrow-right"></i></button></a>
             </div>
 
             <!-- ENTERPRISE -->
