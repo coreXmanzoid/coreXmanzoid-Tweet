@@ -149,7 +149,7 @@ button:hover {
     display: grid;
     grid-template-columns: 280px repeat(2, 1fr);
     grid-template-rows: auto auto auto;
-    gap: 8px;
+    gap: 5px;
 }
 
 .div1 {

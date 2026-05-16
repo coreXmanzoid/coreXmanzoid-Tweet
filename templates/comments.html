@@ -48,7 +48,12 @@
         <div class="post-heading">
             <img src="{{ post.user.profile_image_url if post.user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
                 alt="" width="40" height="40" class="rounded-circle me-2">
-            <h5 data-userid="{{ post.user.id}}">{{ post.user.name }}<br /><span>@{{ post.user.username }}</span></h5>
+            <h5 data-userid="{{ post.user.id}}">{{ post.user.name }}
+                {% if subscription_has_feature(post.user, "monetization", "verified_badge") %}
+                <i class="bi bi-patch-check-fill m-1" style="font-size: 14px; color: #F94818;"></i>
+                {% endif %}
+                <br /><span>@{{ post.user.username }}</span>
+            </h5>
         </div>
         <div class="post-content">
             <p class="content">{{ post.content }}</p>
@@ -70,7 +75,8 @@
             alt="" width="35" height="35" class="rounded-circle me-2">
         <input type="text" autocomplete="off" name="content"
             maxlength="{{ subscription_limit(current_user, 'comments', 'comment_length', 100) if subscription_limit(current_user, 'comments', 'comment_length', 100) != -1 else 1000 }}"
-            placeholder="Leave your Comment" {% if not subscription_has_feature(current_user, 'comments', 'can_comment') %}disabled{% endif %}>
+            placeholder="Leave your Comment" {% if not subscription_has_feature(current_user, 'comments' , 'can_comment'
+            ) %}disabled{% endif %}>
         <button id="submitComment" data-current_user_username="{{ current_user.username }}"
             data-current_user_name="{{ current_user.name }}">Reply</button>
     </div>
@@ -85,8 +91,13 @@
             <div class="post-heading">
                 <img src="{{ comment.user.profile_image_url if comment.user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
                     alt="" width="30" height="30" class="rounded-circle me-2">
-                <h5 data-userid="{{ comment.user.id }}">{{ comment.user.name }} <br><span>@{{ comment.user.username
-                        }}</span></h5>
+                <h5 data-userid="{{ comment.user.id }}">{{ comment.user.name }}
+                    {% if subscription_has_feature(comment.user, "monetization", "verified_badge") %}
+                    <i class="bi bi-patch-check-fill m-1" style="font-size: 14px; color: #F94818;"></i>
+                    {% endif %}
+                    <br><span>@{{ comment.user.username
+                        }}</span>
+                </h5>
             </div>
             <div class="post-actions comment-actions" data-commentId="{{ comment.id }}">
                 <a class="like-comment"><i class="bi bi-heart"></i> {{ comment.likes }}</a>

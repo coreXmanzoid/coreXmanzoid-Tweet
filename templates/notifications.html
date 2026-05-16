@@ -26,7 +26,11 @@
     <img src="{{notification.sender.profile_image_url if notification.sender.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
         width="45" height="45" class="rounded-circle">
     <div class="notification-info">
-        <strong>{{notification.sender.name}}</strong>
+        <strong>{{notification.sender.name}}
+            {% if subscription_has_feature(notification.sender, "monetization", "verified_badge") %}
+            <i class="bi bi-patch-check-fill m-1" style="font-size: 14px; color: #F94818;"></i>
+            {% endif %}
+        </strong>
         <small>&nbsp;{{notification.title}} {% if not notification.is_read %}<span class="badge rounded-circle">
             </span>{% endif %}</small>
     </div>

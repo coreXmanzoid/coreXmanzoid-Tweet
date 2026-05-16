@@ -30,9 +30,12 @@
         <div class="div1 {{current_user.id}}">
             <div class="d-none d-sm-block">
                 <div class="d-flex flex-column flex-shrink-0 p-3 bg-light me-0" style="width: 280px; height: 100vh;">
-                    <a  class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none logostyle">
-                        <img class="img-fluid" src="{{ url_for('static', filename='assets/Logo_icon.png') }}" alt="icon">
-                        <img src="{{ url_for('static', filename='assets/Logo_wordle.png')}}" class="img-fluid" alt="wordle">
+                    <a
+                        class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none logostyle">
+                        <img class="img-fluid" src="{{ url_for('static', filename='assets/Logo_icon.png') }}"
+                            alt="icon">
+                        <img src="{{ url_for('static', filename='assets/Logo_wordle.png')}}" class="img-fluid"
+                            alt="wordle">
                     </a>
                     <hr>
                     <ul class="nav nav-pills flex-column mb-auto">
@@ -131,16 +134,23 @@
                             id="dropdownUser2" data-bs-toggle="dropdown" aria-expanded="false">
                             <img src="{{ current_user.profile_image_url if current_user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
                                 alt="" width="32" height="32" class="rounded-circle me-2">
-                            <strong data-username="{{ current_user.username }}">{{ current_user.name }}</strong>
+                            <strong data-username="{{ current_user.username }}">{{ current_user.name }}
+                                {% if subscription_has_feature(current_user, "monetization", "verified_badge") %}
+                                <i class="bi bi-patch-check-fill m-1" style="font-size: 14px; color: #F94818;"></i>
+                                {% endif %}
+                            </strong>
                         </a>
                         <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
-                            <li><a class="dropdown-item LActive" href="{{ url_for('setting.setting', section='support') }}">Help</a></li>
-                            <li><a class="dropdown-item LActive" href="{{ url_for('setting.setting_index')}}">Settings</a></li>
+                            <li><a class="dropdown-item LActive"
+                                    href="{{ url_for('setting.setting', section='support') }}">Help</a></li>
+                            <li><a class="dropdown-item LActive"
+                                    href="{{ url_for('setting.setting_index')}}">Settings</a></li>
                             <li><a class="dropdown-item LActive profile-link" href="#">Profile</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item LActive" href="{{ url_for('account.logout', st=1) }}">Sign out</a>
+                            <li><a class="dropdown-item LActive" href="{{ url_for('account.logout', st=1) }}">Sign
+                                    out</a>
                             </li>
                         </ul>
                     </div>
@@ -183,9 +193,9 @@
         <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js"></script>
         <script>
             window.firebaseRuntimeConfig = {
-                firebaseEnabled: {{ firebase_enabled | default(false) | tojson }},
-                vapidKey: {{ fcm_vapid_key | default('') | tojson }},
-                firebaseConfig: {{ firebase_config | tojson }}
+                firebaseEnabled: {{ firebase_enabled | default (false) | tojson }},
+            vapidKey: { { fcm_vapid_key | default ('') | tojson } },
+            firebaseConfig: { { firebase_config | tojson } }
             };
         </script>
         <script src="{{ url_for('static', filename='js/firebase-client.js') }}?v=2026-05-15-1"></script>

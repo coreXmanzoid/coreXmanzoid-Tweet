@@ -7,6 +7,7 @@
   <title>Account Settings</title>
   <link rel="shortcut icon" href="{{ url_for('static', filename='assets/logo.png') }}" type="image/x-icon">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles01.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/setting.css') }}" />
@@ -40,7 +41,11 @@
         <div class="profile-avatar"><img
             src="{{ current_user.profile_image_url if current_user.profile_image_url else url_for('static', filename='assets/default-profile.jpg')}}"
             class="profile-pic"></div>
-        <h2>{{ current_user.name }}</h2>
+        <h2>{{ current_user.name }}
+          {% if subscription_has_feature(current_user, "monetization", "verified_badge") %}
+          <i class="bi bi-patch-check-fill" style="font-size: 14px; color: #F94818;"></i>
+          {% endif %}
+        </h2>
         <p data-userid="{{ current_user.id }}">@{{ current_user.username }}</p>
       </div>
 
@@ -94,8 +99,8 @@
                 <div class="field">
                   <label for="number">Contact</label>
                   <input id="number" type="number"
-                    value="{{ current_user.contact if current_user.email else 'coreXmanzoid@example.com' }}"
-                    {% if not subscription_has_feature(current_user, 'profile', 'can_set_contact') %}disabled{% endif %}>
+                    value="{{ current_user.contact if current_user.email else 'coreXmanzoid@example.com' }}" {% if not
+                    subscription_has_feature(current_user, 'profile' , 'can_set_contact' ) %}disabled{% endif %}>
                 </div>
               </div>
               <div class="col-md-6">
@@ -133,7 +138,8 @@
           </div>
           <div class="field field-wide bio ms-3">
             <label for="bio">Bio</label>
-            <textarea id="bio" maxlength="{{ subscription_limit(current_user, 'profile', 'bio_length', 80) if subscription_limit(current_user, 'profile', 'bio_length', 80) != -1 else 1000 }}">{{ current_user.get_setting('profile-info', 'bio') }}</textarea>
+            <textarea id="bio"
+              maxlength="{{ subscription_limit(current_user, 'profile', 'bio_length', 80) if subscription_limit(current_user, 'profile', 'bio_length', 80) != -1 else 1000 }}">{{ current_user.get_setting('profile-info', 'bio') }}</textarea>
           </div>
         </div>
       </section>
@@ -161,8 +167,8 @@
                 <div class="field">
                   <label for="website">Website</label>
                   <input id="website" type="url" placeholder="https://example.com"
-                    value="{{ current_user.get_setting('account-info', 'website') }}"
-                    {% if not subscription_has_feature(current_user, 'profile', 'can_set_website') %}disabled{% endif %}>
+                    value="{{ current_user.get_setting('account-info', 'website') }}" {% if not
+                    subscription_has_feature(current_user, 'profile' , 'can_set_website' ) %}disabled{% endif %}>
                 </div>
               </div>
             </div>
@@ -309,14 +315,18 @@
           <label class="toggle">
             <span>Email Notifications</span>
             <input id="emailz" type="checkbox" {% if
-              current_user.get_setting('notifications-setting', 'email_notifications' ) and subscription_has_feature(current_user, 'notifications', 'email_notifications') %} checked {% endif %}
-              {% if not subscription_has_feature(current_user, 'notifications', 'email_notifications') %}disabled{% endif %}>
+              current_user.get_setting('notifications-setting', 'email_notifications' ) and
+              subscription_has_feature(current_user, 'notifications' , 'email_notifications' ) %} checked {% endif %} {%
+              if not subscription_has_feature(current_user, 'notifications' , 'email_notifications' ) %}disabled{% endif
+              %}>
           </label>
           <label class="toggle">
             <span>Push Notifications</span>
             <input id="push" type="checkbox" {% if
-              current_user.get_setting('notifications-setting', 'push_notifications' ) and subscription_has_feature(current_user, 'notifications', 'push_notifications') %} checked {% endif %}
-              {% if not subscription_has_feature(current_user, 'notifications', 'push_notifications') %}disabled{% endif %}>
+              current_user.get_setting('notifications-setting', 'push_notifications' ) and
+              subscription_has_feature(current_user, 'notifications' , 'push_notifications' ) %} checked {% endif %} {%
+              if not subscription_has_feature(current_user, 'notifications' , 'push_notifications' ) %}disabled{% endif
+              %}>
           </label>
           <div class="field">
             <label>*Customize what type of activity triggers a notification</label>
@@ -375,7 +385,8 @@
             </div>
             <!-- <a href="/setting/download-account-data/{{ current_user.id }}"><button type="button">Download</button></a> -->
             {% if subscription_has_feature(current_user, 'account', 'can_download_data') %}
-            <a href="{{ url_for('setting.download_account_data', id=current_user.id)}}"><button type="button">Download</button></a>
+            <a href="{{ url_for('setting.download_account_data', id=current_user.id)}}"><button
+                type="button">Download</button></a>
             {% endif %}
           </div>
           <div class="app-item">
