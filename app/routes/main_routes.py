@@ -1,4 +1,5 @@
 import re
+import json
 import sqlite3
 import tempfile
 from datetime import datetime
@@ -26,6 +27,7 @@ from werkzeug.utils import secure_filename
 from app.decorators import only_admin, verified_user
 from app.extensions import db
 from app import models
+from app.firebase.firebase_config import get_firebase_web_config
 from app.services.account_service import AccountService
 
 main_bp = Blueprint("main", __name__)
@@ -432,12 +434,67 @@ def terms_of_service():
 
 @main_bp.route("/firebase-messaging-sw.js")
 def firebase_messaging_sw():
-    response = make_response(
-        send_from_directory(current_app.static_folder, "firebase-messaging-sw.js")
-    )
+    firebase_config = json.dumps(get_firebase_web_config())
+    script = f"""
+importScripts("https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js");
+
+firebase.initializeApp({firebase_config});
+
+const messaging = firebase.messaging();
+
+function getNotificationPayload(payload) {{
+    const notification = payload && payload.notification ? payload.notification : {{}};
+    const data = payload && payload.data ? payload.data : {{}};
+    return {{
+        title: notification.title || data.title || "ChatFlick",
+        body: notification.body || data.body || "",
+        icon: notification.icon || data.icon || "/static/assets/logo.png",
+        data: data
+    }};
+}}
+
+messaging.onBackgroundMessage(function (payload) {{
+    const notification = getNotificationPayload(payload);
+    return self.registration.showNotification(notification.title, {{
+        body: notification.body,
+        icon: notification.icon,
+        badge: "/static/assets/logo.png",
+        data: notification.data,
+        tag: notification.data && notification.data.type
+            ? notification.data.type + "_" + (notification.data.identifier || "")
+            : "chatflick_general"
+    }});
+}});
+
+self.addEventListener("notificationclick", function (event) {{
+    event.notification.close();
+    const targetUrl = event.notification.data && event.notification.data.url
+        ? event.notification.data.url
+        : "/home";
+
+    event.waitUntil(
+        clients.matchAll({{ type: "window", includeUncontrolled: true }}).then(function (clientList) {{
+            for (const client of clientList) {{
+                if ("focus" in client) return client.focus();
+            }}
+            if (clients.openWindow) return clients.openWindow(targetUrl);
+        }})
+    );
+}});
+
+self.addEventListener("install", function () {{
+    self.skipWaiting();
+}});
+
+self.addEventListener("activate", function (event) {{
+    event.waitUntil(self.clients.claim());
+}});
+""".lstrip()
+    response = make_response(script)
     response.headers["Content-Type"] = "application/javascript; charset=utf-8"
     response.headers["Service-Worker-Allowed"] = "/"
-    response.headers["Cache-Control"] = "no-cache"
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     return response
 
 

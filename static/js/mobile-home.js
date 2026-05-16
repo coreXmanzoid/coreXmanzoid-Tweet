@@ -207,12 +207,10 @@ function initializeDynamicContent($root) {
     if ($root.find(".notifications, #notifications-permission").length) {
         const permissionWarning = document.getElementById("notifications-permission");
         if (permissionWarning) {
-            if (!("Notification" in window) || Notification.permission !== "granted") {
-                $root.find(".notifications").hide();
-            } else {
+            if ("Notification" in window && Notification.permission === "granted") {
                 $root.find("#notifications-permission").remove();
-                $root.find(".notifications").show();
             }
+            $root.find(".notifications").show();
         }
     }
 

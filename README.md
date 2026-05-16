@@ -150,6 +150,13 @@ CLOUDINARY_API_SECRET=your-api-secret
 FIREBASE_SERVICE_ACCOUNT=path/to/service-account.json
 FCM_VAPID_KEY=your-vapid-key
 FIREBASE_API_KEY=your-firebase-api-key
+FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+FIREBASE_PROJECT_ID=your-project-id
+FIREBASE_STORAGE_BUCKET=your-project.firebasestorage.app
+FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+FIREBASE_APP_ID=your-web-app-id
+FIREBASE_MEASUREMENT_ID=your-measurement-id
+PUBLIC_BASE_URL=https://yourusername.pythonanywhere.com
 
 # Groq AI
 GROQ_API_KEY=your-groq-api-key
@@ -157,6 +164,10 @@ GROQ_API_KEY=your-groq-api-key
 # Cloudflare Turnstile CAPTCHA
 CLOUDFARE_SECRET_KEY=your-turnstile-secret
 ```
+
+Notification checks after deployment:
+- Open `/notification-health` while logged in to confirm Firebase Admin, VAPID, web config, HTTPS, and saved token status.
+- After enabling notifications on the device, POST `/notification-test-push` while logged in to send a push notification to your current browser token.
 
 ### Run the App
 

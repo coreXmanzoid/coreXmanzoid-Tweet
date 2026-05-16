@@ -9,6 +9,34 @@ from firebase_admin import credentials
 BASE_DIR = Path(__file__).resolve().parents[2]
 load_dotenv(BASE_DIR / ".env")
 
+DEFAULT_FIREBASE_WEB_CONFIG = {
+    "apiKey": "AIzaSyDjohzpCRhWTU1bMBqU3CXLlPiyfDSobgk",
+    "authDomain": "corexmanzoid-twitter-7a86a.firebaseapp.com",
+    "projectId": "corexmanzoid-twitter-7a86a",
+    "storageBucket": "corexmanzoid-twitter-7a86a.firebasestorage.app",
+    "messagingSenderId": "266928901713",
+    "appId": "1:266928901713:web:b092a1071e9467deccf270",
+    "measurementId": "G-5BXH7TMB3S",
+}
+
+
+def get_firebase_web_config():
+    return {
+        "apiKey": os.getenv("FIREBASE_API_KEY", DEFAULT_FIREBASE_WEB_CONFIG["apiKey"]),
+        "authDomain": os.getenv("FIREBASE_AUTH_DOMAIN", DEFAULT_FIREBASE_WEB_CONFIG["authDomain"]),
+        "projectId": os.getenv("FIREBASE_PROJECT_ID", DEFAULT_FIREBASE_WEB_CONFIG["projectId"]),
+        "storageBucket": os.getenv("FIREBASE_STORAGE_BUCKET", DEFAULT_FIREBASE_WEB_CONFIG["storageBucket"]),
+        "messagingSenderId": os.getenv(
+            "FIREBASE_MESSAGING_SENDER_ID",
+            DEFAULT_FIREBASE_WEB_CONFIG["messagingSenderId"],
+        ),
+        "appId": os.getenv("FIREBASE_APP_ID", DEFAULT_FIREBASE_WEB_CONFIG["appId"]),
+        "measurementId": os.getenv(
+            "FIREBASE_MEASUREMENT_ID",
+            DEFAULT_FIREBASE_WEB_CONFIG["measurementId"],
+        ),
+    }
+
 
 def _candidate_service_account_paths():
     configured_path = (

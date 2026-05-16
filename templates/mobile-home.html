@@ -143,20 +143,12 @@
         window.firebaseRuntimeConfig = {
             firebaseEnabled: {{ firebase_enabled | default(false) | tojson }},
             vapidKey: {{ fcm_vapid_key | default('') | tojson }},
-            firebaseConfig: {
-                apiKey: {{ firebase_api_key | default('') | tojson }},
-                authDomain: "corexmanzoid-twitter-7a86a.firebaseapp.com",
-                projectId: "corexmanzoid-twitter-7a86a",
-                storageBucket: "corexmanzoid-twitter-7a86a.firebasestorage.app",
-                messagingSenderId: "266928901713",
-                appId: "1:266928901713:web:b092a1071e9467deccf270",
-                measurementId: "G-5BXH7TMB3S"
-            }
+            firebaseConfig: {{ firebase_config | tojson }}
         };
     </script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js"></script>
-    <script src="{{ url_for('static', filename='js/firebase.js') }}?v=2026-05-08-1"></script>
+    <script src="{{ url_for('static', filename='js/firebase-client.js') }}?v=2026-05-15-1"></script>
     <script src="{{ url_for('static', filename='js/mobile-home.js') }}?v=2026-05-09-1"></script>
 </body>
 

@@ -1,7 +1,11 @@
+import os
+from types import SimpleNamespace
+
 from flask import Blueprint, jsonify, render_template, request
 from flask_login import login_required, current_user
 
 from app.extensions import db
+from app.firebase.firebase_config import get_firebase_web_config, init_firebase
 from app.models.notifications import Notification
 from app.services.notification_service import NotificationService
 from app.services.push_service import send_notification
@@ -25,7 +29,71 @@ def save_token():
     current_user.fb_auth_token = token
     db.session.commit()
 
-    return jsonify({"status": "saved"})
+    return jsonify({"status": "saved", "token_length": len(token)})
+
+
+@notification_bp.route("/notification-health")
+@login_required
+def notification_health():
+    firebase_ok, firebase_status = init_firebase()
+    firebase_config = get_firebase_web_config()
+
+    return jsonify(
+        {
+            "firebase_admin_ready": firebase_ok,
+            "firebase_admin_status": firebase_status,
+            "fcm_vapid_key_configured": bool(os.getenv("FCM_VAPID_KEY")),
+            "firebase_web_configured": all(
+                bool(firebase_config.get(key))
+                for key in (
+                    "apiKey",
+                    "authDomain",
+                    "projectId",
+                    "messagingSenderId",
+                    "appId",
+                )
+            ),
+            "current_user_has_token": bool(current_user.fb_auth_token),
+            "request_is_secure": request.is_secure,
+            "public_base_url": (
+                os.getenv("PUBLIC_BASE_URL")
+                or os.getenv("APP_BASE_URL")
+                or os.getenv("CHATFLICK_BASE_URL")
+                or ""
+            ),
+        }
+    )
+
+
+@notification_bp.route("/notification-test-push", methods=["POST"])
+@login_required
+def notification_test_push():
+    if not current_user.fb_auth_token:
+        return jsonify(
+            {
+                "status": "error",
+                "message": "No FCM token is saved for the current user. Enable notifications first.",
+            }
+        ), 400
+
+    test_notification = SimpleNamespace(
+        title="ChatFlick test",
+        message="Push notifications are connected for this device.",
+        type="test",
+        identifier=current_user.id,
+        sender_id=current_user.id,
+        recipient=current_user,
+    )
+
+    if not send_notification(test_notification):
+        return jsonify(
+            {
+                "status": "error",
+                "message": "Firebase accepted no send. Check PythonAnywhere error logs for the exact Firebase error.",
+            }
+        ), 502
+
+    return jsonify({"status": "sent"})
 
 
 @notification_bp.route("/notifications")

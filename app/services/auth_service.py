@@ -6,7 +6,7 @@ from app.extensions import db
 from app.models.users import UserData
 from app.services.email_service import EmailService
 from app.utils.username import validate_username
-from app.utils.time_utils import utc_now
+from app.utils.time_utils import utc_iso
 def get_serializer():
     return URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
 
@@ -41,7 +41,7 @@ class AuthService:
 
         db.session.add(user)
         
-        user.set_setting("account-info", "created_at", utc_now())
+        user.set_setting("account-info", "created_at", utc_iso())
         user.set_setting("account-info","level", "New Member")
         db.session.commit()
 

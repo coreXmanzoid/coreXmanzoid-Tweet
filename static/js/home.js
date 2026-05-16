@@ -296,12 +296,10 @@ function initializeNotificationsFragment($root) {
 
     const permissionWarning = document.getElementById("notifications-permission");
     if (permissionWarning) {
-        if (!("Notification" in window) || Notification.permission !== "granted") {
-            $(".notifications").hide();
-        } else {
+        if ("Notification" in window && Notification.permission === "granted") {
             $("#notifications-permission").remove();
-            $(".notifications").show();
         }
+        $(".notifications").show();
     }
 
     $root.find(".notification-message span").each(function () {

@@ -8,7 +8,7 @@ from app.extensions import db, login_manager, oauth as oauth_client
 from app.utils.time_utils import utc_now
 
 from app.routes.notification_routes import notification_bp
-from app.firebase.firebase_config import init_firebase
+from app.firebase.firebase_config import get_firebase_web_config, init_firebase
 from app.routes.profile_routes import profile_bp
 from app.routes.post_routes import post_bp
 from app.routes.ai_routes import ai_bp
@@ -52,6 +52,7 @@ def create_app():
             "firebase_status": firebase_status,
             "fcm_vapid_key": os.getenv("FCM_VAPID_KEY", ""),
             "firebase_api_key": os.getenv("FIREBASE_API_KEY", ""),
+            "firebase_config": get_firebase_web_config(),
             "current_time": utc_now(),
             "current_user": current_user if current_user else None,
         }
