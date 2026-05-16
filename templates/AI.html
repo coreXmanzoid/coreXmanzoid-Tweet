@@ -24,7 +24,8 @@
             </div>
 
             <div class="chat-input">
-                <input type="text" id="user-input" autocomplete="off" maxlength="1000"
+                <input type="text" id="user-input" autocomplete="off"
+                    maxlength="{{ subscription_limit(current_user, 'ai', 'ai_message_length', 1000) if subscription_limit(current_user, 'ai', 'ai_message_length', 1000) != -1 else 1000 }}"
                     placeholder="Ask..." />
                 <button onclick="sendMessage()">Send</button>
             </div>

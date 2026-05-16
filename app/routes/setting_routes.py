@@ -17,6 +17,7 @@ from app.services.data_downloading_service import DownloadData
 from app.services.email_service import EmailService
 from app.services.auth_service import AuthService
 from app.services.ai_service import AIService
+from app.utils.subscription_manager import get_limit, has_feature, is_unlimited
 from datetime import date
 
 from app.utils.username import validate_username
@@ -66,6 +67,14 @@ def profile_setting():
             )
             new_contact = data["new_contact"]
             new_bio = data["new_bio"]
+            bio_limit = get_limit(user, "profile", "bio_length", 80)
+
+            if not has_feature(user, "profile", "can_set_contact"):
+                new_contact = current_user.contact or ""
+            if not has_feature(user, "profile", "can_set_bio"):
+                new_bio = current_user.get_setting("profile-info", "bio", "")
+            elif not is_unlimited(bio_limit) and len(new_bio) > int(bio_limit):
+                return jsonify({"status": "error", "message": f"Bio must be {bio_limit} characters or fewer for your plan."}), 403
             
             if current_user.name != new_name:
                 SettingService.change_name(user, new_name)
@@ -107,6 +116,8 @@ def account_setting():
             new_birthdate = data["new_birthdate"]
             new_website = data["new_website"]
             new_about = data["new_about"]
+            if not has_feature(user, "profile", "can_set_website"):
+                new_website = user.get_setting("account-info", "website", "")
 
             if current_user.email != new_email:
                 if not EmailService.validate_email(str(new_email)):
@@ -205,6 +216,10 @@ def notifications_setting():
         if user:
             push_notifications = data["push_notifications"]
             email_notifications = data["email_notifications"]
+            if push_notifications and not has_feature(user, "notifications", "push_notifications"):
+                return jsonify({"status": "error", "message": "Push notifications require a higher plan."}), 403
+            if email_notifications and not has_feature(user, "notifications", "email_notifications"):
+                return jsonify({"status": "error", "message": "Email notifications require a higher plan."}), 403
             mentions = data["mentions"]
             reposts = data["reposts"]
             likes_comments = data["likes_comments"]
@@ -266,6 +281,8 @@ def support_setting():
 def download_account_data(id):
     if id != current_user.id:
         return jsonify({"status": "error", "message": "Unauthorized"}), 403
+    if not has_feature(current_user, "account", "can_download_data"):
+        return jsonify({"status": "error", "message": "Your plan does not allow data downloads."}), 403
 
     user = db.session.get(UserData, id)
     if not user:
@@ -288,6 +305,8 @@ def download_account_data(id):
 @login_required
 def create_report():
     if request.method == "POST":
+        if not has_feature(current_user, "support", "can_report_content"):
+            return jsonify({"status": "error", "message": "Your plan does not allow reports."}), 403
         data = request.get_json()
         user_id = data["user_id"]
         message = data["message"]
@@ -301,6 +320,8 @@ def create_report():
 @login_required
 def create_support_request():
     if request.method == "POST":
+        if not has_feature(current_user, "support", "can_submit_support_ticket"):
+            return jsonify({"status": "error", "message": "Your plan does not allow support tickets."}), 403
         data = request.get_json()
         user_id = data["user_id"]
         category = data["category"]
@@ -328,11 +349,15 @@ def danger_zone(st):
         if not user or user.id != current_user.id:
             return jsonify({"status": "error", "message": "Unauthorized"}), 403
         if st == 1:
+            if not has_feature(user, "account", "can_deactivate"):
+                return jsonify({"status": "error", "message": "Your plan does not allow account deactivation."}), 403
             SettingService.deactivate_account(user)
             logout_user()
             flash("Account is Deactivated.", "info")
             return jsonify({"status": "success", "message": "account deactivated"})
         if st == 2:
+            if not has_feature(user, "account", "can_delete"):
+                return jsonify({"status": "error", "message": "Your plan does not allow account deletion."}), 403
             SettingService.delete_account(user)
             logout_user()
             flash("Account is deleted completely from DataBase.", "info")

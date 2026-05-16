@@ -151,9 +151,13 @@
         <div>
           <span>Joined</span>
           <p>
-            {{ user.get_setting('account-info', 'created_at').strftime('%B %Y')
-            if user.get_setting('account-info', 'created_at')
-            else 'Unknown' }}
+            {% set created_at = user.get_setting('account-info', 'created_at') %}
+
+            {% if created_at %}
+            {{ created_at[:7] | replace('-', ' ') }}
+            {% else %}
+            Unknown
+            {% endif %}
           </p>
         </div>
       </div>

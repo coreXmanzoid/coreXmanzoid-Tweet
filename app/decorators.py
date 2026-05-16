@@ -1,5 +1,6 @@
 from functools import wraps
 from flask_login import current_user
+from app.utils.subscription_manager import feature_required, plan_required
 
 
 def verified_user(func):
@@ -17,7 +18,7 @@ def pro_user(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
 
-        if current_user.status != "PRO":
+        if current_user.subscription_plan not in {"pro", "enterprise"}:
             return "Pro user required. Access Denied.", 403
 
         return func(*args, **kwargs)

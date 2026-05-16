@@ -5,8 +5,12 @@ import cloudinary.uploader
 class CloudinaryService:
 
     @staticmethod
-    def upload_profile_picture(file, user_id):
+    def upload_profile_picture(file, user_id, resolution="256x256"):
         configure_cloudinary()
+        try:
+            width, height = [int(value) for value in str(resolution).lower().split("x", 1)]
+        except (TypeError, ValueError):
+            width, height = 256, 256
 
         result = cloudinary.uploader.upload(
             file,
@@ -14,7 +18,7 @@ class CloudinaryService:
             public_id=f"user_{user_id}",
             overwrite=True,
             transformation=[
-                {"width": 256, "height": 256, "crop": "fill"},
+                {"width": width, "height": height, "crop": "fill"},
                 {"quality": "auto"},
                 {"fetch_format": "auto"},
             ],

@@ -8,15 +8,14 @@ from werkzeug.utils import secure_filename
 
 from app.extensions import db
 from app.models.payment import PaymentSubmission
-from flask import Blueprint, jsonify, render_template, request
-from flask_login import login_required, current_user
+from app.utils.subscription_manager import load_plans, normalize_plan
 
 pricing_bp = Blueprint("pricing", __name__)
 
 @pricing_bp.route("/pricing")
 def pricing():
     user = current_user if current_user.is_authenticated else None
-    return render_template("pricing.html", user=user)
+    return render_template("pricing.html", user=user, plans=load_plans())
 
 
 
@@ -51,6 +50,9 @@ def payment_submit():
     full_name = request.form.get("full_name", "").strip()
     email = request.form.get("email", "").strip()
     plan = request.form.get("plan", "").strip()
+    normalized_plan = normalize_plan(plan.split("_", 1)[0] if plan else "pro")
+    if normalized_plan == "free":
+        normalized_plan = "pro"
     payment_method = request.form.get("payment_method", "").strip()
     transaction_id = request.form.get("transaction_id", "").strip()
     note = request.form.get("note", "").strip()
@@ -96,7 +98,7 @@ def payment_submit():
             user_id=current_user.id,
             full_name=full_name,
             email=email.lower(),
-            plan=plan or "pro_monthly",
+            plan=f"{normalized_plan}_monthly",
             payment_method=payment_method,
             transaction_id=transaction_id,
             screenshot_path=filename,

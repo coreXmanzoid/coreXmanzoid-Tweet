@@ -16,7 +16,10 @@ def comments(post_id):
 
     if state == 1:  # add comment
 
-        new_comment, post = CommentService.add_comment(post_id, content)
+        try:
+            new_comment, post = CommentService.add_comment(post_id, content)
+        except ValueError as exc:
+            return jsonify({"status": "error", "message": str(exc)}), 403
 
         comments = CommentService.get_comments(post_id)
 

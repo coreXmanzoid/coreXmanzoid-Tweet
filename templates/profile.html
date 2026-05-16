@@ -52,8 +52,8 @@
 
             <h5>
                 <b>{{user.name}}</b>
-                {% if user.status == "PRO"%}
-                <i class="bi bi-patch-check-fill m-1"></i>
+                {% if subscription_has_feature(user, "monetization", "verified_badge") %}
+                <i class="bi bi-patch-check-fill m-1" style="font-size: 18px; color: #F94818;"></i>
                 {% endif %}
             </h5>
 
@@ -71,6 +71,7 @@
                 <small><em>{{ user.get_setting('profile-info', 'bio') }}</em></small>
                 {% endif %}
                 <small>
+                    {% if user.get_setting('account-info', 'website') %}
                     <a href="{{ user.get_setting('account-info', 'website') }}" target="_blank"
                         rel="noopener noreferrer">
                         {% if user.get_setting('account-info', 'website')|length > 30 %}
@@ -79,6 +80,7 @@
                         {{ user.get_setting('account-info', 'website') }}
                         {% endif %}
                     </a>
+                    {% endif %}
                 </small>
             </div>
 
@@ -132,7 +134,7 @@
 </div>
 
 <!-- <hr style="margin: 0px 0px 15px 0px;"> -->
-{% if current_user.status != "PRO" %}
+{% if not current_user.is_paid_plan %}
 <div class="profile-tab" style="padding: 0;">
     <div class="premium">
         <h4>You aren't Verified Yet <i class="bi bi-patch-check-fill m-1" style="font-size: 18px;"></i></h4>

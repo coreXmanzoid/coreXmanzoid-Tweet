@@ -15,6 +15,7 @@ DEFAULT_USER_SETTINGS = {
         "created_at": None,  # Set to account creation date when user is created.
         "level": "New Member",
         "warnings": 0,  # Track and block account on third warning.
+        "previous_status": None,
     },
     "privacy-setting": {
         "private_account": False,
@@ -31,6 +32,7 @@ DEFAULT_USER_SETTINGS = {
         "reposts": True,
     },
     "support": {"theme": "light"},
+    "usage": {"ai": {"date": None, "count": 0}},
 }
 _MISSING = object()
 
@@ -167,6 +169,30 @@ class UserData(UserMixin, db.Model):
             _set_nested(settings, path, value)
 
         self.setting = settings
+
+    @property
+    def subscription_plan(self):
+        from app.utils.subscription_manager import get_plan
+
+        return get_plan(self)
+
+    @subscription_plan.setter
+    def subscription_plan(self, plan):
+        from app.utils.subscription_manager import status_for_plan
+
+        self.status = status_for_plan(plan)
+
+    @property
+    def is_pro(self):
+        return self.subscription_plan == "pro"
+
+    @property
+    def is_enterprise(self):
+        return self.subscription_plan == "enterprise"
+
+    @property
+    def is_paid_plan(self):
+        return self.subscription_plan in {"pro", "enterprise"}
         
     # Relationships
     posts = relationship("Post", back_populates="user", cascade="all, delete-orphan")

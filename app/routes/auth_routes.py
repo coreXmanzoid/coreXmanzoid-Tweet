@@ -9,6 +9,8 @@ from app.services.auth_service import AuthService
 from app.services.captcha_service import CaptchaService
 from app.services.email_service import EmailService
 from app.services.google_auth_service import GoogleAuthService
+from app.utils.time_utils import utc_now
+from app.utils.subscription_manager import has_feature
 from app.utils.username import validate_username
 
 auth_bp = Blueprint("auth", __name__)
@@ -57,6 +59,9 @@ def verify_email_with_token(token):
 
 @auth_bp.route("/login/google")
 def google_login():
+    if current_user.is_authenticated and not has_feature(current_user, "auth", "google_oauth"):
+        flash("Your plan does not include Google sign in.")
+        return redirect(url_for("auth.login"))
     redirect_uri = url_for("auth.authorize_google", _external=True)
     google = get_google_client()
     return google.authorize_redirect(redirect_uri)
@@ -156,12 +161,14 @@ def login():
         if user:
             session['user_id'] = user.id
 
-        if remember:
-            session.permanent = True   # lasts 7 days
+        if remember and has_feature(user, "auth", "is_remember_me"):
+            session.permanent = True
+            session["login_at"] = utc_now().isoformat()
         else:
-            session.permanent = False  # ends when browser closes
+            session.permanent = False
+            session.pop("login_at", None)
 
-        login_user(user)
+        login_user(user, remember=bool(session.permanent))
 
         return redirect(url_for("main.homepage"))
 

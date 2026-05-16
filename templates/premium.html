@@ -1,11 +1,13 @@
 <!-- remember 100 in home.js -->
 <div class="ai-bar" style="display: none">
     <div class="right-sidebar">
+        {% if not current_user.is_paid_plan %}
         <div class="premium">
             <h4>Subscribe to Premium</h4>
             <p>Get access to premium features with better response & unlimited access to Manzoid-AI.</p>
             <a href="{{ url_for('pricing.pricing') }}"><button>Subscribe</button></a>
         </div>
+        {% endif %}
         <div class="premium">
             <h4>Manzoid AI Tips</h4>
             <ul>
@@ -45,11 +47,13 @@
             <input type="text" placeholder="Search By Name">
         </div>
     </center>
+    {% if not current_user.is_paid_plan %}
     <div class="premium">
         <h4>Subscribe to Premium</h4>
         <p>Get access to premium features that are available for our special users</p>
         <a href="{{ url_for('pricing.pricing') }}"><button>Subscribe</button></a>
     </div>
+    {% endif %}
     <div class="explore-accounts">
         <!-- Show Accounts Segguestions -->
         <div class="loader-wrapper">

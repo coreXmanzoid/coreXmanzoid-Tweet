@@ -6,6 +6,7 @@ from app.models.users import UserData
 from app.models.follows import Follow
 from app.services.cloudinary_service import CloudinaryService
 from app.decorators import verified_user
+from app.utils.subscription_manager import get_limit
 
 profile_bp = Blueprint("profile", __name__)
 
@@ -31,7 +32,11 @@ def upload_profile(id):
         return jsonify({"status": "error", "message": "Unauthorized"}), 403
 
     try:
-        image_url = CloudinaryService.upload_profile_picture(file, id)
+        image_url = CloudinaryService.upload_profile_picture(
+            file,
+            id,
+            resolution=get_limit(current_user, "profile", "profile_image_resolution", "256x256"),
+        )
 
         user.profile_image_url = image_url
         db.session.commit()

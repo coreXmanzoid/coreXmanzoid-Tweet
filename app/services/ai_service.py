@@ -11,7 +11,7 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 client = Groq(api_key=GROQ_API_KEY)
 
 user_history = {}
-MAX_HISTORY = 2
+DEFAULT_MAX_HISTORY = 2
 CHATFLICK_JSON_PATH = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "..", "ChatFlick.json")
 )
@@ -216,7 +216,7 @@ class AIService:
         return [item for _, item in scored[:MAX_SUPPORT_EXAMPLES]]
 
     @staticmethod
-    def chat(user_id, message):
+    def chat(user_id, message, max_history=DEFAULT_MAX_HISTORY):
 
         history = user_history.get(user_id, [])
 
@@ -230,8 +230,10 @@ class AIService:
 
         history.append((message, answer))
 
-        if len(history) > MAX_HISTORY:
-            history = history[-MAX_HISTORY:]
+        if max_history == 0:
+            history = []
+        elif max_history > 0 and len(history) > max_history:
+            history = history[-max_history:]
 
         user_history[user_id] = history
 

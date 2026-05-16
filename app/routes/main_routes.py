@@ -521,7 +521,7 @@ def homepage():
 @main_bp.route("/mobile-home", methods=["GET", "POST"])
 @login_required
 def mobile_homepage():
-    is_user_verified = current_user.status == "VERIFIED" or current_user.status == "PRO"
+    is_user_verified = current_user.status in {"VERIFIED", "PENDING_PRO", "PRO", "ENTERPRISE"}
     mobile_accounts = AccountService.random_accounts()
     return render_template(
         "mobile-home.html",

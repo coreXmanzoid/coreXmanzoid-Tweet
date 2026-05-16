@@ -1,6 +1,7 @@
 from app.extensions import db
 from app.models.notifications import Notification
 from app.services.push_service import send_notification
+from app.utils.subscription_manager import has_feature
 from app.utils.time_utils import utc_now
 
 
@@ -8,6 +9,11 @@ class NotificationService:
 
     @staticmethod
     def create_notification(sender_id, recipient_id, title, message, type, identifier):
+        from app.models.users import UserData
+
+        recipient = db.session.get(UserData, recipient_id)
+        if recipient and not has_feature(recipient, "notifications", "in_app_notifications"):
+            return None
 
         notification = Notification(
             sender_id=sender_id,
@@ -25,6 +31,11 @@ class NotificationService:
 
     @staticmethod
     def update_or_create(type, identifier, message, recipient_id, sender_id=None, title="Notification", commit=True):
+        from app.models.users import UserData
+
+        recipient = db.session.get(UserData, recipient_id)
+        if recipient and not has_feature(recipient, "notifications", "in_app_notifications"):
+            return None
 
         notification = db.session.execute(
             db.select(Notification).where(
@@ -69,6 +80,11 @@ class NotificationService:
 
             if user_id == post.user.id:
                 continue
+            from app.models.users import UserData
+
+            recipient = db.session.get(UserData, user_id)
+            if recipient and not has_feature(recipient, "notifications", "in_app_notifications"):
+                continue
 
             notif = Notification(
                 sender_id=post.user.id,
@@ -86,6 +102,7 @@ class NotificationService:
 
         for notif in notifications:
             try:
-                send_notification(notif)
+                if has_feature(notif.recipient, "notifications", "push_notifications"):
+                    send_notification(notif)
             except Exception as exc:
                 print("Notification failed:", exc)

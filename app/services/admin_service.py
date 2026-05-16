@@ -5,6 +5,7 @@ from app.models.payment import PaymentSubmission
 from app.models.report import Report
 from app.models.support_requests import Support
 from app.models.users import UserData
+from app.utils.subscription_manager import normalize_plan
 from app.utils.time_utils import utc_iso_from, utc_now
 
 
@@ -91,7 +92,7 @@ class AdminService:
         if user.status == "BLOCKED":
             raise ValueError("Blocked users cannot receive Pro access")
 
-        user.status = "PRO"
+        user.subscription_plan = "pro"
         db.session.commit()
         return AdminService._serialize_user(user)
 
@@ -117,7 +118,8 @@ class AdminService:
         if user.status == "BLOCKED":
             raise ValueError("Blocked users cannot receive Pro access")
 
-        user.status = "PRO"
+        requested_plan = normalize_plan((submission.plan or "pro").split("_", 1)[0])
+        user.subscription_plan = requested_plan if requested_plan != "free" else "pro"
         submission.status = "approved"
         submission.reviewed_at = utc_now()
         db.session.commit()
@@ -234,7 +236,8 @@ class AdminService:
         blocked = status == "BLOCKED"
         pending_pro = status == "PENDING_PRO"
         pro = status == "PRO"
-        verified = status in {"VERIFIED", "PENDING_PRO", "PRO"}
+        enterprise = status == "ENTERPRISE"
+        verified = status in {"VERIFIED", "PENDING_PRO", "PRO", "ENTERPRISE"}
 
         return {
             "id": f"USR-{user.id:04d}",
@@ -244,6 +247,8 @@ class AdminService:
             "verified": verified,
             "pendingPro": pending_pro,
             "pro": pro,
+            "enterprise": enterprise,
+            "plan": user.subscription_plan,
             "status": "Blocked" if blocked else "Deactivated" if status == "DEACTIVED" else "Active",
             "rawStatus": status,
             "warnings": int(user.get_setting("account-info", "warnings", 0) or 0),

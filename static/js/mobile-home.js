@@ -385,7 +385,7 @@ function resetOverlay() {
 
 function updateComposerState($textarea) {
     const inputLength = $textarea.val().length;
-    const maxLength = 180;
+    const maxLength = Number($textarea.attr("maxlength")) || 180;
     const progress = (inputLength / maxLength) * 100;
     const circumference = 2 * Math.PI * 22;
     const offset = (progress / 100) * circumference;

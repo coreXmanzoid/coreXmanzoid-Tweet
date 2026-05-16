@@ -68,7 +68,9 @@
     <div class="my-comment">
         <img src="{{ current_user.profile_image_url if current_user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
             alt="" width="35" height="35" class="rounded-circle me-2">
-        <input type="text" autocomplete="off" name="content" maxlength="130" placeholder="Leave your Comment">
+        <input type="text" autocomplete="off" name="content"
+            maxlength="{{ subscription_limit(current_user, 'comments', 'comment_length', 100) if subscription_limit(current_user, 'comments', 'comment_length', 100) != -1 else 1000 }}"
+            placeholder="Leave your Comment" {% if not subscription_has_feature(current_user, 'comments', 'can_comment') %}disabled{% endif %}>
         <button id="submitComment" data-current_user_username="{{ current_user.username }}"
             data-current_user_name="{{ current_user.name }}">Reply</button>
     </div>

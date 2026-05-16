@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from types import SimpleNamespace
 
 from flask import Blueprint, jsonify, render_template, request
@@ -10,7 +11,8 @@ from app.models.notifications import Notification
 from app.services.notification_service import NotificationService
 from app.services.push_service import send_notification
 from app.decorators import verified_user
-from app.utils.time_utils import utc_iso_from
+from app.utils.subscription_manager import get_limit, has_feature, is_unlimited
+from app.utils.time_utils import utc_iso_from, utc_now
 
 
 notification_bp = Blueprint("notifications", __name__)
@@ -25,6 +27,8 @@ def save_token():
 
     if not token:
         return jsonify({"status": "error", "message": "token is required"}), 400
+    if not has_feature(current_user, "notifications", "push_notifications"):
+        return jsonify({"status": "error", "message": "Push notifications require a higher plan."}), 403
 
     current_user.fb_auth_token = token
     db.session.commit()
@@ -75,6 +79,8 @@ def notification_test_push():
                 "message": "No FCM token is saved for the current user. Enable notifications first.",
             }
         ), 400
+    if not has_feature(current_user, "notifications", "push_notifications"):
+        return jsonify({"status": "error", "message": "Push notifications require a higher plan."}), 403
 
     test_notification = SimpleNamespace(
         title="ChatFlick test",
@@ -100,13 +106,12 @@ def notification_test_push():
 @login_required
 def notifications():
 
+    history_days = get_limit(current_user, "notifications", "notification_history_days", 7)
+    query = db.select(Notification).where(Notification.recipient_id == current_user.id)
+    if not is_unlimited(history_days):
+        query = query.where(Notification.created_at >= utc_now() - timedelta(days=int(history_days)))
     notifications = (
-        db.session.execute(
-            db.select(Notification)
-            .where(Notification.recipient_id == current_user.id)
-            .order_by(Notification.created_at.desc())
-            .limit(15)
-        )
+        db.session.execute(query.order_by(Notification.created_at.desc()).limit(15))
         .scalars()
         .all()
     )
@@ -178,6 +183,8 @@ def send_notification_route(state, push):
         return jsonify({"status": "error", "message": "title and message are required"}), 400
 
     send_push = str(push).lower() == "true"
+    if send_push and not has_feature(current_user, "notifications", "push_notifications"):
+        send_push = False
 
     if state == 2:
 
@@ -200,14 +207,16 @@ def send_notification_route(state, push):
                 commit=False,
             )
 
-            notifications.append(notif)
+            if notif:
+                notifications.append(notif)
 
         db.session.commit()
 
         if send_push:
             for notif in notifications:
                 try:
-                    send_notification(notif)
+                    if has_feature(notif.recipient, "notifications", "push_notifications"):
+                        send_notification(notif)
                 except Exception as exc:
                     print("Notification failed:", exc)
 
@@ -238,9 +247,10 @@ def send_notification_route(state, push):
             commit=True,
         )
 
-        if send_push:
+        if send_push and notif:
             try:
-                send_notification(notif)
+                if has_feature(notif.recipient, "notifications", "push_notifications"):
+                    send_notification(notif)
             except Exception as exc:
                 print("Notification failed:", exc)
 

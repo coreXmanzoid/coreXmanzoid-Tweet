@@ -7,7 +7,8 @@
 <div class="newPost">
     <img src="{{ current_user.profile_image_url if current_user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
         alt="" width="50" height="50" class="rounded-circle me-2">
-    <textarea name="post-input" spellcheck="false" placeholder="Whats-happening!"></textarea>
+    <textarea name="post-input" spellcheck="false" placeholder="Whats-happening!"
+        maxlength="{{ subscription_limit(current_user, 'posts', 'post_length', 180) if subscription_limit(current_user, 'posts', 'post_length', 180) != -1 else 10000 }}"></textarea>
 </div>
 <div class="submit">
     <div class="progress-circle" style="width: 40px; height: 40px;">

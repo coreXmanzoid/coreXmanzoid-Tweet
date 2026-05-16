@@ -12,12 +12,17 @@
     <div class="post-heading">
         <img src="{{ post.user.profile_image_url if post.user.profile_image_url else url_for('static', filename='assets/default-profile.jpg') }}"
             alt="" width="40" height="40" class="rounded-circle me-2">
-        <h5 data-userid="{{ post.user.id}}">{{ post.user.name }}<br /><span>@{{ post.user.username }}</span>
+        <h5 data-userid="{{ post.user.id}}">{{ post.user.name }}
+            {% if subscription_has_feature(post.user, "monetization", "verified_badge") %}
+            <i class="bi bi-patch-check-fill m-1" style="font-size: 14px; color: #F94818;"></i>
+            {% endif %}
+            <br /><span>@{{ post.user.username }}</span>
             {% if not reposts %}
             <strong class="post-time" data-timestamp="{{ utc_iso_from(post.timestamp) }}">
                 {{ utc_iso_from(post.timestamp) }}
-            </strong></span></h5>
-            {% endif %}
+            </strong></span>
+        </h5>
+        {% endif %}
         </h5>
         {% if reposts %}
         <p class="ps-2 text-muted fs-6 d-md-inline">

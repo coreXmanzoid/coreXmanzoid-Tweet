@@ -42,7 +42,10 @@ def explore_accounts(id, state):
 @verified_user
 def follows(id, st):
     if st == 1:
-        FollowService.follow_user(id)
+        try:
+            FollowService.follow_user(id)
+        except ValueError as exc:
+            return jsonify({"status": "error", "message": str(exc)}), 403
     elif st == 2:
         FollowService.unfollow_user(id)
 

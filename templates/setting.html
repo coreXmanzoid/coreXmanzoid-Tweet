@@ -94,7 +94,8 @@
                 <div class="field">
                   <label for="number">Contact</label>
                   <input id="number" type="number"
-                    value="{{ current_user.contact if current_user.email else 'coreXmanzoid@example.com' }}">
+                    value="{{ current_user.contact if current_user.email else 'coreXmanzoid@example.com' }}"
+                    {% if not subscription_has_feature(current_user, 'profile', 'can_set_contact') %}disabled{% endif %}>
                 </div>
               </div>
               <div class="col-md-6">
@@ -132,7 +133,7 @@
           </div>
           <div class="field field-wide bio ms-3">
             <label for="bio">Bio</label>
-            <textarea id="bio">{{ current_user.get_setting('profile-info', 'bio') }}</textarea>
+            <textarea id="bio" maxlength="{{ subscription_limit(current_user, 'profile', 'bio_length', 80) if subscription_limit(current_user, 'profile', 'bio_length', 80) != -1 else 1000 }}">{{ current_user.get_setting('profile-info', 'bio') }}</textarea>
           </div>
         </div>
       </section>
@@ -160,7 +161,8 @@
                 <div class="field">
                   <label for="website">Website</label>
                   <input id="website" type="url" placeholder="https://example.com"
-                    value="{{ current_user.get_setting('account-info', 'website') }}">
+                    value="{{ current_user.get_setting('account-info', 'website') }}"
+                    {% if not subscription_has_feature(current_user, 'profile', 'can_set_website') %}disabled{% endif %}>
                 </div>
               </div>
             </div>
@@ -307,12 +309,14 @@
           <label class="toggle">
             <span>Email Notifications</span>
             <input id="emailz" type="checkbox" {% if
-              current_user.get_setting('notifications-setting', 'email_notifications' ) %} checked {% endif %}>
+              current_user.get_setting('notifications-setting', 'email_notifications' ) and subscription_has_feature(current_user, 'notifications', 'email_notifications') %} checked {% endif %}
+              {% if not subscription_has_feature(current_user, 'notifications', 'email_notifications') %}disabled{% endif %}>
           </label>
           <label class="toggle">
             <span>Push Notifications</span>
             <input id="push" type="checkbox" {% if
-              current_user.get_setting('notifications-setting', 'push_notifications' ) %} checked {% endif %}>
+              current_user.get_setting('notifications-setting', 'push_notifications' ) and subscription_has_feature(current_user, 'notifications', 'push_notifications') %} checked {% endif %}
+              {% if not subscription_has_feature(current_user, 'notifications', 'push_notifications') %}disabled{% endif %}>
           </label>
           <div class="field">
             <label>*Customize what type of activity triggers a notification</label>
@@ -370,7 +374,9 @@
               <span class="muted">Export a copy of your account information.</span>
             </div>
             <!-- <a href="/setting/download-account-data/{{ current_user.id }}"><button type="button">Download</button></a> -->
+            {% if subscription_has_feature(current_user, 'account', 'can_download_data') %}
             <a href="{{ url_for('setting.download_account_data', id=current_user.id)}}"><button type="button">Download</button></a>
+            {% endif %}
           </div>
           <div class="app-item">
             <div>
@@ -505,7 +511,9 @@
           <div class="row">
             <div class="inline-actions danger-area col-md-6">
               <button id="1" style="background-color: #F94818;" type="button">Deactivate Account</button>
+              {% if subscription_has_feature(current_user, 'account', 'can_delete') %}
               <button id="2" style="background-color: #F94818;" type="button">Delete Account</button>
+              {% endif %}
             </div>
             <div class="col-md-6 mt-3">
               <p class="">
