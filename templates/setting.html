@@ -97,10 +97,23 @@
                     value="@{{ current_user.username if current_user.username else 'coreXmanzoid' }}">
                 </div>
                 <div class="field">
-                  <label for="number">Contact</label>
+                  <div class="field-label-row">
+                    <label for="number">Contact</label>
+
+                    {% if not subscription_has_feature(current_user, 'profile', 'can_set_contact') %}
+                    <span class="pro-badge">✨ PRO</span>
+                    {% endif %}
+                  </div>
+
                   <input id="number" type="number"
-                    value="{{ current_user.contact if current_user.email else 'coreXmanzoid@example.com' }}" {% if not
-                    subscription_has_feature(current_user, 'profile' , 'can_set_contact' ) %}disabled{% endif %}>
+                    value="{{ current_user.contact if current_user.contact else 'coreXmanzoid@example.com' }}" {% if not
+                    subscription_has_feature(current_user, 'profile' , 'can_set_contact' ) %} disabled {% endif %}>
+
+                  {% if not subscription_has_feature(current_user, 'profile', 'can_set_contact') %}
+                  <small class="upgrade-text">
+                    Upgrade to Pro to customize your contact information.
+                  </small>
+                  {% endif %}
                 </div>
               </div>
               <div class="col-md-6">
@@ -165,11 +178,22 @@
                   <input id="birthday" type="date" value="{{ current_user.birth_date }}">
                 </div>
                 <div class="field">
-                  <label for="website">Website</label>
+                  <div class="field-label-row">
+                    <label for="website">Website</label>
+                    {% if not subscription_has_feature(current_user, 'profile', 'can_set_contact') %}
+                    <span class="pro-badge">✨ PRO</span>
+                    {% endif %}
+                  </div>
+
                   <input id="website" type="url" placeholder="https://example.com"
                     value="{{ current_user.get_setting('account-info', 'website') }}" {% if not
                     subscription_has_feature(current_user, 'profile' , 'can_set_website' ) %}disabled{% endif %}>
                 </div>
+                {% if not subscription_has_feature(current_user, 'profile', 'can_set_website') %}
+                <small class="upgrade-text">
+                  Upgrade to Pro to add your website link.
+                </small>
+                {% endif %}
               </div>
             </div>
             <div class="col-md-6">
@@ -313,7 +337,13 @@
         </div>
         <div class="toggle-grid">
           <label class="toggle">
-            <span>Email Notifications</span>
+            <div>
+              <span>Email Notifications</span>
+              {% if not subscription_has_feature(current_user, 'notifications', 'email_notifications') %}
+              <span class="pro-badge ms-1">✨ PRO</span>
+              {% endif %}
+            </div>
+
             <input id="emailz" type="checkbox" {% if
               current_user.get_setting('notifications-setting', 'email_notifications' ) and
               subscription_has_feature(current_user, 'notifications' , 'email_notifications' ) %} checked {% endif %} {%
@@ -321,13 +351,23 @@
               %}>
           </label>
           <label class="toggle">
-            <span>Push Notifications</span>
+            <div>
+              <span>Push Notifications</span>
+              {% if not subscription_has_feature(current_user, 'notifications', 'push_notifications') %}
+              <span class="pro-badge ms-1">✨ PRO</span>
+              {% endif %}
+            </div>
             <input id="push" type="checkbox" {% if
               current_user.get_setting('notifications-setting', 'push_notifications' ) and
               subscription_has_feature(current_user, 'notifications' , 'push_notifications' ) %} checked {% endif %} {%
               if not subscription_has_feature(current_user, 'notifications' , 'push_notifications' ) %}disabled{% endif
               %}>
           </label>
+          {% if not subscription_has_feature(current_user, 'notifications', 'push_notifications') %}
+          <small class="upgrade-text">
+            Upgrade to Pro to customize your contact information.
+          </small>
+          {% endif %}
           <div class="field">
             <label>*Customize what type of activity triggers a notification</label>
           </div>
