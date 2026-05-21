@@ -49,6 +49,11 @@
                     <span class="nav-label">Reports</span>
                     <span class="nav-badge" id="reportsPendingBadge">0</span>
                 </button>
+                <button class="nav-item" type="button" data-section="postReports">
+                    <span class="nav-icon"><i class="bi bi-file-earmark-post-fill"></i></span>
+                    <span class="nav-label">Post Reports</span>
+                    <span class="nav-badge" id="postReportsPendingBadge">0</span>
+                </button>
                 <button class="nav-item" type="button" data-section="payments">
                     <span class="nav-icon"><i class="bi bi-credit-card-fill"></i></span>
                     <span class="nav-label">Payments</span>
@@ -321,6 +326,55 @@
                             <i class="bi bi-shield-x"></i>
                             <h4>No reports found</h4>
                             <p>There are no results matching the current filters.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content-section" id="postReportsSection" data-section-panel="postReports">
+                <div class="content-card">
+                    <div class="section-toolbar">
+                        <div>
+                            <span class="eyebrow-text">Content Moderation</span>
+                            <h3>Post Reports</h3>
+                            <p class="section-copy">Review reported posts, inspect the original content, warn authors,
+                                or remove posts from the public feed.</p>
+                        </div>
+                        <div class="toolbar-controls">
+                            <div class="search-shell">
+                                <i class="bi bi-search"></i>
+                                <input type="search" id="postReportsSearchInput"
+                                    placeholder="Search post report, user, reason, or content">
+                            </div>
+                            <select class="filter-select" id="postReportsStatusFilter">
+                                <option value="all">All Statuses</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Reviewed">Reviewed</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-shell">
+                        <div class="table-responsive">
+                            <table class="table admin-table align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Report ID</th>
+                                        <th>Reporter</th>
+                                        <th>Post Author</th>
+                                        <th>Reason</th>
+                                        <th>Post</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="postReportsTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div class="empty-state d-none" id="postReportsEmptyState">
+                            <i class="bi bi-file-earmark-check"></i>
+                            <h4>No post reports found</h4>
+                            <p>There are no reported posts matching the current filters.</p>
                         </div>
                     </div>
                 </div>
@@ -604,6 +658,83 @@
                 </div>
                 <div class="modal-footer border-0">
                     <button type="button" class="primary-button" id="markReviewedButton">Mark as Reviewed</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="postReportDetailsModal" tabindex="-1" aria-labelledby="postReportDetailsLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content admin-modal">
+                <div class="modal-header border-0">
+                    <div>
+                        <span class="eyebrow-text">Post Report Details</span>
+                        <h4 class="modal-title" id="postReportDetailsLabel">Reported Post Review</h4>
+                    </div>
+                    <button type="button" class="btn-close admin-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="detail-grid">
+                        <div class="detail-card">
+                            <span>Report ID</span>
+                            <strong id="modalPostReportId">-</strong>
+                        </div>
+                        <div class="detail-card">
+                            <span>Reporter</span>
+                            <strong id="modalPostReportReporter">-</strong>
+                        </div>
+                        <div class="detail-card">
+                            <span>Post Author</span>
+                            <strong id="modalPostReportAuthor">-</strong>
+                        </div>
+                        <div class="detail-card">
+                            <span>Reason</span>
+                            <strong id="modalPostReportReason">-</strong>
+                        </div>
+                        <div class="detail-card">
+                            <span>Report Status</span>
+                            <strong id="modalPostReportStatus">-</strong>
+                        </div>
+                        <div class="detail-card">
+                            <span>Post Status</span>
+                            <strong id="modalPostReportPostStatus">-</strong>
+                        </div>
+                        <div class="detail-card detail-card-wide">
+                            <span>Timestamp</span>
+                            <strong id="modalPostReportTimestamp">-</strong>
+                        </div>
+                    </div>
+
+                    <div class="post-review-layout">
+                        <div class="message-panel">
+                            <label>Reported Post</label>
+                            <article class="reported-post-card">
+                                <div class="reported-post-header">
+                                    <div>
+                                        <strong id="modalPostReportPostAuthor">-</strong>
+                                        <span id="modalPostReportPostMeta">-</span>
+                                    </div>
+                                    <span class="status-pill" id="modalPostReportPostBadge">-</span>
+                                </div>
+                                <div class="reported-post-content" id="modalPostReportPostContent"></div>
+                                <div class="reported-post-tags" id="modalPostReportPostTags"></div>
+                            </article>
+                        </div>
+
+                        <div class="message-panel">
+                            <label>Reporter Details</label>
+                            <div class="message-box" id="modalPostReportDetails"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="soft-button" id="warnPostAuthorButton">Warn Post Author</button>
+                    <button type="button" class="soft-button action-block" id="removeReportedPostButton">Remove
+                        Post</button>
+                    <button type="button" class="primary-button" id="markPostReportReviewedButton">Mark as
+                        Reviewed</button>
                 </div>
             </div>
         </div>

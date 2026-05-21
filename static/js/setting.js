@@ -58,8 +58,8 @@ function readFlashedMessages() {
         const parsed = JSON.parse(flashNode.textContent);
         return Array.isArray(parsed) ? parsed : [];
     } catch (error) {
-        const message = err?.responseJSON?.message || "Unable to submit request Request.";
-        showSettingToast(message, "error");
+        showSettingToast("Unable to read saved notifications.", "error");
+        return [];
     }
 }
 

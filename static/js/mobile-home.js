@@ -9,6 +9,39 @@ const mobileFeedState = {
     active: false
 };
 
+function showMobileToast(message, type = "info") {
+    const stack = document.getElementById("mobileToastStack");
+    if (!stack || !message) {
+        return;
+    }
+
+    const normalizedType = ["success", "error", "info"].includes(type) ? type : "info";
+    const toast = document.createElement("article");
+    toast.className = "mobile-toast mobile-toast--" + normalizedType;
+    toast.setAttribute("role", normalizedType === "error" ? "alert" : "status");
+    toast.innerHTML = '<strong></strong><span></span><button type="button" aria-label="Close notification">&times;</button>';
+    toast.querySelector("strong").textContent = normalizedType === "success"
+        ? "Success"
+        : normalizedType === "error"
+            ? "Something went wrong"
+            : "Notice";
+    toast.querySelector("span").textContent = message;
+
+    const removeToast = function () {
+        if (toast.classList.contains("is-removing")) {
+            return;
+        }
+        toast.classList.add("is-removing");
+        window.setTimeout(function () {
+            toast.remove();
+        }, 220);
+    };
+
+    toast.querySelector("button").addEventListener("click", removeToast);
+    stack.appendChild(toast);
+    window.setTimeout(removeToast, 3800);
+}
+
 function abortAndRenew(key) {
     if (mobileControllers[key]) {
         mobileControllers[key].abort();
@@ -383,6 +416,68 @@ function resetOverlay() {
     $("body").css("overflow", "");
 }
 
+function openMobileReport(postId) {
+    if (!postId) {
+        showMobileToast("Unable to find the post you want to report.", "error");
+        return;
+    }
+
+    $("#mobileReportOverlay").data("postid", postId).prop("hidden", false);
+    $("#mobile-report-category").val("No Reason Selected");
+    $("#mobile-report-details").val("");
+    $("body").css("overflow", "hidden");
+}
+
+function closeMobileReport() {
+    $("#mobileReportOverlay").removeData("postid").prop("hidden", true);
+    $("#mobile-report-category").val("No Reason Selected");
+    $("#mobile-report-details").val("");
+    if ($(".fullpost-overlay").prop("hidden")) {
+        $("body").css("overflow", "");
+    }
+}
+
+function submitMobileReport() {
+    const postId = $("#mobileReportOverlay").data("postid");
+    const category = $("#mobile-report-category").val();
+    const message = $("#mobile-report-details").val().trim();
+    const $button = $("#mobileReportSubmit");
+
+    if (!postId) {
+        showMobileToast("Unable to find the post you want to report.", "error");
+        return;
+    }
+
+    if (!category || category === "No Reason Selected") {
+        showMobileToast("Please select a report reason before submitting.", "error");
+        return;
+    }
+
+    $button.prop("disabled", true).text("Submitting...");
+
+    $.ajax({
+        url: "/reports/posts",
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({
+            post_id: postId,
+            category: category,
+            message: message
+        }),
+        success: function (data) {
+            closeMobileReport();
+            showMobileToast(data?.message || "Report submitted successfully.", "success");
+        },
+        error: function (err) {
+            const message = err?.responseJSON?.message || "Unable to submit your report right now.";
+            showMobileToast(message, "error");
+        },
+        complete: function () {
+            $button.prop("disabled", false).text("Submit Report");
+        }
+    });
+}
+
 function updateComposerState($textarea) {
     const inputLength = $textarea.val().length;
     const maxLength = Number($textarea.attr("maxlength")) || 180;
@@ -474,6 +569,40 @@ function showLikedPosts() {
     setAccountsRowVisible(false);
     $(".post-section").html('<div class="mobile-more-title"><h4>Liked post</h4></div>');
     showPosts(3, getCurrentUserId());
+}
+
+
+function validatePostFeatures(content, mentionsData) {
+
+    // Detect mentions like @coreXmanzoid
+    const mentionMatches = content.match(/@\w+/g) || [];
+
+    // Detect hashtags like #ChatFlick
+    const hashtagMatches = content.match(/#\w+/g) || [];
+
+        // Check hashtag limit
+    if (hashtagMatches.length > 5) {
+
+        showMobileToast(
+            "Free users can only use up to 5 hashtags per post.",
+            "Notice"
+        );
+
+        return false;
+    }
+
+    // Check plain text mentions for free users
+    if (mentionMatches.length > 0 && (!mentionsData || mentionsData.length === 0)) {
+
+        showMobileToast(
+            "Upgrade to ChatFlick Pro to use mentions in posts.",
+            "Notice"
+        );
+
+        return false;
+    }
+
+    return true;
 }
 
 function exploreAccounts(url) {
@@ -757,7 +886,7 @@ function submitComment() {
             $newComment.next(".comment-content").remove();
             $newComment.remove();
             $(".comments span").text(Math.max(comments - 1, 0));
-            alert("Failed to submit comment. Please try again.");
+            showMobileToast("Failed to submit comment. Please try again.", "error");
         },
         complete: function () {
             $("#submitComment").prop("disabled", false);
@@ -876,6 +1005,34 @@ $(function () {
         }
     });
 
+    $(document).on("click", "#report-post", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const postId = $(this).closest(".options-menu").data("postid")
+            || $(this).closest(".post, .post-detail").data("postid")
+            || $(".fullpost-box .post-detail").data("postid");
+        document.querySelectorAll(".options-menu.show").forEach(function (menu) {
+            menu.classList.remove("show");
+        });
+        openMobileReport(postId);
+    });
+
+    $(document).on("click", ".mobile-report-close", function (e) {
+        e.preventDefault();
+        closeMobileReport();
+    });
+
+    $(document).on("click", "#mobileReportOverlay", function (e) {
+        if (e.target === this) {
+            closeMobileReport();
+        }
+    });
+
+    $(document).on("click", "#mobileReportSubmit", function (e) {
+        e.preventDefault();
+        submitMobileReport();
+    });
+
     $("#notification-icon").on("click", showNotifications);
 
     $(document).on("click", "#verifyBtn", function () {
@@ -898,7 +1055,7 @@ $(function () {
                     }
                 } else {
                     $button.prop("disabled", false).text("Send Verification Email");
-                    alert("Failed to send verification email. Please try again.");
+                    showMobileToast("Failed to send verification email. Please try again.", "error");
                 }
             },
             error: function () {
@@ -953,7 +1110,7 @@ $(function () {
             success: function (response) {
                 if (response.status !== "success") {
                     $('#feed-post .post[data-postid="' + tempPostId + '"]').remove();
-                    alert("Failed to post. Please try again.");
+                    showMobileToast("Failed to post. Please try again.", "error");
                     return;
                 } else {
 
@@ -988,9 +1145,11 @@ $(function () {
             },
             error: function () {
                 $('#feed-post .post[data-postid="' + tempPostId + '"]').remove();
-                alert("An error occurred. Please try again.");
+                showMobileToast("An error occurred. Please try again.", "error");
             }
         });
+        const mentionsData = JSON.parse($textarea.attr("data-mentions") || "[]");
+        validatePostFeatures(content, mentionsData);
     });
 
     $(document).on("click", ".ProfileOptions h6", function () {
@@ -1067,7 +1226,7 @@ $(function () {
 
             const nextContent = $textarea.val().trim();
             if (!nextContent) {
-                alert("Post content cannot be empty.");
+                showMobileToast("Post content cannot be empty.", "error");
                 return;
             }
 
@@ -1087,14 +1246,14 @@ $(function () {
                 }),
                 success: function (res) {
                     if (res.status !== "success") {
-                        alert(res.status || "Unable to update post.");
+                        showMobileToast(res.status || "Unable to update post.", "error");
                         return;
                     }
 
                     closeEditor(res.content || nextContent, originalMentions);
                 },
                 error: function () {
-                    alert("Failed to update post. Please try again.");
+                    showMobileToast("Failed to update post. Please try again.", "error");
                 },
                 complete: function () {
                     $saveBtn.css("pointer-events", "");
@@ -1125,14 +1284,14 @@ $(function () {
                 data: JSON.stringify({ post_id: postId }),
                 success: function (res) {
                     if (res.status !== "success") {
-                        alert(res.status || "Unable to delete post.");
+                        showMobileToast(res.status || "Unable to delete post.", "error");
                         return;
                     }
 
                     $('.post[data-postid="' + postId + '"]').remove();
                 },
                 error: function () {
-                    alert("Failed to delete post. Please try again.");
+                    showMobileToast("Failed to delete post. Please try again.", "error");
                 },
                 complete: function () {
                     $deleteBtn.css("pointer-events", "");
@@ -1356,7 +1515,7 @@ $(function () {
             shareDone = navigator.share(shareData);
         } else if (navigator.clipboard && window.isSecureContext) {
             shareDone = navigator.clipboard.writeText(shareData.text).then(function () {
-                alert("Post copied to clipboard!");
+                showMobileToast("Post copied to clipboard.", "success");
             });
         } else {
             shareDone = Promise.reject(new Error("Sharing is not available"));

@@ -9,26 +9,26 @@
                 <i class="bi bi-three-dots"></i>
             </button>
 
-            <div class="options-menu">
-                <a href="#" class="option-item">
+            <div class="options-menu" data-id="{{ user.id}}">
+                <a href="#" id="about-this-account" class="option-item">
                     About this account
                 </a>
                 <hr>
 
-                <a href="#" class="option-item">
+                <a href="#" id="copy-profile-link" class="option-item">
                     Copy profile Link
                 </a>
                 <hr>
-                <a href="#" class="option-item">
+                <a href="#" id="report-user" class="option-item">
                     Report @{{ user.username }}
                 </a>
                 <hr>
 
-                <a href="#" class="option-item">
+                <a href="#" id="not-interested" class="option-item">
                     Not interested in this account
                 </a>
                 <hr>
-                <a href="#" class="option-item">
+                <a href="#" id="block-user" class="option-item">
                     Block @{{ user.username }}
                 </a>
             </div>

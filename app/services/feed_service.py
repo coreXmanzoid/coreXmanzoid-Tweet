@@ -1,4 +1,4 @@
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from app.extensions import db
 from app.models.posts import Post
 from app.models.users import UserData
@@ -14,12 +14,17 @@ class FeedService:
         return query
 
     @staticmethod
+    def _visible_posts(query):
+        return query.where(or_(Post.status.is_(None), Post.status == "ACTIVE"))
+
+    @staticmethod
     def profile_posts(user_id, limit=None, exclude_ids=None):
         query = (
             db.select(Post)
             .where(Post.user_id == user_id)
             .order_by(Post.timestamp.desc())
         )
+        query = FeedService._visible_posts(query)
         query = FeedService._with_exclusions(query, exclude_ids)
         if limit:
             query = query.limit(limit)
@@ -51,6 +56,7 @@ class FeedService:
             .where(Post.user_id.in_(following_ids))
             .order_by(Post.timestamp.desc())
         )
+        query = FeedService._visible_posts(query)
         query = FeedService._with_exclusions(query, exclude_ids)
         if limit:
             query = query.limit(limit)
@@ -74,6 +80,7 @@ class FeedService:
             .where(Post.id.in_(user.liked_posts))
             .order_by(Post.timestamp.desc())
         )
+        query = FeedService._visible_posts(query)
         query = FeedService._with_exclusions(query, exclude_ids)
         if limit:
             query = query.limit(limit)
@@ -97,6 +104,7 @@ class FeedService:
             .where(Post.id.in_(user.reposted_posts))
             .order_by(Post.timestamp.desc())
         )
+        query = FeedService._visible_posts(query)
         query = FeedService._with_exclusions(query, exclude_ids)
         if limit:
             query = query.limit(limit)
@@ -111,7 +119,7 @@ class FeedService:
 
     @staticmethod
     def random_posts(limit=None, exclude_ids=None):
-        query = db.select(Post).order_by(func.random())
+        query = FeedService._visible_posts(db.select(Post).order_by(func.random()))
         query = FeedService._with_exclusions(query, exclude_ids)
         if limit:
             query = query.limit(limit)

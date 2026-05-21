@@ -8,6 +8,56 @@ const feedState = {
     active: false
 };
 
+function getToastMeta(type) {
+    switch (type) {
+        case "success":
+            return { icon: "+", title: "Success" };
+        case "error":
+            return { icon: "!", title: "Something went wrong" };
+        case "info":
+            return { icon: "i", title: "Notice" };
+        default:
+            return { icon: "*", title: "Update" };
+    }
+}
+
+function showSettingToast(message, type = "info") {
+    const toastStack = document.getElementById("settingsToastStack");
+    if (!toastStack || !message) {
+        return;
+    }
+
+    const normalizedType = ["success", "error", "info"].includes(type) ? type : "info";
+    const meta = getToastMeta(normalizedType);
+    const toast = document.createElement("article");
+    toast.className = `settings-toast settings-toast--${normalizedType}`;
+    toast.setAttribute("role", normalizedType === "error" ? "alert" : "status");
+
+    toast.innerHTML = `
+        <div class="settings-toast-icon" aria-hidden="true">${meta.icon}</div>
+        <div class="settings-toast-body">
+            <h3 class="settings-toast-title">${meta.title}</h3>
+            <p class="settings-toast-message"></p>
+        </div>
+        <button class="settings-toast-close" type="button" aria-label="Close notification">&times;</button>
+    `;
+
+    toast.querySelector(".settings-toast-message").textContent = message;
+
+    const removeToast = () => {
+        if (toast.classList.contains("is-removing")) {
+            return;
+        }
+
+        toast.classList.add("is-removing");
+        window.setTimeout(() => toast.remove(), 250);
+    };
+
+    toast.querySelector(".settings-toast-close").addEventListener("click", removeToast);
+    toastStack.appendChild(toast);
+    window.setTimeout(removeToast, 4200);
+}
+
 function abortAndRenew(key) {
     if (controllers[key]) {
         controllers[key].abort();
@@ -444,6 +494,39 @@ function updateComposerState($textarea) {
     $container.find(".submit button").prop("disabled", !(inputLength > 0 && inputLength <= maxLength));
 }
 
+function validatePostFeatures(content, mentionsData) {
+
+    // Detect mentions like @coreXmanzoid
+    const mentionMatches = content.match(/@\w+/g) || [];
+
+    // Detect hashtags like #ChatFlick
+    const hashtagMatches = content.match(/#\w+/g) || [];
+
+        // Check hashtag limit
+    if (hashtagMatches.length > 5) {
+
+        showSettingToast(
+            "Free users can only use up to 5 hashtags per post.",
+            "Notice"
+        );
+
+        return false;
+    }
+
+    // Check plain text mentions for free users
+    if (mentionMatches.length > 0 && (!mentionsData || mentionsData.length === 0)) {
+
+        showSettingToast(
+            "Upgrade to ChatFlick Pro to use mentions in posts.",
+            "Notice"
+        );
+
+        return false;
+    }
+
+    return true;
+}
+
 function exploreAccounts(url) {
     $(".explore-accounts").html('<div class="loader-wrapper"><span class="loader"></span></div>');
 
@@ -532,7 +615,7 @@ function showFullPost(e) {
     if (e) {
         e.preventDefault();
     }
-    
+
     let $post = $(this).closest(".post");
     if ($post.length === 0) {
         $post = $(".post.active-post").first();
@@ -544,7 +627,7 @@ function showFullPost(e) {
         $(".notifications-tab").hide();
         return;
     }
-    
+
     const postId = $post.data("postid");
     const activePost = $post.hasClass("active-post");
     initializeOptionsToggle();
@@ -768,7 +851,7 @@ function submitComment() {
                 $(".all-comments").html('<div class="no-data text-center py-3">No comments yet.</div>');
             }
 
-            alert("Failed to submit comment. Please try again.");
+            showSettingToast("Failed to submit comment. Please try again.", "error");
         },
         complete: function () {
             $("#submitComment").prop("disabled", false);
@@ -840,7 +923,7 @@ $(".verification-box button").on("click", function () {
                     button.after('<strong id="verification-status" class="verification-tag">Verification email sent! Please check your inbox.</strong>');
                 }
             } else {
-                alert("Failed to send verification email. Please try again.");
+                showSettingToast("Failed to send verification email. Please try again.", "error");
             }
         }
     });
@@ -956,6 +1039,7 @@ $(document).off("click.submitPost", ".submit button").on("click.submitPost", ".s
 
     const tempPostId = prependPost(content, userId);
 
+    
     ajaxWithAbort("submitPost", {
         url: "/managePosts/1",
         method: "POST",
@@ -964,7 +1048,7 @@ $(document).off("click.submitPost", ".submit button").on("click.submitPost", ".s
         success: function (response) {
             if (response.status !== "success") {
                 $('.div3 .post[data-postid="' + tempPostId + '"]').remove();
-                alert("Failed to post. Please try again.");
+                showSettingToast("Failed to post. Please try again.", "error");
                 return;
             }
 
@@ -1000,9 +1084,11 @@ $(document).off("click.submitPost", ".submit button").on("click.submitPost", ".s
         },
         error: function () {
             $('.div3 .post[data-postid="' + tempPostId + '"]').remove();
-            alert("An error occurred. Please try again.");
-        }
+            showSettingToast("An error occurred. Please try again.", "error");
+        },
     });
+
+    validatePostFeatures(content, JSON.parse($("textarea[name='post-input']").attr("data-mentions") || "[]"));
 });
 
 $(document).off("input.postComposer", "textarea[name='post-input']").on("input.postComposer", "textarea[name='post-input']", function () {
@@ -1091,7 +1177,7 @@ $(document).off("click.profileOptions", ".ProfileOptions h6").on("click.profileO
         showPosts(3, userId);
     } else if (option === "Reposts") {
         showPosts(4, userId);
-    } else if (option === "About"){
+    } else if (option === "About") {
         loadFragment(
             "profileAbout",
             $(".div3"),
@@ -1110,6 +1196,78 @@ $(document).off("click.postProfile", ".post-heading h5").on("click.postProfile",
         showProfile(profileId);
     }
 });
+
+$(document).off("click.options-menu", ".options-menu a").on("click.options-menu", ".options-menu a", function (e) {
+    e.stopPropagation();
+    let clickID = $(this).attr("id");
+    if (clickID === "report-post") {
+        e.preventDefault();
+        const postId = $(this).closest(".options-menu").data("postid")
+            || $(this).closest(".post, .post-detail").data("postid");
+        $(".report-center").data("postid", postId).show();
+    }
+});
+
+$(document).off("click.close-report", ".report-center .close")
+    .on("click.close-report", ".report-center .close", function (e) {
+        e.stopPropagation();
+        $(".report-center").removeData("postid").hide();
+    });
+
+$(document).off("click.report-submit", "#reportSBtn")
+    .on("click.report-submit", "#reportSBtn", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Call your function here
+        submitReportContent();
+    });
+
+function submitReportContent() {
+    const problem = $("#report-center-input").val().trim();
+    const category = $("#report-category").val();
+    const $button = $("#reportSBtn");
+    const $answer = $("#support-ai-answer");
+    const postId = $(".report-center").data("postid") || $("#post-options").data("postid");
+
+    if (!postId) {
+        showSettingToast("Unable to find the post you want to report.", "error");
+        return;
+    }
+
+    if (!category || category === "No Reason Selected") {
+        showSettingToast("Please select a report reason before submitting.", "error");
+        return;
+    }
+
+    $button.prop("disabled", true).text("Submitting...");
+    $answer.hide().text("");
+    $.ajax({
+        url: "/reports/posts",
+        type: "POST",
+        data: JSON.stringify({
+            post_id: postId,
+            category: category,
+            message: problem
+        }),
+        contentType: "application/json",
+        success: function (data) {
+            showSettingToast(data?.message || "Report submitted successfully.", "success");
+            $("#report-center-input").val("");
+            $("#report-category").val("No Reason Selected");
+            $(".report-center").removeData("postid").hide();
+        },
+        error: function (err) {
+            const message = err?.responseJSON?.message || "Unable to submit your report right now.";
+            showSettingToast(message, "error");
+        },
+        complete: function () {
+            $button.prop("disabled", false).text("Submit");
+        }
+    });
+};
+
+
 
 $(document).off("click.editPost", ".edit-post").on("click.editPost", ".edit-post", function () {
     const editLink = $(this);
@@ -1236,7 +1394,7 @@ $(document).off("click.likePost", ".like").on("click.likePost", ".like", functio
             }
         },
         error: function () {
-            alert("An error occurred while processing your like. Please try again.");
+            showSettingToast("An error occurred while processing your like. Please try again.", "error");
             $btn.toggleClass("text-warning", wasLiked);
             $icon.toggleClass("bi-heart-fill", wasLiked);
             $icon.toggleClass("bi-heart", !wasLiked);
@@ -1357,7 +1515,7 @@ $(document).off("click.sharePost", ".share, .shares").on("click.sharePost", ".sh
         const result = await sharePostContent(shareData);
 
         if (result.mode === "clipboard") {
-            alert("Post copied to clipboard!");
+            showSettingToast("Post copied to clipboard.", "success");
         }
 
         $.ajax({
@@ -1386,7 +1544,7 @@ $(document).off("click.sharePost", ".share, .shares").on("click.sharePost", ".sh
         }
 
         console.error("Share failed:", err);
-        alert("Unable to share this post right now.");
+        showSettingToast("Unable to share this post right now.", "error");
         $btn.data("loading", false);
     }
 });
@@ -1424,7 +1582,7 @@ $(document).off("click.likeComment", ".like-comment").on("click.likeComment", ".
             $icon.toggleClass("bi-heart-fill", wasLiked);
             $icon.toggleClass("bi-heart", !wasLiked);
             textNode[0].nodeValue = " " + likes;
-            alert("Failed to update like. Please try again.");
+            showSettingToast("Failed to update like. Please try again.", "error");
         }
     });
 });

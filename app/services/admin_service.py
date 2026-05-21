@@ -1,7 +1,9 @@
 from flask import url_for
 
 from app.extensions import db
+from app.models.notifications import Notification
 from app.models.payment import PaymentSubmission
+from app.models.report_post import ReportPost
 from app.models.report import Report
 from app.models.support_requests import Support
 from app.models.users import UserData
@@ -18,6 +20,9 @@ class AdminService:
         reports = db.session.scalars(
             db.select(Report).order_by(Report.created_at.desc(), Report.id.desc())
         ).all()
+        post_reports = db.session.scalars(
+            db.select(ReportPost).order_by(ReportPost.created_at.desc(), ReportPost.id.desc())
+        ).all()
         users = db.session.scalars(
             db.select(UserData).order_by(UserData.id.desc())
         ).all()
@@ -33,6 +38,10 @@ class AdminService:
                 for item in support_requests
             ],
             "userReports": [AdminService._serialize_report(item) for item in reports],
+            "postReports": [
+                AdminService._serialize_post_report(item)
+                for item in post_reports
+            ],
             "managedUsers": [AdminService._serialize_user(item) for item in users],
             "paymentSubmissions": [
                 AdminService._serialize_payment_submission(item) for item in payments
@@ -73,6 +82,60 @@ class AdminService:
         report.status = "REVIEWED"
         db.session.commit()
         return AdminService._serialize_report(report)
+
+    @staticmethod
+    def mark_post_report_reviewed(report_id):
+        report = AdminService._get_post_report(report_id)
+        report.status = "reviewed"
+        report.admin_action = report.admin_action or "reviewed"
+        report.reviewed_at = utc_now()
+        db.session.commit()
+        return AdminService._serialize_post_report(report)
+
+    @staticmethod
+    def remove_reported_post(report_id):
+        report = AdminService._get_post_report(report_id)
+        if not report.post:
+            raise ValueError("Reported post not found")
+
+        report.post.status = "REMOVED"
+        report.status = "reviewed"
+        report.admin_action = "post_removed"
+        report.reviewed_at = utc_now()
+        db.session.commit()
+        return AdminService._serialize_post_report(report)
+
+    @staticmethod
+    def warn_reported_post_author(report_id):
+        report = AdminService._get_post_report(report_id)
+        if not report.post or not report.post.user:
+            raise ValueError("Reported post author not found")
+
+        user = report.post.user
+        if user.status == "BLOCKED":
+            raise ValueError("User is already blocked")
+
+        warnings = int(user.get_setting("account-info", "warnings", 0) or 0) + 1
+        user.set_setting("account-info", "warnings", warnings)
+
+        if warnings >= 3:
+            AdminService._remember_previous_status(user)
+            user.status = "BLOCKED"
+
+        db.session.add(Notification(
+            recipient_id=user.id,
+            sender_id=None,
+            title="Moderation Warning",
+            message="Your post was reviewed by moderation and a warning was added to your account.",
+            type="moderation_warning",
+            identifier=report.post_id,
+        ))
+        report.admin_action = "warning_sent"
+        db.session.commit()
+        return {
+            "report": AdminService._serialize_post_report(report),
+            "user": AdminService._serialize_user(user),
+        }
 
     @staticmethod
     def verify_user(user_id):
@@ -198,6 +261,13 @@ class AdminService:
         return submission
 
     @staticmethod
+    def _get_post_report(report_id):
+        report = db.session.get(ReportPost, report_id)
+        if not report:
+            raise ValueError("Post report not found")
+        return report
+
+    @staticmethod
     def _remember_previous_status(user):
         previous_status = user.status if user.status != "BLOCKED" else "UNVERIFIED"
         user.set_setting("account-info", "previous_status", previous_status)
@@ -228,6 +298,37 @@ class AdminService:
             "text": item.report_text,
             "status": AdminService._present_status(item.status),
             "timestamp": AdminService._format_timestamp(item.created_at),
+        }
+
+    @staticmethod
+    def _serialize_post_report(item):
+        post = item.post
+        author = post.user if post else None
+        reporter = item.reporter
+        return {
+            "id": f"PRP-{item.id:04d}",
+            "dbId": item.id,
+            "postId": f"PST-{item.post_id:04d}" if item.post_id else "PST-0000",
+            "postDbId": item.post_id,
+            "postContent": post.content if post else "Post unavailable",
+            "postHashtags": post.hashtags if post and isinstance(post.hashtags, list) else [],
+            "postStatus": AdminService._present_status(post.status if post else "unknown"),
+            "postTimestamp": AdminService._format_timestamp(post.timestamp if post else None),
+            "authorId": f"USR-{post.user_id:04d}" if post else "USR-0000",
+            "authorDbId": post.user_id if post else None,
+            "authorName": author.name if author else "Unknown User",
+            "authorUsername": author.username if author else "",
+            "authorWarnings": int(author.get_setting("account-info", "warnings", 0) or 0) if author else 0,
+            "reporterId": f"USR-{item.reported_by:04d}",
+            "reporterDbId": item.reported_by,
+            "reporterName": reporter.name if reporter else "Unknown User",
+            "reason": item.reason,
+            "details": item.details or "",
+            "status": AdminService._present_status(item.status),
+            "adminAction": AdminService._present_status(item.admin_action),
+            "adminNote": item.admin_note or "",
+            "timestamp": AdminService._format_timestamp(item.created_at),
+            "reviewedAt": AdminService._format_timestamp(item.reviewed_at),
         }
 
     @staticmethod

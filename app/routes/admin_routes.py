@@ -104,6 +104,45 @@ def mark_report_reviewed(report_id):
     return jsonify({"status": "success", "item": report})
 
 
+@admin_bp.route("/admin/api/post-reports/<int:report_id>/review", methods=["POST"])
+@login_required
+@verified_user
+@only_admin
+def mark_post_report_reviewed(report_id):
+    try:
+        report = AdminService.mark_post_report_reviewed(report_id)
+    except ValueError as exc:
+        return jsonify({"status": "error", "message": str(exc)}), 404
+
+    return jsonify({"status": "success", "item": report})
+
+
+@admin_bp.route("/admin/api/post-reports/<int:report_id>/remove-post", methods=["POST"])
+@login_required
+@verified_user
+@only_admin
+def remove_reported_post(report_id):
+    try:
+        report = AdminService.remove_reported_post(report_id)
+    except ValueError as exc:
+        return jsonify({"status": "error", "message": str(exc)}), 404
+
+    return jsonify({"status": "success", "item": report})
+
+
+@admin_bp.route("/admin/api/post-reports/<int:report_id>/warn-author", methods=["POST"])
+@login_required
+@verified_user
+@only_admin
+def warn_reported_post_author(report_id):
+    try:
+        result = AdminService.warn_reported_post_author(report_id)
+    except ValueError as exc:
+        return jsonify({"status": "error", "message": str(exc)}), 400
+
+    return jsonify({"status": "success", **result})
+
+
 @admin_bp.route("/admin/api/users/<int:user_id>/verify", methods=["POST"])
 @login_required
 @verified_user

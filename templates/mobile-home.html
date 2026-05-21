@@ -135,6 +135,39 @@
         </nav>
     </div>
 
+    <div class="mobile-report-overlay" id="mobileReportOverlay" hidden>
+        <section class="mobile-report-sheet" role="dialog" aria-modal="true" aria-labelledby="mobileReportTitle">
+            <button class="mobile-report-close" type="button" aria-label="Close report form">&times;</button>
+            <span class="mobile-report-kicker">Report Center</span>
+            <h2 id="mobileReportTitle">Report this post</h2>
+            <label for="mobile-report-category">Reason</label>
+            <select id="mobile-report-category">
+                <option value="No Reason Selected">Select a reason</option>
+                <option value="Spam">Spam</option>
+                <option value="Harassment or Bullying">Harassment or Bullying</option>
+                <option value="Hate Speech">Hate Speech</option>
+                <option value="Violence or Threats">Violence or Threats</option>
+                <option value="Adult or Sexual Content">Adult or Sexual Content</option>
+                <option value="Graphic or Disturbing Content">Graphic or Disturbing Content</option>
+                <option value="Fake Information">Fake Information</option>
+                <option value="Scam or Fraud">Scam or Fraud</option>
+                <option value="Copyright Violation">Copyright Violation</option>
+                <option value="Privacy Violation">Privacy Violation</option>
+                <option value="Self-harm or Dangerous Content">Self-harm or Dangerous Content</option>
+                <option value="Impersonation">Impersonation</option>
+                <option value="Illegal Content">Illegal Content</option>
+                <option value="Off-topic or Misleading">Off-topic or Misleading</option>
+                <option value="Other">Other</option>
+            </select>
+            <label for="mobile-report-details">Details</label>
+            <textarea id="mobile-report-details"
+                placeholder="Add any extra detail that helps moderation review this post."></textarea>
+            <button id="mobileReportSubmit" class="mobile-report-submit" type="button">Submit Report</button>
+        </section>
+    </div>
+
+    <div id="mobileToastStack" class="mobile-toast-stack" aria-live="polite" aria-atomic="true"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
         crossorigin="anonymous"></script>
@@ -149,7 +182,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js"></script>
     <script src="{{ url_for('static', filename='js/firebase-client.js') }}?v=2026-05-15-1"></script>
-    <script src="{{ url_for('static', filename='js/mobile-home.js') }}?v=2026-05-09-1"></script>
+    <script src="{{ url_for('static', filename='js/mobile-home.js') }}?v=2026-05-21-report-1"></script>
 </body>
 
 </html>

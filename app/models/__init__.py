@@ -5,4 +5,5 @@ from .comments import Comments
 from .notifications import Notification
 from .support_requests import Support
 from .report import Report
+from .report_post import ReportPost
 from .payment import PaymentSubmission

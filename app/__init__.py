@@ -27,6 +27,7 @@ from app.routes.account_routes import account_bp
 from app.routes.setting_routes import setting_bp
 from app.routes.admin_routes import admin_bp
 from app.routes.pricing_routes import pricing_bp
+from app.routes.report_routes import report_bp
 
 def create_app():
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -106,6 +107,7 @@ def create_app():
     app.register_blueprint(setting_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(pricing_bp)
+    app.register_blueprint(report_bp)
 
     with app.app_context():
         from app import models

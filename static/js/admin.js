@@ -1,5 +1,6 @@
 let supportRequests = [];
 let userReports = [];
+let postReports = [];
 let managedUsers = [];
 let paymentSubmissions = [];
 
@@ -7,12 +8,15 @@ const state = {
     activeSection: "dashboard",
     selectedSupportId: null,
     selectedReportId: null,
+    selectedPostReportId: null,
     selectedUserId: null,
     sidebarCollapsed: false,
     supportQuery: "",
     supportStatus: "all",
     reportsQuery: "",
     reportsStatus: "all",
+    postReportsQuery: "",
+    postReportsStatus: "all",
     paymentsQuery: "",
     paymentsStatus: "all",
     selectedPaymentId: null,
@@ -24,6 +28,7 @@ const pageMeta = {
     dashboard: { title: "Dashboard", kicker: "Admin Workspace" },
     support: { title: "Support Requests", kicker: "Support Desk" },
     reports: { title: "Reports", kicker: "Moderation Desk" },
+    postReports: { title: "Post Reports", kicker: "Content Moderation" },
     payments: { title: "Payments", kicker: "Payment Verification" },
     users: { title: "Users", kicker: "Account Control" }
 };
@@ -34,23 +39,28 @@ const el = {
     pageKicker: document.getElementById("pageKicker"),
     supportTableBody: document.getElementById("supportTableBody"),
     reportsTableBody: document.getElementById("reportsTableBody"),
+    postReportsTableBody: document.getElementById("postReportsTableBody"),
     paymentsTableBody: document.getElementById("paymentsTableBody"),
     usersTableBody: document.getElementById("usersTableBody"),
     usersOverviewGrid: document.getElementById("usersOverviewGrid"),
     supportEmptyState: document.getElementById("supportEmptyState"),
     reportsEmptyState: document.getElementById("reportsEmptyState"),
+    postReportsEmptyState: document.getElementById("postReportsEmptyState"),
     paymentsEmptyState: document.getElementById("paymentsEmptyState"),
     usersEmptyState: document.getElementById("usersEmptyState"),
     supportSearchInput: document.getElementById("supportSearchInput"),
     supportStatusFilter: document.getElementById("supportStatusFilter"),
     reportsSearchInput: document.getElementById("reportsSearchInput"),
     reportsStatusFilter: document.getElementById("reportsStatusFilter"),
+    postReportsSearchInput: document.getElementById("postReportsSearchInput"),
+    postReportsStatusFilter: document.getElementById("postReportsStatusFilter"),
     paymentsSearchInput: document.getElementById("paymentsSearchInput"),
     paymentsStatusFilter: document.getElementById("paymentsStatusFilter"),
     usersSearchInput: document.getElementById("usersSearchInput"),
     usersFilterTabs: document.getElementById("usersFilterTabs"),
     supportPendingBadge: document.getElementById("supportPendingBadge"),
     reportsPendingBadge: document.getElementById("reportsPendingBadge"),
+    postReportsPendingBadge: document.getElementById("postReportsPendingBadge"),
     paymentsPendingBadge: document.getElementById("paymentsPendingBadge"),
     usersBlockedBadge: document.getElementById("usersBlockedBadge"),
     selectedUserName: document.getElementById("selectedUserName"),
@@ -89,6 +99,9 @@ const el = {
     sendReplyButton: document.getElementById("sendReplyButton"),
     markAnsweredButton: document.getElementById("markAnsweredButton"),
     markReviewedButton: document.getElementById("markReviewedButton"),
+    markPostReportReviewedButton: document.getElementById("markPostReportReviewedButton"),
+    removeReportedPostButton: document.getElementById("removeReportedPostButton"),
+    warnPostAuthorButton: document.getElementById("warnPostAuthorButton"),
     approvePaymentButton: document.getElementById("approvePaymentButton"),
     rejectPaymentButton: document.getElementById("rejectPaymentButton"),
     backupDataButton: document.getElementById("backupDataButton"),
@@ -105,6 +118,19 @@ const el = {
     modalReportStatus: document.getElementById("modalReportStatus"),
     modalReportTimestamp: document.getElementById("modalReportTimestamp"),
     modalReportMessage: document.getElementById("modalReportMessage"),
+    modalPostReportId: document.getElementById("modalPostReportId"),
+    modalPostReportReporter: document.getElementById("modalPostReportReporter"),
+    modalPostReportAuthor: document.getElementById("modalPostReportAuthor"),
+    modalPostReportReason: document.getElementById("modalPostReportReason"),
+    modalPostReportStatus: document.getElementById("modalPostReportStatus"),
+    modalPostReportPostStatus: document.getElementById("modalPostReportPostStatus"),
+    modalPostReportTimestamp: document.getElementById("modalPostReportTimestamp"),
+    modalPostReportPostAuthor: document.getElementById("modalPostReportPostAuthor"),
+    modalPostReportPostMeta: document.getElementById("modalPostReportPostMeta"),
+    modalPostReportPostBadge: document.getElementById("modalPostReportPostBadge"),
+    modalPostReportPostContent: document.getElementById("modalPostReportPostContent"),
+    modalPostReportPostTags: document.getElementById("modalPostReportPostTags"),
+    modalPostReportDetails: document.getElementById("modalPostReportDetails"),
     modalPaymentId: document.getElementById("modalPaymentId"),
     modalPaymentUser: document.getElementById("modalPaymentUser"),
     modalPaymentPlan: document.getElementById("modalPaymentPlan"),
@@ -126,6 +152,7 @@ const el = {
 
 const supportModal = new bootstrap.Modal(document.getElementById("supportDetailsModal"));
 const reportModal = new bootstrap.Modal(document.getElementById("reportDetailsModal"));
+const postReportModal = new bootstrap.Modal(document.getElementById("postReportDetailsModal"));
 const paymentModal = new bootstrap.Modal(document.getElementById("paymentDetailsModal"));
 
 const esc = (v) => String(v ?? "")
@@ -142,7 +169,9 @@ const statusClass = (status) => {
     if (s === "approved") return "reviewed";
     if (s === "rejected") return "blocked";
     if (s === "blocked") return "blocked";
+    if (s === "removed") return "blocked";
     if (s === "verified") return "verified";
+    if (s === "active") return "verified";
     return "pending";
 };
 
@@ -202,6 +231,7 @@ async function loadDashboard() {
     const payload = await api("/admin/api/dashboard");
     supportRequests = payload.data?.supportRequests || [];
     userReports = payload.data?.userReports || [];
+    postReports = payload.data?.postReports || [];
     managedUsers = payload.data?.managedUsers || [];
     paymentSubmissions = payload.data?.paymentSubmissions || [];
     if (!managedUsers.some((u) => u.id === state.selectedUserId)) {
@@ -234,6 +264,26 @@ function filterReports() {
         const okStatus = state.reportsStatus === "all" || item.status === state.reportsStatus;
         const okQuery = !q || [item.id, item.userId, item.userName, item.text]
             .some((field) => String(field).toLowerCase().includes(q));
+        return okStatus && okQuery;
+    });
+}
+
+function filterPostReports() {
+    const q = state.postReportsQuery.trim().toLowerCase();
+    return postReports.filter((item) => {
+        const okStatus = state.postReportsStatus === "all" || item.status === state.postReportsStatus;
+        const okQuery = !q || [
+            item.id,
+            item.postId,
+            item.reporterId,
+            item.reporterName,
+            item.authorId,
+            item.authorName,
+            item.authorUsername,
+            item.reason,
+            item.details,
+            item.postContent
+        ].some((field) => String(field).toLowerCase().includes(q));
         return okStatus && okQuery;
     });
 }
@@ -298,6 +348,22 @@ function renderReportsTable() {
         </tr>
     `).join("");
     el.reportsEmptyState.classList.toggle("d-none", rows.length > 0);
+}
+
+function renderPostReportsTable() {
+    const rows = filterPostReports();
+    el.postReportsTableBody.innerHTML = rows.map((item) => `
+        <tr>
+            <td data-label="Report ID"><strong>${esc(item.id)}</strong><div class="table-meta">${esc(formatLocalTimestamp(item.timestamp))}</div></td>
+            <td data-label="Reporter"><div class="user-block"><span class="user-name">${esc(item.reporterName)}</span><span class="user-id">${esc(item.reporterId)}</span></div></td>
+            <td data-label="Post Author"><div class="user-block"><span class="user-name">${esc(item.authorName)}</span><span class="user-id">@${esc(item.authorUsername || "unknown")} - ${esc(item.authorId)}</span></div></td>
+            <td data-label="Reason">${esc(item.reason)}</td>
+            <td data-label="Post"><div class="message-preview">${esc(item.postContent)}</div></td>
+            <td data-label="Status"><span class="status-pill ${statusClass(item.status)}">${esc(item.status)}</span><div class="table-meta">${esc(item.postStatus)} post</div></td>
+            <td data-label="Action" class="text-end row-action-cell"><button class="row-action-button" type="button" data-post-report-id="${esc(item.id)}">Review Post</button></td>
+        </tr>
+    `).join("");
+    el.postReportsEmptyState.classList.toggle("d-none", rows.length > 0);
 }
 
 function renderPaymentsTable() {
@@ -421,11 +487,13 @@ function renderUserPanel() {
 function updateMetrics() {
     const supportPending = supportRequests.filter((v) => v.status === "Pending").length;
     const reportPending = userReports.filter((v) => v.status === "Pending").length;
+    const postReportPending = postReports.filter((v) => v.status === "Pending").length;
     const paymentPending = paymentSubmissions.filter((v) => v.status === "Pending").length;
     const blocked = managedUsers.filter((v) => v.status === "Blocked").length;
     const verified = managedUsers.filter((v) => v.verified).length;
     el.supportPendingBadge.textContent = supportPending;
     el.reportsPendingBadge.textContent = reportPending;
+    el.postReportsPendingBadge.textContent = postReportPending;
     el.paymentsPendingBadge.textContent = paymentPending;
     el.usersBlockedBadge.textContent = blocked;
     el.supportTotalMetric.textContent = supportRequests.length;
@@ -434,12 +502,13 @@ function updateMetrics() {
     el.paymentsTotalMetric.textContent = paymentSubmissions.length;
     el.approvedPaymentsMetric.textContent = paymentSubmissions.filter((v) => v.status === "Approved").length;
     el.blockedUsersMetric.textContent = blocked;
-    el.pendingTotalMetric.textContent = supportPending + reportPending + paymentPending;
+    el.pendingTotalMetric.textContent = supportPending + reportPending + postReportPending + paymentPending;
     el.answeredMetric.textContent = supportRequests.filter((v) => v.status === "Answered").length;
-    el.reviewedMetric.textContent = userReports.filter((v) => v.status === "Reviewed").length;
+    el.reviewedMetric.textContent = userReports.filter((v) => v.status === "Reviewed").length
+        + postReports.filter((v) => v.status === "Reviewed").length;
     el.verifiedUsersMetric.textContent = verified;
     el.dashboardSupportPending.textContent = supportPending;
-    el.dashboardReportsPending.textContent = reportPending;
+    el.dashboardReportsPending.textContent = reportPending + postReportPending;
     el.dashboardPendingPro.textContent = managedUsers.filter((v) => v.pendingPro).length;
     el.dashboardPaymentsPending.textContent = paymentPending;
 }
@@ -447,6 +516,7 @@ function updateMetrics() {
 function renderAll() {
     renderSupportTable();
     renderReportsTable();
+    renderPostReportsTable();
     renderPaymentsTable();
     renderUsersOverview();
     renderUsersTable();
@@ -508,6 +578,31 @@ function openReportModal(id) {
     el.modalReportTimestamp.textContent = formatLocalTimestamp(item.timestamp);
     el.modalReportMessage.textContent = item.text;
     reportModal.show();
+}
+
+function openPostReportModal(id) {
+    const item = postReports.find((v) => v.id === id);
+    if (!item) return;
+    state.selectedPostReportId = id;
+    el.modalPostReportId.textContent = item.id;
+    el.modalPostReportReporter.textContent = `${item.reporterName} (${item.reporterId})`;
+    el.modalPostReportAuthor.textContent = `${item.authorName} (${item.authorId})`;
+    el.modalPostReportReason.textContent = item.reason;
+    el.modalPostReportStatus.textContent = item.status;
+    el.modalPostReportPostStatus.textContent = item.postStatus;
+    el.modalPostReportTimestamp.textContent = formatLocalTimestamp(item.timestamp);
+    el.modalPostReportPostAuthor.textContent = `${item.authorName} @${item.authorUsername || "unknown"}`;
+    el.modalPostReportPostMeta.textContent = `${item.postId} - ${formatLocalTimestamp(item.postTimestamp)} - ${item.authorWarnings} warning${item.authorWarnings === 1 ? "" : "s"}`;
+    el.modalPostReportPostBadge.textContent = item.postStatus;
+    el.modalPostReportPostBadge.className = `status-pill ${statusClass(item.postStatus)}`;
+    el.modalPostReportPostContent.textContent = item.postContent || "Post unavailable.";
+    el.modalPostReportPostTags.innerHTML = (item.postHashtags || [])
+        .map((tag) => `<span>${esc(tag)}</span>`)
+        .join("");
+    el.modalPostReportDetails.textContent = item.details || "No extra details were provided by the reporter.";
+    el.removeReportedPostButton.disabled = String(item.postStatus).toLowerCase() === "removed";
+    el.markPostReportReviewedButton.disabled = item.status === "Reviewed";
+    postReportModal.show();
 }
 
 function openPaymentModal(id) {
@@ -585,6 +680,32 @@ async function markReviewed() {
     await loadDashboard();
     openReportModal(item.id);
     showToast(`${item.id} marked as reviewed.`);
+}
+
+async function postReportAction(action) {
+    const item = postReports.find((v) => v.id === state.selectedPostReportId);
+    if (!item) return;
+
+    const endpoints = {
+        review: "review",
+        remove: "remove-post",
+        warn: "warn-author"
+    };
+
+    await api(`/admin/api/post-reports/${item.dbId}/${endpoints[action]}`, { method: "POST" });
+    await loadDashboard();
+
+    const latest = postReports.find((v) => v.dbId === item.dbId);
+    if (latest) {
+        openPostReportModal(latest.id);
+    }
+
+    const messages = {
+        review: `${item.id} marked as reviewed.`,
+        remove: `${item.postId} was removed from public feeds.`,
+        warn: `Warning sent to ${item.authorName}.`
+    };
+    showToast(messages[action]);
 }
 
 async function paymentAction(action) {
@@ -720,6 +841,14 @@ function bindEvents() {
         state.reportsStatus = e.target.value;
         renderReportsTable();
     });
+    el.postReportsSearchInput.addEventListener("input", (e) => {
+        state.postReportsQuery = e.target.value;
+        renderPostReportsTable();
+    });
+    el.postReportsStatusFilter.addEventListener("change", (e) => {
+        state.postReportsStatus = e.target.value;
+        renderPostReportsTable();
+    });
     el.paymentsSearchInput.addEventListener("input", (e) => {
         state.paymentsQuery = e.target.value;
         renderPaymentsTable();
@@ -745,6 +874,10 @@ function bindEvents() {
     el.reportsTableBody.addEventListener("click", (e) => {
         const button = e.target.closest("[data-report-id]");
         if (button) openReportModal(button.dataset.reportId);
+    });
+    el.postReportsTableBody.addEventListener("click", (e) => {
+        const button = e.target.closest("[data-post-report-id]");
+        if (button) openPostReportModal(button.dataset.postReportId);
     });
     el.paymentsTableBody.addEventListener("click", (e) => {
         const button = e.target.closest("[data-payment-id]");
@@ -776,6 +909,9 @@ function bindEvents() {
     el.generateAIReplyButton.addEventListener("click", async () => { try { await generateAIReply(); } catch (error) { showToast(error.message); } });
     el.markAnsweredButton.addEventListener("click", async () => { try { await markAnswered(); } catch (error) { showToast(error.message); } });
     el.markReviewedButton.addEventListener("click", async () => { try { await markReviewed(); } catch (error) { showToast(error.message); } });
+    el.markPostReportReviewedButton.addEventListener("click", async () => { try { await postReportAction("review"); } catch (error) { showToast(error.message); } });
+    el.removeReportedPostButton.addEventListener("click", async () => { try { await postReportAction("remove"); } catch (error) { showToast(error.message); } });
+    el.warnPostAuthorButton.addEventListener("click", async () => { try { await postReportAction("warn"); } catch (error) { showToast(error.message); } });
     el.approvePaymentButton.addEventListener("click", async () => { try { await paymentAction("approve"); } catch (error) { showToast(error.message); } });
     el.rejectPaymentButton.addEventListener("click", async () => { try { await paymentAction("reject"); } catch (error) { showToast(error.message); } });
     el.backupDataButton?.addEventListener("click", downloadSqliteBackup);

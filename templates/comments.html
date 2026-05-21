@@ -9,36 +9,36 @@
                 <i class="bi bi-three-dots"></i>
             </button>
 
-            <div class="options-menu">
-                <a href="#" class="option-item">
+            <div class="options-menu" id="post-options" data-postid="{{ post.id }}">
+                <a href="#" id="follow-me" class="option-item">
                     Follow @{{ post.user.username }}
                 </a>
                 <hr>
 
-                <a href="#" class="option-item delete">
+                <a href="#" id="copy-link" class="option-item delete">
                     Copy Link
                 </a>
                 <hr>
-                <a href="#" class="option-item">
+                <a href="#" id="report-post" class="option-item">
                     Report Post
                 </a>
                 <hr>
 
-                <a href="#" class="option-item">
+                <a href="#" id="add-to-favorites" class="option-item">
                     Add to Favorites
                 </a>
                 <hr>
 
-                <a href="#" class="option-item">
+                <a href="#" id="interested-in-post" class="option-item">
                     Interested in this Post
                 </a>
                 <hr>
 
-                <a href="#" class="option-item delete">
+                <a href="#" id="not-interested-in-post" class="option-item delete">
                     Not interested in this Post
                 </a>
                 <hr>
-                <a href="#" class="option-item delete">
+                <a href="#" id="block-user" class="option-item delete">
                     Block Posts from @{{ post.user.username }}
                 </a>
             </div>
@@ -109,6 +109,38 @@
         <hr>
         {% endfor %}
         {% endif %}
+    </div>
+</div>
+<div class="verification-overlay report-center" style="display: none;">
+    <div class="verification-box">
+        <small class="close">&times;</small>
+        <h2>Report Center</h2>
+        <div class="select-problem">
+            <strong>Category: </strong>
+            <select name="report-category" id="report-category">
+                <option value="No Reason Selected">Select a reason</option>
+
+                <option value="Spam">Spam</option>
+                <option value="Harassment or Bullying">Harassment or Bullying</option>
+                <option value="Hate Speech">Hate Speech</option>
+                <option value="Violence or Threats">Violence or Threats</option>
+                <option value="Adult or Sexual Content">Adult or Sexual Content</option>
+                <option value="Graphic or Disturbing Content">Graphic or Disturbing Content</option>
+                <option value="Fake Information">Fake Information</option>
+                <option value="Scam or Fraud">Scam or Fraud</option>
+                <option value="Copyright Violation">Copyright Violation</option>
+                <option value="Privacy Violation">Privacy Violation</option>
+                <option value="Self-harm or Dangerous Content">Self-harm or Dangerous Content</option>
+                <option value="Impersonation">Impersonation</option>
+                <option value="Illegal Content">Illegal Content</option>
+                <option value="Off-topic or Misleading">Off-topic or Misleading</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+        <textarea name="help" id="report-center-input" placeholder="Please provide more details about the issue you are reporting. (optional)"
+            style="height: 200px;"></textarea>
+        <div id="support-ai-answer" class="faq-answer" style="display: none;"></div>
+        <button id="reportSBtn">Submit</button>
     </div>
 </div>
 <script>

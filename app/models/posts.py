@@ -6,6 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.extensions import db
 from app.utils.time_utils import utc_now
 
+
 class Post(db.Model):
     __tablename__ = "posts"
 
@@ -26,6 +27,9 @@ class Post(db.Model):
     reposts: Mapped[int] = mapped_column(Integer, default=0)
     shares: Mapped[int] = mapped_column(Integer, default=0)
 
-    user = relationship("UserData", back_populates="posts")
-    comment_entries = relationship("Comments", back_populates="post", cascade="all, delete-orphan")
+    status: Mapped[str] = mapped_column(String(20), default="ACTIVE", nullable=False)
 
+    user = relationship("UserData", back_populates="posts")
+    comment_entries = relationship(
+        "Comments", back_populates="post", cascade="all, delete-orphan"
+    )

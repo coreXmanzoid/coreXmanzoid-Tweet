@@ -363,6 +363,18 @@ button {
     border-color: var(--accent);
 }
 
+.soft-button.action-block {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.36);
+    color: #b91c1c;
+}
+
+.soft-button.action-block:hover {
+    background: #b91c1c;
+    border-color: #b91c1c;
+    color: #fff;
+}
+
 .content-section {
     display: none;
     animation: section-in 220ms ease;
@@ -1235,6 +1247,72 @@ button {
     align-items: start;
 }
 
+.post-review-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.reported-post-card {
+    padding: 18px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid var(--border-strong);
+    box-shadow: var(--shadow-sm);
+}
+
+.reported-post-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.reported-post-header strong,
+.reported-post-header span {
+    display: block;
+}
+
+.reported-post-header strong {
+    font-weight: 800;
+}
+
+.reported-post-header span:not(.status-pill) {
+    color: var(--muted);
+    font-size: 0.92rem;
+}
+
+.reported-post-content {
+    min-height: 96px;
+    padding: 16px;
+    border-radius: 18px;
+    background: rgba(248, 241, 229, 0.74);
+    color: var(--text);
+    line-height: 1.65;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.reported-post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.reported-post-tags span {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(249, 72, 24, 0.1);
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
 .payment-screenshot-panel {
     display: grid;
     gap: 10px;
@@ -1303,7 +1381,8 @@ button {
         grid-template-columns: 1fr;
     }
 
-    .payment-review-layout {
+    .payment-review-layout,
+    .post-review-layout {
         grid-template-columns: 1fr;
     }
 
