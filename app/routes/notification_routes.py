@@ -8,6 +8,7 @@ from flask_login import login_required, current_user
 from app.extensions import db
 from app.firebase.firebase_config import get_firebase_web_config, init_firebase
 from app.models.notifications import Notification
+from app.models.users import UserData
 from app.services.notification_service import NotificationService
 from app.services.push_service import send_notification
 from app.decorators import verified_user
@@ -30,10 +31,49 @@ def save_token():
     if not has_feature(current_user, "notifications", "push_notifications"):
         return jsonify({"status": "error", "message": "Push notifications require a higher plan."}), 403
 
+    duplicate_owner = db.session.execute(
+        db.select(db.func.count())
+        .select_from(UserData)
+        .where(
+            UserData.fb_auth_token == token,
+            UserData.id != current_user.id,
+        )
+    ).scalar()
+
+    if duplicate_owner:
+        db.session.execute(
+            db.update(UserData)
+            .where(
+                UserData.fb_auth_token == token,
+                UserData.id != current_user.id,
+            )
+            .values(fb_auth_token=None)
+        )
+
     current_user.fb_auth_token = token
     db.session.commit()
 
-    return jsonify({"status": "saved", "token_length": len(token)})
+    return jsonify(
+        {
+            "status": "saved",
+            "token_length": len(token),
+            "duplicates_removed": int(duplicate_owner or 0),
+        }
+    )
+
+
+@notification_bp.route("/delete-token", methods=["POST"])
+@login_required
+def delete_token():
+    data = request.get_json(silent=True) or {}
+    token = (data.get("token") or "").strip()
+
+    if token and current_user.fb_auth_token != token:
+        return jsonify({"status": "ignored"})
+
+    current_user.fb_auth_token = None
+    db.session.commit()
+    return jsonify({"status": "deleted"})
 
 
 @notification_bp.route("/notification-health")
@@ -58,7 +98,9 @@ def notification_health():
                 )
             ),
             "current_user_has_token": bool(current_user.fb_auth_token),
+            "current_user_token_length": len(current_user.fb_auth_token or ""),
             "request_is_secure": request.is_secure,
+            "request_host": request.host,
             "public_base_url": (
                 os.getenv("PUBLIC_BASE_URL")
                 or os.getenv("APP_BASE_URL")

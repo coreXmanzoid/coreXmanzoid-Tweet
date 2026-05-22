@@ -857,6 +857,8 @@ function submitComment() {
             $("#submitComment").prop("disabled", false);
         }
     });
+    let commentMentions = parseMentions($newComment.next(".comment-content").find(".content").data("mentions"));
+    validatePostFeatures(postContent, commentMentions);
 }
 
 function checkForNotifications(id) {

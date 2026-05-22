@@ -2,6 +2,7 @@ import os
 
 from flask import current_app
 from firebase_admin import messaging
+from app.extensions import db
 from app.firebase.firebase_config import init_firebase
 
 
@@ -27,10 +28,9 @@ def send_notification(notification) -> bool:
     notification_url = f"{base_url}/home" if base_url.startswith("https://") else "/home"
 
     webpush_options = {
-        "notification": messaging.WebpushNotification(
-            icon="/static/assets/logo.png",
-            badge="/static/assets/logo.png",
-        )
+        "headers": {
+            "Urgency": "high",
+        }
     }
     if notification_url.startswith("https://"):
         webpush_options["fcm_options"] = messaging.WebpushFCMOptions(
@@ -38,10 +38,6 @@ def send_notification(notification) -> bool:
         )
 
     message = messaging.Message(
-        notification=messaging.Notification(
-            title=notification.title,
-            body=notification.message,
-        ),
         data={
             "title": str(notification.title or "ChatFlick"),
             "body": str(notification.message or ""),
@@ -57,6 +53,11 @@ def send_notification(notification) -> bool:
     try:
         messaging.send(message)
         return True
+    except (messaging.UnregisteredError, messaging.SenderIdMismatchError):
+        current_app.logger.warning("Removing invalid FCM token for recipient_id=%s", getattr(recipient, "id", None))
+        recipient.fb_auth_token = None
+        db.session.commit()
+        return False
     except Exception as exc:
         current_app.logger.exception("Push notification failed: %s", exc)
         return False

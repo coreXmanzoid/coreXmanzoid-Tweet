@@ -43,9 +43,10 @@ def create_app():
     # app.config["SQLALCHEMY_DATABASE_URI"] = str(os.environ.get("SQLALCHEMY_DATABASE_URI"))
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
+    secure_cookie = os.getenv("SESSION_COOKIE_SECURE", "").lower()
     app.config.update(
         SESSION_COOKIE_HTTPONLY=True,
-        SESSION_COOKIE_SECURE=True,  # only if using HTTPS
+        SESSION_COOKIE_SECURE=secure_cookie in {"1", "true", "yes", "on"},
         SESSION_COOKIE_SAMESITE="Lax",
     )
     db.init_app(app)

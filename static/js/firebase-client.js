@@ -3,6 +3,7 @@ const firebaseEnabled = Boolean(firebaseRuntimeConfig.firebaseEnabled);
 const vapidKey = firebaseRuntimeConfig.vapidKey || "";
 const firebaseMessagingSwPath = "/firebase-messaging-sw.js";
 const firebaseConfig = firebaseRuntimeConfig.firebaseConfig || {};
+const firebaseTokenStorageKey = "chatflick:fcm-token";
 
 let messaging = null;
 let firebaseMessagingRegistrationPromise = null;
@@ -24,10 +25,20 @@ function getFirebaseMessagingRegistration() {
     if (!firebaseMessagingRegistrationPromise) {
         firebaseMessagingRegistrationPromise = navigator.serviceWorker.register(firebaseMessagingSwPath, {
             scope: "/"
+        }).then(function (registration) {
+            return navigator.serviceWorker.ready.then(function () {
+                return registration;
+            });
         });
     }
 
     return firebaseMessagingRegistrationPromise;
+}
+
+function hasCompleteFirebaseConfig() {
+    return ["apiKey", "authDomain", "projectId", "messagingSenderId", "appId"].every(function (key) {
+        return Boolean(firebaseConfig[key]);
+    });
 }
 
 async function isFirebaseMessagingSupported() {
@@ -49,6 +60,11 @@ async function initializeFirebaseMessaging() {
 
     firebaseMessagingReadyPromise = (async function () {
         if (!firebaseEnabled) {
+            return null;
+        }
+
+        if (!hasCompleteFirebaseConfig()) {
+            console.warn("Firebase web config is incomplete.");
             return null;
         }
 
@@ -118,7 +134,7 @@ async function enableNotifications(allowPermissionPrompt = true) {
         }
 
         if (!window.isSecureContext) {
-            if (allowPermissionPrompt) alert("Push notifications require HTTPS.");
+            if (allowPermissionPrompt) alert("Push notifications require HTTPS or localhost.");
             return;
         }
 
@@ -162,11 +178,19 @@ async function enableNotifications(allowPermissionPrompt = true) {
         const response = await fetch("/save-token", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            credentials: "same-origin",
             body: JSON.stringify({ token: token })
         });
 
         if (!response.ok) {
-            if (allowPermissionPrompt) alert("Failed to save notification token.");
+            let message = "Failed to save notification token.";
+            try {
+                const errorResult = await response.json();
+                if (errorResult && errorResult.message) message = errorResult.message;
+            } catch (parseError) {
+                // Ignore non-JSON errors.
+            }
+            if (allowPermissionPrompt) alert(message);
             return;
         }
 
@@ -178,6 +202,12 @@ async function enableNotifications(allowPermissionPrompt = true) {
 
         if (allowPermissionPrompt) {
             alert("Notifications enabled");
+        }
+
+        try {
+            window.localStorage.setItem(firebaseTokenStorageKey, token);
+        } catch (storageError) {
+            console.warn("Could not persist FCM token locally:", storageError);
         }
 
         $("#notifications-permission").remove();
@@ -192,10 +222,58 @@ function requestNotificationPermission() {
     return enableNotifications(true);
 }
 
+async function deleteSavedNotificationToken() {
+    let token = "";
+    try {
+        token = window.localStorage.getItem(firebaseTokenStorageKey) || "";
+    } catch (storageError) {
+        token = "";
+    }
+
+    try {
+        const activeMessaging = await initializeFirebaseMessaging();
+        if (activeMessaging && token) {
+            if (activeMessaging.deleteToken.length > 0) {
+                await activeMessaging.deleteToken(token);
+            } else {
+                await activeMessaging.deleteToken();
+            }
+        }
+    } catch (error) {
+        console.warn("Unable to delete Firebase token in browser:", error);
+    }
+
+    try {
+        await fetch("/delete-token", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "same-origin",
+            body: JSON.stringify({ token: token })
+        });
+    } catch (error) {
+        console.warn("Unable to clear notification token on server:", error);
+    }
+
+    try {
+        window.localStorage.removeItem(firebaseTokenStorageKey);
+    } catch (storageError) {
+        // Ignore storage cleanup failures.
+    }
+}
+
 document.addEventListener("click", function (event) {
     if (event.target && event.target.closest(".notifications-allow")) {
         event.preventDefault();
         enableNotifications(true);
+    }
+
+    const logoutLink = event.target && event.target.closest("a[href*='/logout/']");
+    if (logoutLink) {
+        event.preventDefault();
+        const href = logoutLink.href;
+        deleteSavedNotificationToken().finally(function () {
+            window.location.href = href;
+        });
     }
 });
 
@@ -207,3 +285,4 @@ initializeFirebaseMessaging().then(function () {
 
 window.enableNotifications = enableNotifications;
 window.requestNotificationPermission = requestNotificationPermission;
+window.deleteSavedNotificationToken = deleteSavedNotificationToken;

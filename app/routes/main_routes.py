@@ -439,7 +439,9 @@ def firebase_messaging_sw():
 importScripts("https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js");
 
-firebase.initializeApp({firebase_config});
+if (!firebase.apps.length) {{
+    firebase.initializeApp({firebase_config});
+}}
 
 const messaging = firebase.messaging();
 
@@ -456,14 +458,17 @@ function getNotificationPayload(payload) {{
 
 messaging.onBackgroundMessage(function (payload) {{
     const notification = getNotificationPayload(payload);
+    const tag = notification.data && notification.data.type
+        ? notification.data.type + "_" + (notification.data.identifier || "")
+        : "chatflick_general";
+
     return self.registration.showNotification(notification.title, {{
         body: notification.body,
         icon: notification.icon,
         badge: "/static/assets/logo.png",
         data: notification.data,
-        tag: notification.data && notification.data.type
-            ? notification.data.type + "_" + (notification.data.identifier || "")
-            : "chatflick_general"
+        tag: tag,
+        renotify: true
     }});
 }});
 
@@ -472,11 +477,12 @@ self.addEventListener("notificationclick", function (event) {{
     const targetUrl = event.notification.data && event.notification.data.url
         ? event.notification.data.url
         : "/home";
+    const absoluteTargetUrl = new URL(targetUrl, self.location.origin).href;
 
     event.waitUntil(
         clients.matchAll({{ type: "window", includeUncontrolled: true }}).then(function (clientList) {{
             for (const client of clientList) {{
-                if ("focus" in client) return client.focus();
+                if (client.url === absoluteTargetUrl && "focus" in client) return client.focus();
             }}
             if (clients.openWindow) return clients.openWindow(targetUrl);
         }})

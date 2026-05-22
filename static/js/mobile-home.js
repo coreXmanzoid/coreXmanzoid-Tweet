@@ -580,7 +580,7 @@ function validatePostFeatures(content, mentionsData) {
     // Detect hashtags like #ChatFlick
     const hashtagMatches = content.match(/#\w+/g) || [];
 
-        // Check hashtag limit
+    // Check hashtag limit
     if (hashtagMatches.length > 5) {
 
         showMobileToast(
@@ -892,6 +892,8 @@ function submitComment() {
             $("#submitComment").prop("disabled", false);
         }
     });
+    let commentMentions = parseMentions($newComment.next(".comment-content").find(".content").data("mentions"));
+    validatePostFeatures(postContent, commentMentions);
 }
 
 function showFullPost(e) {

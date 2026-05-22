@@ -62,6 +62,8 @@ def follows(id, st):
 @account_bp.route("/logout/<int:st>")
 @login_required
 def logout(st):
+    current_user.fb_auth_token = None
+    db.session.commit()
     logout_user()
     if st == 1:
         return redirect(url_for("main.home"))

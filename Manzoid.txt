@@ -34,3 +34,35 @@ flask db upgrade
 /shipping-policy
 /contact
 /about
+
+
+
+
+
+fetch("/notification-test-push", {
+  method: "POST",
+  credentials: "same-origin"
+}).then(r => r.json()).then(console.log)
+
+
+
+
+
+
+
+fetch("/delete-token", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  credentials: "same-origin",
+  body: JSON.stringify({ token: "test-token" })
+}).then(r => r.json()).then(console.log)
+
+
+
+fetch("/save-token", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  credentials: "same-origin",
+  body: JSON.stringify({ token: "test-token" })
+}).then(r => r.json()).then(console.log)
+
